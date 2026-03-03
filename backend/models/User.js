@@ -6,8 +6,9 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: [true, 'Please add an email'], unique: true },
   password: { type: String, required: [true, 'Please add a password'] },
   // Phone is extremely important for a Riyasewana-style classifieds platform
-  phone: { type: String, required: [true, 'Please add a phone number'] }, 
-  role: { type: String, enum: ['User', 'Admin', 'InspectionCompany'], default: 'User' },
+  phone: { type: String, required: [true, 'Please add a phone number'] },
+  garageId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  role: { type: String, enum: ['User', 'Admin', 'InspectionCompany', 'GarageOwner', 'Mechanic'], default: 'User' },
   // Fields only applicable when role === 'InspectionCompany'
   companyProfile: {
     companyName:    { type: String },
@@ -20,6 +21,22 @@ const userSchema = new mongoose.Schema({
     rating:         { type: Number, default: 0 },
     totalReviews:   { type: Number, default: 0 },
     isVerified:     { type: Boolean, default: false },
+  },
+  // Fields applicable when role === 'GarageOwner' or 'Mechanic'
+  serviceProviderProfile: {
+    garageName: { type: String, default: '' },
+    description: { type: String, default: '' },
+    address: { type: String, default: '' },
+    city: { type: String, default: '' },
+    logo: { type: String, default: '' },
+    operatingHours: { type: String, default: 'Mon-Sat 8:00 AM - 6:00 PM' },
+    website: { type: String, default: '' },
+    phone: { type: String, default: '' },
+    rating: { type: Number, default: 0 },
+    totalReviews: { type: Number, default: 0 },
+    isVerified: { type: Boolean, default: false },
+    isActive: { type: Boolean, default: true },
+    serviceCategories: { type: [String], default: [] }
   },
 }, { timestamps: true });
 
