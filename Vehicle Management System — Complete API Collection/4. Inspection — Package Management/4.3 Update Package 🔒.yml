@@ -1,0 +1,27 @@
+info:
+  name: 4.3 Update Package 🔒
+  type: http
+  seq: 3
+
+http:
+  method: PUT
+  url: "{{base_url}}/api/inspection/packages/{{package_id}}"
+  headers:
+    - name: Authorization
+      value: Bearer {{company_token}}
+  body:
+    type: multipart-form
+    data:
+      - name: price
+        type: text
+        value: "14000"
+      - name: description
+        type: text
+        value: "Updated: Premium 80-point inspection with digital report."
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

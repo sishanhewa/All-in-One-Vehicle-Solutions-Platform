@@ -1,0 +1,36 @@
+info:
+  name: Step 3 — Register User
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{base_url}}/api/auth/register"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "name": "E2E Test User",
+        "email": "e2etest@test.com",
+        "password": "test12345",
+        "phone": "+94779999999"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: "var jsonData = res.getBody();\r
+
+        pm.collectionVariables.set('user_token', jsonData.token);\r
+
+        console.log('✅ User registered:', jsonData.name);"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

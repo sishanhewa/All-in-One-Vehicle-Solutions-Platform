@@ -1,0 +1,38 @@
+info:
+  name: 6.7 Complete Inspection 🔒 Company
+  type: http
+  seq: 7
+
+http:
+  method: PUT
+  url: "{{base_url}}/api/inspection/bookings/{{booking_id}}/complete"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: Bearer {{company_token}}
+  body:
+    type: json
+    data: |-
+      {
+        "inspectionResult": "Pass",
+        "overallScore": 87,
+        "checklist": [
+          { "item": "Engine", "condition": "Good", "notes": "Running smoothly, no unusual sounds" },
+          { "item": "Transmission", "condition": "Excellent", "notes": "Smooth gear shifts" },
+          { "item": "Brakes", "condition": "Fair", "notes": "Front pads worn ~60%, replacement recommended within 10,000km" },
+          { "item": "Suspension", "condition": "Good", "notes": "No leaks or unusual movement" },
+          { "item": "Electrical", "condition": "Excellent", "notes": "All systems functional" },
+          { "item": "Body", "condition": "Good", "notes": "Minor scratch on rear bumper" },
+          { "item": "Interior", "condition": "Good", "notes": "Clean, all controls working" },
+          { "item": "Tires", "condition": "Excellent", "notes": "New tires, ~95% tread remaining" }
+        ],
+        "resultRemarks": "Vehicle is in good overall condition. Recommended: Replace front brake pads within 10,000km. Minor cosmetic scratch on rear bumper. All major systems are functioning properly."
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,26 @@
+info:
+  name: 6.9 Cancel Booking 🔒 Company
+  type: http
+  seq: 9
+
+http:
+  method: PUT
+  url: "{{base_url}}/api/inspection/bookings/{{booking_id}}/cancel"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: Bearer {{company_token}}
+  body:
+    type: json
+    data: |-
+      {
+        "reason": "Company equipment maintenance — rescheduling required"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

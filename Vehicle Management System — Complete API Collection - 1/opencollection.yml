@@ -1,0 +1,58 @@
+opencollection: 1.0.0
+
+info:
+  name: Vehicle Management System — Complete API Collection - 1
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ""
+      port: ""
+      auth:
+        username: ""
+        password: ""
+      bypassProxy: ""
+
+request:
+  auth:
+    type: bearer
+    token: "{{user_token}}"
+  variables:
+    - name: base_url
+      value: http://localhost:5000
+    - name: user_token
+      value: ""
+    - name: company_token
+      value: ""
+    - name: listing_id
+      value: ""
+    - name: company_id
+      value: ""
+    - name: package_id
+      value: ""
+    - name: booking_id
+      value: ""
+
+docs:
+  content: |-
+    Full API collection for the Vehicle Management System including Auth, Marketplace, and Vehicle Inspection modules.
+
+    ## Setup
+    1. Set `base_url` variable to `http://localhost:5000`
+    2. Register a user and copy the token to `user_token`
+    3. Register a company and copy the token to `company_token`
+
+    ## Testing Workflow
+    1. Auth → Register & Login
+    2. Marketplace → CRUD listings
+    3. Inspection → Register company → Create packages → Book → Confirm → Start → Complete
+
+    For detailed request/response examples, refer to `API_TESTING_GUIDE.md`.
+  type: text/markdown
+bundled: false
+extensions:
+  bruno:
+    ignore:
+      - node_modules
+      - .git

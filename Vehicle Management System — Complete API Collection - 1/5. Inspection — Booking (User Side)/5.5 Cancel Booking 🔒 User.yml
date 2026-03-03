@@ -1,0 +1,26 @@
+info:
+  name: 5.5 Cancel Booking 🔒 User
+  type: http
+  seq: 5
+
+http:
+  method: PUT
+  url: "{{base_url}}/api/inspection/bookings/{{booking_id}}/cancel"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: Bearer {{user_token}}
+  body:
+    type: json
+    data: |-
+      {
+        "reason": "Schedule conflict — need to reschedule"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

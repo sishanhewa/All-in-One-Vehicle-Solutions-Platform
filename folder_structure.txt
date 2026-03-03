@@ -1,0 +1,584 @@
+{
+  "type": "directory",
+  "name": "All-in-One-Vehicle-Solutions-Platform",
+  "root": true,
+  "children": [
+    {
+      "type": "directory",
+      "name": ".git",
+      "excluded": true
+    },
+    {
+      "type": "directory",
+      "name": ".idea",
+      "excluded": true
+    },
+    {
+      "type": "directory",
+      "name": "backend",
+      "children": [
+        {
+          "type": "directory",
+          "name": "config",
+          "children": [
+            {
+              "type": "file",
+              "name": "db.js"
+            }
+          ]
+        },
+        {
+          "type": "directory",
+          "name": "controllers",
+          "children": [
+            {
+              "type": "file",
+              "name": "authController.js"
+            },
+            {
+              "type": "file",
+              "name": "inspectionBookingController.js"
+            },
+            {
+              "type": "file",
+              "name": "inspectionCompanyController.js"
+            },
+            {
+              "type": "file",
+              "name": "marketplaceController.js"
+            }
+          ]
+        },
+        {
+          "type": "directory",
+          "name": "middleware",
+          "children": [
+            {
+              "type": "file",
+              "name": "authMiddleware.js"
+            },
+            {
+              "type": "file",
+              "name": "roleMiddleware.js"
+            },
+            {
+              "type": "file",
+              "name": "uploadMiddleware.js"
+            }
+          ]
+        },
+        {
+          "type": "directory",
+          "name": "models",
+          "children": [
+            {
+              "type": "file",
+              "name": "InspectionBooking.js"
+            },
+            {
+              "type": "file",
+              "name": "InspectionPackage.js"
+            },
+            {
+              "type": "file",
+              "name": "Listing.js"
+            },
+            {
+              "type": "file",
+              "name": "User.js"
+            }
+          ]
+        },
+        {
+          "type": "directory",
+          "name": "node_modules",
+          "excluded": true
+        },
+        {
+          "type": "directory",
+          "name": "public",
+          "children": [
+            {
+              "type": "directory",
+              "name": "uploads",
+              "children": [
+                {
+                  "type": "file",
+                  "name": "images-1774781396978.jpg"
+                },
+                {
+                  "type": "file",
+                  "name": "images-1774800099125.jpg"
+                },
+                {
+                  "type": "file",
+                  "name": "images-1774800139820.jpg"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "directory",
+          "name": "routes",
+          "children": [
+            {
+              "type": "file",
+              "name": "authRoutes.js"
+            },
+            {
+              "type": "file",
+              "name": "inspectionRoutes.js"
+            },
+            {
+              "type": "file",
+              "name": "marketplaceRoutes.js"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": ".env"
+        },
+        {
+          "type": "file",
+          "name": ".gitignore"
+        },
+        {
+          "type": "file",
+          "name": "package-lock.json"
+        },
+        {
+          "type": "file",
+          "name": "package.json"
+        },
+        {
+          "type": "file",
+          "name": "seedInspectionCompanies.js"
+        },
+        {
+          "type": "file",
+          "name": "seedMarketplace.js"
+        },
+        {
+          "type": "file",
+          "name": "server.js"
+        }
+      ]
+    },
+    {
+      "type": "directory",
+      "name": "frontend",
+      "children": [
+        {
+          "type": "directory",
+          "name": ".expo",
+          "excluded": true
+        },
+        {
+          "type": "directory",
+          "name": "app",
+          "children": [
+            {
+              "type": "directory",
+              "name": "(tabs)",
+              "children": [
+                {
+                  "type": "file",
+                  "name": "_layout.tsx"
+                },
+                {
+                  "type": "file",
+                  "name": "explore.tsx"
+                },
+                {
+                  "type": "file",
+                  "name": "index.tsx"
+                },
+                {
+                  "type": "file",
+                  "name": "inspections.tsx"
+                },
+                {
+                  "type": "file",
+                  "name": "marketplace.tsx"
+                }
+              ]
+            },
+            {
+              "type": "file",
+              "name": "_layout.tsx"
+            },
+            {
+              "type": "file",
+              "name": "BookingDetails.tsx"
+            },
+            {
+              "type": "file",
+              "name": "BookInspection.tsx"
+            },
+            {
+              "type": "file",
+              "name": "CompanyDashboard.tsx"
+            },
+            {
+              "type": "file",
+              "name": "CompanyDetails.tsx"
+            },
+            {
+              "type": "file",
+              "name": "CompanyRegister.tsx"
+            },
+            {
+              "type": "file",
+              "name": "CreateListing.tsx"
+            },
+            {
+              "type": "file",
+              "name": "EditListing.tsx"
+            },
+            {
+              "type": "file",
+              "name": "ListingDetails.tsx"
+            },
+            {
+              "type": "file",
+              "name": "login.tsx"
+            },
+            {
+              "type": "file",
+              "name": "ManageAds.tsx"
+            },
+            {
+              "type": "file",
+              "name": "ManagePackages.tsx"
+            },
+            {
+              "type": "file",
+              "name": "modal.tsx"
+            },
+            {
+              "type": "file",
+              "name": "MyBookings.tsx"
+            },
+            {
+              "type": "file",
+              "name": "RecordInspection.tsx"
+            },
+            {
+              "type": "file",
+              "name": "register.tsx"
+            },
+            {
+              "type": "file",
+              "name": "SellerProfile.tsx"
+            }
+          ]
+        },
+        {
+          "type": "directory",
+          "name": "assets",
+          "children": [
+            {
+              "type": "directory",
+              "name": "images",
+              "children": [
+                {
+                  "type": "file",
+                  "name": "android-icon-background.png"
+                },
+                {
+                  "type": "file",
+                  "name": "android-icon-foreground.png"
+                },
+                {
+                  "type": "file",
+                  "name": "android-icon-monochrome.png"
+                },
+                {
+                  "type": "file",
+                  "name": "favicon.png"
+                },
+                {
+                  "type": "file",
+                  "name": "icon.png"
+                },
+                {
+                  "type": "file",
+                  "name": "partial-react-logo.png"
+                },
+                {
+                  "type": "file",
+                  "name": "react-logo.png"
+                },
+                {
+                  "type": "file",
+                  "name": "react-logo@2x.png"
+                },
+                {
+                  "type": "file",
+                  "name": "react-logo@3x.png"
+                },
+                {
+                  "type": "file",
+                  "name": "splash-icon.png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "directory",
+          "name": "components",
+          "children": [
+            {
+              "type": "directory",
+              "name": "ui",
+              "children": [
+                {
+                  "type": "file",
+                  "name": "collapsible.tsx"
+                },
+                {
+                  "type": "file",
+                  "name": "icon-symbol.ios.tsx"
+                },
+                {
+                  "type": "file",
+                  "name": "icon-symbol.tsx"
+                }
+              ]
+            },
+            {
+              "type": "file",
+              "name": "external-link.tsx"
+            },
+            {
+              "type": "file",
+              "name": "haptic-tab.tsx"
+            },
+            {
+              "type": "file",
+              "name": "hello-wave.tsx"
+            },
+            {
+              "type": "file",
+              "name": "parallax-scroll-view.tsx"
+            },
+            {
+              "type": "file",
+              "name": "themed-text.tsx"
+            },
+            {
+              "type": "file",
+              "name": "themed-view.tsx"
+            }
+          ]
+        },
+        {
+          "type": "directory",
+          "name": "constants",
+          "children": [
+            {
+              "type": "file",
+              "name": "theme.ts"
+            }
+          ]
+        },
+        {
+          "type": "directory",
+          "name": "hooks",
+          "children": [
+            {
+              "type": "file",
+              "name": "use-color-scheme.ts"
+            },
+            {
+              "type": "file",
+              "name": "use-color-scheme.web.ts"
+            },
+            {
+              "type": "file",
+              "name": "use-theme-color.ts"
+            }
+          ]
+        },
+        {
+          "type": "directory",
+          "name": "node_modules",
+          "excluded": true
+        },
+        {
+          "type": "directory",
+          "name": "scripts",
+          "children": [
+            {
+              "type": "file",
+              "name": "reset-project.js"
+            }
+          ]
+        },
+        {
+          "type": "directory",
+          "name": "src",
+          "children": [
+            {
+              "type": "directory",
+              "name": "api",
+              "children": [
+                {
+                  "type": "file",
+                  "name": "authApi.js"
+                },
+                {
+                  "type": "file",
+                  "name": "inspectionApi.js"
+                },
+                {
+                  "type": "file",
+                  "name": "marketplaceApi.js"
+                }
+              ]
+            },
+            {
+              "type": "directory",
+              "name": "context",
+              "children": [
+                {
+                  "type": "file",
+                  "name": "AuthContext.js"
+                }
+              ]
+            },
+            {
+              "type": "directory",
+              "name": "screens",
+              "children": [
+                {
+                  "type": "file",
+                  "name": "BookingDetails.js"
+                },
+                {
+                  "type": "file",
+                  "name": "BookInspection.js"
+                },
+                {
+                  "type": "file",
+                  "name": "CompanyDashboard.js"
+                },
+                {
+                  "type": "file",
+                  "name": "CompanyDetails.js"
+                },
+                {
+                  "type": "file",
+                  "name": "CreateListing.js"
+                },
+                {
+                  "type": "file",
+                  "name": "EditListing.js"
+                },
+                {
+                  "type": "file",
+                  "name": "InspectionHome.js"
+                },
+                {
+                  "type": "file",
+                  "name": "ListingDetails.js"
+                },
+                {
+                  "type": "file",
+                  "name": "ManagePackages.js"
+                },
+                {
+                  "type": "file",
+                  "name": "MarketplaceFeed.js"
+                },
+                {
+                  "type": "file",
+                  "name": "MyBookings.js"
+                },
+                {
+                  "type": "file",
+                  "name": "RecordInspection.js"
+                },
+                {
+                  "type": "file",
+                  "name": "SellerDashboard.js"
+                },
+                {
+                  "type": "file",
+                  "name": "SellerProfile.js"
+                },
+                {
+                  "type": "file",
+                  "name": "WelcomeScreen.js"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": ".env"
+        },
+        {
+          "type": "file",
+          "name": ".gitignore"
+        },
+        {
+          "type": "file",
+          "name": "app.json"
+        },
+        {
+          "type": "file",
+          "name": "eslint.config.js"
+        },
+        {
+          "type": "file",
+          "name": "expo-env.d.ts"
+        },
+        {
+          "type": "file",
+          "name": "package-lock.json"
+        },
+        {
+          "type": "file",
+          "name": "package.json"
+        },
+        {
+          "type": "file",
+          "name": "README.md"
+        },
+        {
+          "type": "file",
+          "name": "tsconfig.json"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": ".gitignore"
+    },
+    {
+      "type": "file",
+      "name": "API_TESTING_GUIDE.md"
+    },
+    {
+      "type": "file",
+      "name": "package-lock.json"
+    },
+    {
+      "type": "file",
+      "name": "script.py"
+    },
+    {
+      "type": "file",
+      "name": "tree.py"
+    },
+    {
+      "type": "file",
+      "name": "VMS_Postman_Collection.json"
+    }
+  ]
+}

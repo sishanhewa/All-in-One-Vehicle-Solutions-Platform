@@ -1,0 +1,11 @@
+info:
+  name: 7. End-to-End Test Flow
+  type: folder
+  seq: 7
+
+request:
+  auth: inherit
+
+docs:
+  content: Run these in order to test the complete inspection lifecycle
+  type: text/markdown

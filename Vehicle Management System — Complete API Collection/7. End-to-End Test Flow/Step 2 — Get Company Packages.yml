@@ -1,0 +1,28 @@
+info:
+  name: Step 2 — Get Company Packages
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{base_url}}/api/inspection/companies/{{company_id}}/packages"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: "var jsonData = res.getBody();\r
+
+        if (jsonData.length > 0) {\r
+
+        \  pm.collectionVariables.set('package_id', jsonData[0]._id);\r
+
+        \  console.log('✅ package_id saved:', jsonData[0].name);\r
+
+        }"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

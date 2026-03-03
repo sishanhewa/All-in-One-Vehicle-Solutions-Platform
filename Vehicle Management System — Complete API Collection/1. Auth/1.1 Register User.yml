@@ -1,0 +1,39 @@
+info:
+  name: 1.1 Register User
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{base_url}}/api/auth/register"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Test Buyer",
+        "email": "buyer@test.com",
+        "password": "password123",
+        "phone": "+94771234567"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        var jsonData = res.getBody();
+
+        if (jsonData.token) {
+          // Use 'bru.setVar' instead of 'pm.collectionVariables.set'
+          bru.setVar('user_token', jsonData.token);
+          console.log('✅ user_token saved');
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

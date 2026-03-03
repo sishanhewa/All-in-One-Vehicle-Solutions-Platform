@@ -1,0 +1,48 @@
+info:
+  name: 3.1 Register Inspection Company
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{base_url}}/api/inspection/companies/register"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "name": "New Inspector",
+        "email": "newinspector@test.lk",
+        "password": "password123",
+        "phone": "+94771112233",
+        "companyName": "New Test Inspections",
+        "description": "Professional vehicle inspection services",
+        "address": "No. 100, Main Street",
+        "city": "Colombo",
+        "operatingHours": "Mon-Sat 8:00 AM - 6:00 PM",
+        "website": "https://newtestinspect.lk"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: "var jsonData = res.getBody();\r
+
+        if (jsonData.token) {\r
+
+        \  pm.collectionVariables.set('company_token', jsonData.token);\r
+
+        \  pm.collectionVariables.set('company_id', jsonData._id);\r
+
+        \  console.log('✅ company_token & company_id saved');\r
+
+        }"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
