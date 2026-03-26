@@ -1,0 +1,728 @@
+{
+  "info": {
+    "name": "Vehicle Management System — Complete API Collection",
+    "description": "Full API collection for the Vehicle Management System including Auth, Marketplace, and Vehicle Inspection modules.\n\n## Setup\n1. Set `base_url` variable to `http://localhost:5000`\n2. Register a user and copy the token to `user_token`\n3. Register a company and copy the token to `company_token`\n\n## Testing Workflow\n1. Auth → Register & Login\n2. Marketplace → CRUD listings\n3. Inspection → Register company → Create packages → Book → Confirm → Start → Complete",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:5000" },
+    { "key": "user_token", "value": "" },
+    { "key": "company_token", "value": "" },
+    { "key": "listing_id", "value": "" },
+    { "key": "company_id", "value": "" },
+    { "key": "package_id", "value": "" },
+    { "key": "booking_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Auth",
+      "description": "User authentication endpoints",
+      "item": [
+        {
+          "name": "1.1 Register User",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/auth/register", "host": ["{{base_url}}"], "path": ["api", "auth", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Buyer\",\n  \"email\": \"buyer@test.com\",\n  \"password\": \"password123\",\n  \"phone\": \"+94771234567\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "if (jsonData.token) {",
+                "  pm.collectionVariables.set('user_token', jsonData.token);",
+                "  console.log('✅ user_token saved');",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "1.2 Login User",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/auth/login", "host": ["{{base_url}}"], "path": ["api", "auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"buyer@test.com\",\n  \"password\": \"password123\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "if (jsonData.token) {",
+                "  pm.collectionVariables.set('user_token', jsonData.token);",
+                "  console.log('✅ user_token saved');",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "1.3 Login as Company (Ceylon AutoCare)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/auth/login", "host": ["{{base_url}}"], "path": ["api", "auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"info@ceylonautocare.lk\",\n  \"password\": \"ceylon123\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "if (jsonData.token) {",
+                "  pm.collectionVariables.set('company_token', jsonData.token);",
+                "  pm.collectionVariables.set('company_id', jsonData._id);",
+                "  console.log('✅ company_token & company_id saved');",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "1.4 Get User Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{user_token}}" }],
+            "url": { "raw": "{{base_url}}/api/auth/profile", "host": ["{{base_url}}"], "path": ["api", "auth", "profile"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Marketplace",
+      "description": "Vehicle listing CRUD endpoints",
+      "item": [
+        {
+          "name": "2.1 Get All Listings",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/marketplace", "host": ["{{base_url}}"], "path": ["api", "marketplace"] }
+          }
+        },
+        {
+          "name": "2.2 Get All Listings (with filters)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/marketplace?make=Toyota&minPrice=500000&maxPrice=5000000&location=Colombo",
+              "host": ["{{base_url}}"],
+              "path": ["api", "marketplace"],
+              "query": [
+                { "key": "make", "value": "Toyota" },
+                { "key": "minPrice", "value": "500000" },
+                { "key": "maxPrice", "value": "5000000" },
+                { "key": "location", "value": "Colombo" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "2.3 Get Single Listing",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/marketplace/{{listing_id}}", "host": ["{{base_url}}"], "path": ["api", "marketplace", "{{listing_id}}"] }
+          }
+        },
+        {
+          "name": "2.4 Create Listing",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{user_token}}" }],
+            "url": { "raw": "{{base_url}}/api/marketplace", "host": ["{{base_url}}"], "path": ["api", "marketplace"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "make", "value": "Toyota", "type": "text" },
+                { "key": "model", "value": "Corolla", "type": "text" },
+                { "key": "year", "value": "2020", "type": "text" },
+                { "key": "price", "value": "6500000", "type": "text" },
+                { "key": "mileage", "value": "45000", "type": "text" },
+                { "key": "fuelType", "value": "Petrol", "type": "text" },
+                { "key": "transmission", "value": "Automatic", "type": "text" },
+                { "key": "bodyType", "value": "Sedan", "type": "text" },
+                { "key": "location", "value": "Colombo", "type": "text" },
+                { "key": "description", "value": "Well maintained Toyota Corolla 2020 model. Single owner.", "type": "text" },
+                { "key": "images", "type": "file", "src": "" }
+              ]
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "if (jsonData._id) {",
+                "  pm.collectionVariables.set('listing_id', jsonData._id);",
+                "  console.log('✅ listing_id saved');",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "2.5 Update Listing",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{user_token}}" }],
+            "url": { "raw": "{{base_url}}/api/marketplace/{{listing_id}}", "host": ["{{base_url}}"], "path": ["api", "marketplace", "{{listing_id}}"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "price", "value": "6200000", "type": "text" },
+                { "key": "description", "value": "Price reduced! Well maintained Toyota Corolla.", "type": "text" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "2.6 Delete Listing",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{user_token}}" }],
+            "url": { "raw": "{{base_url}}/api/marketplace/{{listing_id}}", "host": ["{{base_url}}"], "path": ["api", "marketplace", "{{listing_id}}"] }
+          }
+        },
+        {
+          "name": "2.7 Get My Listings",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{user_token}}" }],
+            "url": { "raw": "{{base_url}}/api/marketplace/my-listings", "host": ["{{base_url}}"], "path": ["api", "marketplace", "my-listings"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Inspection — Company Management",
+      "description": "Inspection company registration and profile management",
+      "item": [
+        {
+          "name": "3.1 Register Inspection Company",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/inspection/companies/register", "host": ["{{base_url}}"], "path": ["api", "inspection", "companies", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Inspector\",\n  \"email\": \"newinspector@test.lk\",\n  \"password\": \"password123\",\n  \"phone\": \"+94771112233\",\n  \"companyName\": \"New Test Inspections\",\n  \"description\": \"Professional vehicle inspection services\",\n  \"address\": \"No. 100, Main Street\",\n  \"city\": \"Colombo\",\n  \"operatingHours\": \"Mon-Sat 8:00 AM - 6:00 PM\",\n  \"website\": \"https://newtestinspect.lk\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "if (jsonData.token) {",
+                "  pm.collectionVariables.set('company_token', jsonData.token);",
+                "  pm.collectionVariables.set('company_id', jsonData._id);",
+                "  console.log('✅ company_token & company_id saved');",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "3.2 Browse All Companies",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/inspection/companies", "host": ["{{base_url}}"], "path": ["api", "inspection", "companies"] }
+          }
+        },
+        {
+          "name": "3.3 Browse Companies (filter by city)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/inspection/companies?city=Colombo",
+              "host": ["{{base_url}}"],
+              "path": ["api", "inspection", "companies"],
+              "query": [{ "key": "city", "value": "Colombo" }]
+            }
+          }
+        },
+        {
+          "name": "3.4 Browse Companies (search)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/inspection/companies?search=Auto",
+              "host": ["{{base_url}}"],
+              "path": ["api", "inspection", "companies"],
+              "query": [{ "key": "search", "value": "Auto" }]
+            }
+          }
+        },
+        {
+          "name": "3.5 Get Company by ID (with packages)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/inspection/companies/{{company_id}}", "host": ["{{base_url}}"], "path": ["api", "inspection", "companies", "{{company_id}}"] }
+          }
+        },
+        {
+          "name": "3.6 Get Own Company Profile 🔒",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{company_token}}" }],
+            "url": { "raw": "{{base_url}}/api/inspection/companies/profile", "host": ["{{base_url}}"], "path": ["api", "inspection", "companies", "profile"] }
+          }
+        },
+        {
+          "name": "3.7 Update Company Profile 🔒",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{company_token}}" }],
+            "url": { "raw": "{{base_url}}/api/inspection/companies/profile", "host": ["{{base_url}}"], "path": ["api", "inspection", "companies", "profile"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "companyName", "value": "Updated Company Name", "type": "text" },
+                { "key": "description", "value": "Updated description for the company", "type": "text" },
+                { "key": "operatingHours", "value": "Mon-Sun 7:00 AM - 7:00 PM", "type": "text" },
+                { "key": "logo", "type": "file", "src": "" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.8 Get Company's Packages (Public)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/inspection/companies/{{company_id}}/packages", "host": ["{{base_url}}"], "path": ["api", "inspection", "companies", "{{company_id}}", "packages"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Inspection — Package Management",
+      "description": "CRUD operations for inspection packages (Company only)",
+      "item": [
+        {
+          "name": "4.1 Create Package 🔒",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{company_token}}" }],
+            "url": { "raw": "{{base_url}}/api/inspection/packages", "host": ["{{base_url}}"], "path": ["api", "inspection", "packages"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Full Vehicle Inspection", "type": "text" },
+                { "key": "description", "value": "Comprehensive 80-point vehicle inspection covering all major systems.", "type": "text" },
+                { "key": "price", "value": "15000", "type": "text" },
+                { "key": "duration", "value": "90", "type": "text" },
+                { "key": "vehicleTypes", "value": "[\"Car\",\"SUV\",\"Van\"]", "type": "text" },
+                { "key": "checklistItems", "value": "[\"Engine\",\"Transmission\",\"Brakes\",\"Suspension\",\"Electrical\",\"Body\",\"Interior\",\"Tires\"]", "type": "text" },
+                { "key": "images", "type": "file", "src": "" }
+              ]
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "if (jsonData._id) {",
+                "  pm.collectionVariables.set('package_id', jsonData._id);",
+                "  console.log('✅ package_id saved');",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "4.2 Get My Packages 🔒",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{company_token}}" }],
+            "url": { "raw": "{{base_url}}/api/inspection/packages/my-packages", "host": ["{{base_url}}"], "path": ["api", "inspection", "packages", "my-packages"] }
+          }
+        },
+        {
+          "name": "4.3 Update Package 🔒",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{company_token}}" }],
+            "url": { "raw": "{{base_url}}/api/inspection/packages/{{package_id}}", "host": ["{{base_url}}"], "path": ["api", "inspection", "packages", "{{package_id}}"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "price", "value": "14000", "type": "text" },
+                { "key": "description", "value": "Updated: Premium 80-point inspection with digital report.", "type": "text" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "4.4 Delete Package 🔒",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{company_token}}" }],
+            "url": { "raw": "{{base_url}}/api/inspection/packages/{{package_id}}", "host": ["{{base_url}}"], "path": ["api", "inspection", "packages", "{{package_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Inspection — Booking (User Side)",
+      "description": "User-facing booking operations",
+      "item": [
+        {
+          "name": "5.1 Create Booking 🔒 User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{user_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/inspection/bookings", "host": ["{{base_url}}"], "path": ["api", "inspection", "bookings"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyId\": \"{{company_id}}\",\n  \"packageId\": \"{{package_id}}\",\n  \"make\": \"Toyota\",\n  \"model\": \"Corolla\",\n  \"year\": 2021,\n  \"plateNumber\": \"CAB-1234\",\n  \"vehicleType\": \"Car\",\n  \"appointmentDate\": \"2026-04-15\",\n  \"appointmentTime\": \"10:00 AM\",\n  \"notes\": \"Please also check the AC system\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "if (jsonData._id) {",
+                "  pm.collectionVariables.set('booking_id', jsonData._id);",
+                "  console.log('✅ booking_id saved');",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "5.2 Get My Bookings 🔒 User",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{user_token}}" }],
+            "url": { "raw": "{{base_url}}/api/inspection/bookings/my-bookings", "host": ["{{base_url}}"], "path": ["api", "inspection", "bookings", "my-bookings"] }
+          }
+        },
+        {
+          "name": "5.3 Get My Bookings (filter by status) 🔒",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{user_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/inspection/bookings/my-bookings?status=Pending",
+              "host": ["{{base_url}}"],
+              "path": ["api", "inspection", "bookings", "my-bookings"],
+              "query": [{ "key": "status", "value": "Pending" }]
+            }
+          }
+        },
+        {
+          "name": "5.4 Get Booking Details 🔒",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{user_token}}" }],
+            "url": { "raw": "{{base_url}}/api/inspection/bookings/{{booking_id}}", "host": ["{{base_url}}"], "path": ["api", "inspection", "bookings", "{{booking_id}}"] }
+          }
+        },
+        {
+          "name": "5.5 Cancel Booking 🔒 User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{user_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/inspection/bookings/{{booking_id}}/cancel", "host": ["{{base_url}}"], "path": ["api", "inspection", "bookings", "{{booking_id}}", "cancel"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Schedule conflict — need to reschedule\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Inspection — Queue Management (Company Side)",
+      "description": "Company-facing booking queue and inspection lifecycle",
+      "item": [
+        {
+          "name": "6.1 Get Company Queue 🔒 Company",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{company_token}}" }],
+            "url": { "raw": "{{base_url}}/api/inspection/bookings/queue", "host": ["{{base_url}}"], "path": ["api", "inspection", "bookings", "queue"] }
+          }
+        },
+        {
+          "name": "6.2 Get Queue — Today Only 🔒",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{company_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/inspection/bookings/queue?date=today",
+              "host": ["{{base_url}}"],
+              "path": ["api", "inspection", "bookings", "queue"],
+              "query": [{ "key": "date", "value": "today" }]
+            }
+          }
+        },
+        {
+          "name": "6.3 Get Queue — This Week 🔒",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{company_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/inspection/bookings/queue?date=week",
+              "host": ["{{base_url}}"],
+              "path": ["api", "inspection", "bookings", "queue"],
+              "query": [{ "key": "date", "value": "week" }]
+            }
+          }
+        },
+        {
+          "name": "6.4 Get Queue — Pending Only 🔒",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{company_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/inspection/bookings/queue?status=Pending",
+              "host": ["{{base_url}}"],
+              "path": ["api", "inspection", "bookings", "queue"],
+              "query": [{ "key": "status", "value": "Pending" }]
+            }
+          }
+        },
+        {
+          "name": "6.5 Confirm Booking 🔒 Company",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{company_token}}" }],
+            "url": { "raw": "{{base_url}}/api/inspection/bookings/{{booking_id}}/confirm", "host": ["{{base_url}}"], "path": ["api", "inspection", "bookings", "{{booking_id}}", "confirm"] }
+          }
+        },
+        {
+          "name": "6.6 Start Inspection 🔒 Company",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{company_token}}" }],
+            "url": { "raw": "{{base_url}}/api/inspection/bookings/{{booking_id}}/start", "host": ["{{base_url}}"], "path": ["api", "inspection", "bookings", "{{booking_id}}", "start"] }
+          }
+        },
+        {
+          "name": "6.7 Complete Inspection 🔒 Company",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{company_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/inspection/bookings/{{booking_id}}/complete", "host": ["{{base_url}}"], "path": ["api", "inspection", "bookings", "{{booking_id}}", "complete"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inspectionResult\": \"Pass\",\n  \"overallScore\": 87,\n  \"checklist\": [\n    { \"item\": \"Engine\", \"condition\": \"Good\", \"notes\": \"Running smoothly, no unusual sounds\" },\n    { \"item\": \"Transmission\", \"condition\": \"Excellent\", \"notes\": \"Smooth gear shifts\" },\n    { \"item\": \"Brakes\", \"condition\": \"Fair\", \"notes\": \"Front pads worn ~60%, replacement recommended within 10,000km\" },\n    { \"item\": \"Suspension\", \"condition\": \"Good\", \"notes\": \"No leaks or unusual movement\" },\n    { \"item\": \"Electrical\", \"condition\": \"Excellent\", \"notes\": \"All systems functional\" },\n    { \"item\": \"Body\", \"condition\": \"Good\", \"notes\": \"Minor scratch on rear bumper\" },\n    { \"item\": \"Interior\", \"condition\": \"Good\", \"notes\": \"Clean, all controls working\" },\n    { \"item\": \"Tires\", \"condition\": \"Excellent\", \"notes\": \"New tires, ~95% tread remaining\" }\n  ],\n  \"resultRemarks\": \"Vehicle is in good overall condition. Recommended: Replace front brake pads within 10,000km. Minor cosmetic scratch on rear bumper. All major systems are functioning properly.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "6.8 Upload Report Images 🔒 Company",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{company_token}}" }],
+            "url": { "raw": "{{base_url}}/api/inspection/bookings/{{booking_id}}/images", "host": ["{{base_url}}"], "path": ["api", "inspection", "bookings", "{{booking_id}}", "images"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "reportImages", "type": "file", "src": "" },
+                { "key": "reportImages", "type": "file", "src": "" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "6.9 Cancel Booking 🔒 Company",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{company_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/inspection/bookings/{{booking_id}}/cancel", "host": ["{{base_url}}"], "path": ["api", "inspection", "bookings", "{{booking_id}}", "cancel"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Company equipment maintenance — rescheduling required\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. End-to-End Test Flow",
+      "description": "Run these in order to test the complete inspection lifecycle",
+      "item": [
+        {
+          "name": "Step 1 — Login as Company",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/auth/login", "host": ["{{base_url}}"], "path": ["api", "auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"info@ceylonautocare.lk\",\n  \"password\": \"ceylon123\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "pm.collectionVariables.set('company_token', jsonData.token);",
+                "pm.collectionVariables.set('company_id', jsonData._id);",
+                "console.log('✅ Company logged in:', jsonData.companyProfile?.companyName);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Step 2 — Get Company Packages",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/inspection/companies/{{company_id}}/packages", "host": ["{{base_url}}"], "path": ["api", "inspection", "companies", "{{company_id}}", "packages"] }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "if (jsonData.length > 0) {",
+                "  pm.collectionVariables.set('package_id', jsonData[0]._id);",
+                "  console.log('✅ package_id saved:', jsonData[0].name);",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Step 3 — Register User",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/auth/register", "host": ["{{base_url}}"], "path": ["api", "auth", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"E2E Test User\",\n  \"email\": \"e2etest@test.com\",\n  \"password\": \"test12345\",\n  \"phone\": \"+94779999999\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "pm.collectionVariables.set('user_token', jsonData.token);",
+                "console.log('✅ User registered:', jsonData.name);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Step 4 — Book Inspection",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{user_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/inspection/bookings", "host": ["{{base_url}}"], "path": ["api", "inspection", "bookings"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyId\": \"{{company_id}}\",\n  \"packageId\": \"{{package_id}}\",\n  \"make\": \"Honda\",\n  \"model\": \"Civic\",\n  \"year\": 2019,\n  \"plateNumber\": \"WP-KA-5678\",\n  \"vehicleType\": \"Car\",\n  \"appointmentDate\": \"2026-04-20\",\n  \"appointmentTime\": \"11:00 AM\",\n  \"notes\": \"Pre-purchase inspection — buying from a dealer\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "pm.collectionVariables.set('booking_id', jsonData._id);",
+                "console.log('✅ Booking created:', jsonData.status);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Step 5 — Confirm Booking (Company)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{company_token}}" }],
+            "url": { "raw": "{{base_url}}/api/inspection/bookings/{{booking_id}}/confirm", "host": ["{{base_url}}"], "path": ["api", "inspection", "bookings", "{{booking_id}}", "confirm"] }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["console.log('✅ Status:', pm.response.json().status);"] }
+          }]
+        },
+        {
+          "name": "Step 6 — Start Inspection (Company)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{company_token}}" }],
+            "url": { "raw": "{{base_url}}/api/inspection/bookings/{{booking_id}}/start", "host": ["{{base_url}}"], "path": ["api", "inspection", "bookings", "{{booking_id}}", "start"] }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["console.log('✅ Status:', pm.response.json().status);"] }
+          }]
+        },
+        {
+          "name": "Step 7 — Complete Inspection (Company)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{company_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/inspection/bookings/{{booking_id}}/complete", "host": ["{{base_url}}"], "path": ["api", "inspection", "bookings", "{{booking_id}}", "complete"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inspectionResult\": \"Conditional\",\n  \"overallScore\": 72,\n  \"checklist\": [\n    { \"item\": \"Engine\", \"condition\": \"Good\", \"notes\": \"Runs well\" },\n    { \"item\": \"Brakes\", \"condition\": \"Poor\", \"notes\": \"Immediate replacement needed\" },\n    { \"item\": \"Tires\", \"condition\": \"Fair\", \"notes\": \"50% tread remaining\" }\n  ],\n  \"resultRemarks\": \"Vehicle needs brake work before it is roadworthy. Rest of the systems are acceptable.\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["var d = pm.response.json(); console.log('✅ Result:', d.inspectionResult, '| Score:', d.overallScore);"] }
+          }]
+        },
+        {
+          "name": "Step 8 — View Completed Booking (User)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{user_token}}" }],
+            "url": { "raw": "{{base_url}}/api/inspection/bookings/{{booking_id}}", "host": ["{{base_url}}"], "path": ["api", "inspection", "bookings", "{{booking_id}}"] }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var d = pm.response.json();",
+                "console.log('✅ Final Status:', d.status);",
+                "console.log('✅ Result:', d.inspectionResult);",
+                "console.log('✅ Score:', d.overallScore);",
+                "console.log('✅ Checklist items:', d.checklist?.length);"
+              ]
+            }
+          }]
+        }
+      ]
+    }
+  ]
+}
