@@ -4,10 +4,10 @@ const path = require('path');
 const cors = require('cors');
 const connectDB = require('./config/db');
 
+const fs = require('fs');
+
 // Import Routes
-// const marketplaceRoutes = require('./routes/marketplaceRoutes');
 const authRoutes = require('./routes/authRoutes');
-const inspectionRoutes = require('./routes/inspectionRoutes');
 
 // Load enviornment variables
 dotenv.config();
@@ -26,9 +26,18 @@ app.use(cors()); // Enables Cross-Origin Resource Sharing
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // Mount the API Routes
-// app.use('/api/marketplace', marketplaceRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/inspection', inspectionRoutes);
+
+// Dynamically load feature routes depending on which branch you are on
+if (fs.existsSync(path.join(__dirname, 'routes/marketplaceRoutes.js'))) {
+  const marketplaceRoutes = require('./routes/marketplaceRoutes');
+  app.use('/api/marketplace', marketplaceRoutes);
+}
+
+if (fs.existsSync(path.join(__dirname, 'routes/inspectionRoutes.js'))) {
+  const inspectionRoutes = require('./routes/inspectionRoutes');
+  app.use('/api/inspection', inspectionRoutes);
+}
 
 // Test Route
 app.get('/', (req, res) => {
