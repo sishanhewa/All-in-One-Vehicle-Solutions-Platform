@@ -25,20 +25,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Marketplace',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons 
-              name={focused ? 'home' : 'home-outline'} 
-              size={24} 
-              color={color} 
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="inspections"
-        options={{
-          title: 'Inspections',
+          title: 'Vehicle Inspection',
           tabBarIcon: ({ color, focused }) => (
             <Ionicons 
               name={focused ? 'shield-checkmark' : 'shield-checkmark-outline'} 
