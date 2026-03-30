@@ -36,19 +36,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="inspections"
-        options={{
-          title: 'Inspections',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons 
-              name={focused ? 'shield-checkmark' : 'shield-checkmark-outline'} 
-              size={24} 
-              color={color} 
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="explore"
         options={{
           title: 'Account',
