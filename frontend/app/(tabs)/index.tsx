@@ -1,5 +1,5 @@
-import MarketplaceFeed from '../../src/screens/MarketplaceFeed';
+import WelcomeScreen from '../../src/screens/WelcomeScreen';
 
 export default function HomeRoute() {
-  return <MarketplaceFeed />;
+  return <WelcomeScreen />;
 }
