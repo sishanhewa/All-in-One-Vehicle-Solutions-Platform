@@ -7,7 +7,7 @@ const connectDB = require('./config/db');
 // Import Routes
 const marketplaceRoutes = require('./routes/marketplaceRoutes');
 const authRoutes = require('./routes/authRoutes');
-const inspectionRoutes = require('./routes/inspectionRoutes');
+// const inspectionRoutes = require('./routes/inspectionRoutes');
 
 // Load enviornment variables
 dotenv.config();
@@ -28,7 +28,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 // Mount the API Routes
 app.use('/api/marketplace', marketplaceRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/inspection', inspectionRoutes);
+// app.use('/api/inspection', inspectionRoutes);
 
 // Test Route
 app.get('/', (req, res) => {
