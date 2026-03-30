@@ -1,5 +1,5 @@
-import MarketplaceFeed from '../../src/screens/MarketplaceFeed';
+import InspectionHome from '../../src/screens/InspectionHome';
 
 export default function HomeRoute() {
-  return <MarketplaceFeed />;
+  return <InspectionHome />;
 }
