@@ -1,7 +1,8 @@
-import { API_URL } from './marketplaceApi';
+// Base URL for authentication
+const AUTH_API_URL = 'http://10.0.2.2:5000/api/auth';
 
 export const registerUserAPI = async (userData) => {
-  const response = await fetch(`${API_URL.replace('/marketplace', '/auth/register')}`, {
+  const response = await fetch(`${AUTH_API_URL}/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(userData),
@@ -12,7 +13,7 @@ export const registerUserAPI = async (userData) => {
 };
 
 export const loginUserAPI = async (userData) => {
-  const response = await fetch(`${API_URL.replace('/marketplace', '/auth/login')}`, {
+  const response = await fetch(`${AUTH_API_URL}/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(userData),
