@@ -6,7 +6,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#3498db',
+        tabBarActiveTintColor: '#10ac84',
         tabBarInactiveTintColor: '#7f8c8d',
         headerShown: false,
         tabBarStyle: {
@@ -17,11 +17,41 @@ export default function TabLayout() {
           paddingTop: 8,
           height: 64,
         },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '700',
+        },
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Vehicle Inspection',
+          title: 'Home',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              name={focused ? 'home' : 'home-outline'} 
+              size={24} 
+              color={color} 
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="marketplace"
+        options={{
+          title: 'Marketplace',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              name={focused ? 'cart' : 'cart-outline'} 
+              size={24} 
+              color={color} 
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="inspections"
+        options={{
+          title: 'Inspections',
           tabBarIcon: ({ color, focused }) => (
             <Ionicons 
               name={focused ? 'shield-checkmark' : 'shield-checkmark-outline'} 
