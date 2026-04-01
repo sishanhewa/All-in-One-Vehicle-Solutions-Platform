@@ -1,4 +1,4 @@
-// Base URL for authentication
+// Base URL for authentication API
 const AUTH_API_URL = 'http://10.0.2.2:5000/api/auth';
 
 export const registerUserAPI = async (userData) => {
