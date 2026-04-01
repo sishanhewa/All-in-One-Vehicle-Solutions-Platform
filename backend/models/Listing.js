@@ -6,6 +6,7 @@ const listingSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+  title: { type: String },
   make: { type: String, required: [true, 'Please add a make (e.g. Toyota)'] },
   model: { type: String, required: [true, 'Please add a model (e.g. Corolla)'] },
   year: { type: Number, required: [true, 'Please add the year'] },
@@ -21,11 +22,18 @@ const listingSchema = new mongoose.Schema({
     enum: ['Manual', 'Automatic', 'Tiptronic'],
     default: 'Manual',
   },
+  engineCapacity: { type: Number },
   bodyType: {
     type: String,
-    enum: ['Sedan', 'SUV', 'Hatchback', 'Van', 'Truck', 'Coupe', 'Wagon', 'Other'],
+    enum: ['Coupé', 'Hatchback', 'Jeep', 'Pickup', 'SUV', 'Sedan', 'Van', 'Other'],
     default: 'Sedan',
   },
+  condition: {
+    type: String,
+    enum: ['Reconditioned', 'Used', 'New'],
+    default: 'Used',
+  },
+  isNegotiable: { type: Boolean, default: false },
   location: { type: String, required: [true, 'Please add a location'] },
   description: { type: String, default: '' },
   images: [{ type: String }], // paths like /uploads/images-123.jpg
