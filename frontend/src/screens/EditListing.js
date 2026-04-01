@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 const FUEL_TYPES = ['Petrol', 'Diesel', 'Hybrid', 'Electric'];
 const TRANSMISSIONS = ['Manual', 'Automatic', 'Tiptronic'];
 const BODY_TYPES = ['Sedan', 'SUV', 'Hatchback', 'Van', 'Truck', 'Coupe', 'Wagon', 'Other'];
+const CONDITIONS = ['New', 'Used', 'Reconditioned'];
 
 const EditListing = () => {
   const { listingId } = useLocalSearchParams();
@@ -18,6 +19,7 @@ const EditListing = () => {
   const [form, setForm] = useState({
     make: '', model: '', year: '', price: '', mileage: '',
     fuelType: 'Petrol', transmission: 'Manual', bodyType: 'Sedan',
+    condition: 'Used',
     location: '', description: '',
   });
   const [existingImages, setExistingImages] = useState([]);
@@ -43,6 +45,7 @@ const EditListing = () => {
         fuelType: data.fuelType || 'Petrol',
         transmission: data.transmission || 'Manual',
         bodyType: data.bodyType || 'Sedan',
+        condition: data.condition || 'Used',
         location: data.location || '',
         description: data.description || '',
       });
@@ -185,6 +188,7 @@ const EditListing = () => {
       {renderPicker('Fuel Type', FUEL_TYPES, form.fuelType, (v) => updateField('fuelType', v))}
       {renderPicker('Transmission', TRANSMISSIONS, form.transmission, (v) => updateField('transmission', v))}
       {renderPicker('Body Type', BODY_TYPES, form.bodyType, (v) => updateField('bodyType', v))}
+      {renderPicker('Condition', CONDITIONS, form.condition, (v) => updateField('condition', v))}
 
       <View style={styles.fieldGroup}>
         <Text style={styles.label}>Description</Text>
