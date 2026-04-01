@@ -1,5 +1,5 @@
-import WelcomeScreen from '../../src/screens/WelcomeScreen';
+import InspectionHome from '../../src/screens/InspectionHome';
 
 export default function HomeRoute() {
-  return <WelcomeScreen />;
+  return <InspectionHome />;
 }
