@@ -5,7 +5,10 @@ const Listing = require('../models/Listing');
 // @route   GET /api/marketplace
 // @access  Public
 const getListings = asyncHandler(async (req, res) => {
-  const { make, fuelType, transmission, bodyType, location, minPrice, maxPrice, search } = req.query;
+  const { 
+    make, fuelType, transmission, bodyType, location, 
+    minPrice, maxPrice, yearMin, yearMax, condition, search 
+  } = req.query;
 
   let query = { status: 'Available' };
 
@@ -13,12 +16,19 @@ const getListings = asyncHandler(async (req, res) => {
   if (fuelType) query.fuelType = fuelType;
   if (transmission) query.transmission = transmission;
   if (bodyType) query.bodyType = bodyType;
+  if (condition) query.condition = condition;
   if (location) query.location = new RegExp(location, 'i');
 
   if (minPrice || maxPrice) {
     query.price = {};
     if (minPrice) query.price.$gte = Number(minPrice);
     if (maxPrice) query.price.$lte = Number(maxPrice);
+  }
+
+  if (yearMin || yearMax) {
+    query.year = {};
+    if (yearMin) query.year.$gte = Number(yearMin);
+    if (yearMax) query.year.$lte = Number(yearMax);
   }
 
   if (search) {
