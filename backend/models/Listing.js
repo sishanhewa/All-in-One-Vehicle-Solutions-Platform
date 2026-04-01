@@ -31,12 +31,12 @@ const listingSchema = new mongoose.Schema({
   images: [{ type: String }], // paths like /uploads/images-123.jpg
   status: {
     type: String,
-    enum: ['Active', 'Sold', 'Removed'],
-    default: 'Active',
+    enum: ['Available', 'Active', 'Sold', 'Removed'],
+    default: 'Available',
   },
 }, { timestamps: true });
 
 // Index for common queries
 listingSchema.index({ status: 1, make: 1, fuelType: 1, bodyType: 1 });
 
-module.exports = mongoose.model('Listing', listingSchema);
+module.exports = mongoose.model('Listing', listingSchema, 'vehiclelistings');
