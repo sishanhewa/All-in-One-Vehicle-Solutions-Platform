@@ -7,7 +7,7 @@ const Listing = require('../models/Listing');
 const getListings = asyncHandler(async (req, res) => {
   const { make, fuelType, transmission, bodyType, location, minPrice, maxPrice, search } = req.query;
 
-  let query = { status: 'Active' };
+  let query = { status: 'Available' };
 
   if (make) query.make = new RegExp(make, 'i');
   if (fuelType) query.fuelType = fuelType;
