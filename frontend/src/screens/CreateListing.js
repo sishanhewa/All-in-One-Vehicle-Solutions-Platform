@@ -17,7 +17,7 @@ const CreateListing = () => {
   const [form, setForm] = useState({
     make: '', model: '', year: '', price: '', mileage: '',
     fuelType: 'Petrol', transmission: 'Manual', bodyType: 'Sedan',
-    location: '', description: '',
+    condition: 'Used', location: '', description: '',
   });
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
