@@ -85,6 +85,20 @@ export default function ProfileTab() {
           })}
           iconColor="#9b59b6"
         />
+        <MenuItem
+          icon="inbox"
+          title="Rental Requests"
+          subtitle="Approve or reject booking requests for your vehicles"
+          onPress={() => router.push('/rentals/requests')}
+          iconColor="#f39c12"
+        />
+        <MenuItem
+          icon="calendar"
+          title="My Bookings"
+          subtitle="Track the status of your rental bookings"
+          onPress={() => router.push('/rentals/my-bookings')}
+          iconColor="#e67e22"
+        />
       </View>
 
       {/* Logout */}

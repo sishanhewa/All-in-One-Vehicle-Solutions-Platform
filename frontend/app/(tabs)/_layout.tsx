@@ -23,25 +23,12 @@ export default function TabLayout() {
         },
       }}>
       <Tabs.Screen
-        name="index"
+        name="rentals"
         options={{
-          title: 'Marketplace',
+          title: 'Rentals',
           tabBarIcon: ({ color, focused }) => (
             <Ionicons 
-              name={focused ? 'home' : 'home-outline'} 
-              size={24} 
-              color={color} 
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="inspections"
-        options={{
-          title: 'Inspections',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons 
-              name={focused ? 'shield-checkmark' : 'shield-checkmark-outline'} 
+              name={focused ? 'car-sport' : 'car-sport-outline'} 
               size={24} 
               color={color} 
             />
