@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { fetchMyListings, deleteListingAPI, resolveImageUrl } from '../api/marketplaceApi';
+import { fetchMyListings, deleteListingAPI, updateListingAPI, resolveImageUrl } from '../api/marketplaceApi';
 import { Ionicons } from '@expo/vector-icons';
 
 const SellerDashboard = () => {
@@ -30,6 +30,18 @@ const SellerDashboard = () => {
     ]);
   };
 
+  const handleToggleSold = async (item) => {
+    const newStatus = item.status === 'Sold' ? 'Available' : 'Sold';
+    try {
+      const formData = new FormData();
+      formData.append('status', newStatus);
+      const updated = await updateListingAPI(item._id, formData);
+      setListings(p => p.map(l => l._id === updated._id ? updated : l));
+    } catch (e) {
+      Alert.alert('Error', e.message);
+    }
+  };
+
   const fmt = (p) => `Rs. ${Number(p).toLocaleString()}`;
 
   const renderItem = ({ item }) => {
@@ -42,7 +54,10 @@ const SellerDashboard = () => {
           <View style={s.info}><Text style={s.title} numberOfLines={1}>{title}</Text><Text style={s.price}>{fmt(item.price)}</Text><Text style={s.loc}>{item.location} · {item.status}</Text></View>
         </View>
         <View style={s.actions}>
-          <TouchableOpacity style={s.btn} onPress={() => router.push({ pathname: '/ListingDetails', params: { listingId: item._id } })}><Ionicons name="eye-outline" size={18} color="#3498db" /><Text style={[s.btnTxt,{color:'#3498db'}]}>View</Text></TouchableOpacity>
+          <TouchableOpacity style={s.btn} onPress={() => handleToggleSold(item)}>
+            <Ionicons name={item.status === 'Sold' ? 'refresh-outline' : 'checkmark-circle-outline'} size={18} color="#27ae60" />
+            <Text style={[s.btnTxt,{color:'#27ae60'}]}>{item.status === 'Sold' ? 'Relist' : 'Mark Sold'}</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={s.btn} onPress={() => router.push({ pathname: '/EditListing', params: { listingId: item._id } })}><Ionicons name="create-outline" size={18} color="#e67e22" /><Text style={[s.btnTxt,{color:'#e67e22'}]}>Edit</Text></TouchableOpacity>
           <TouchableOpacity style={s.btn} onPress={() => handleDelete(item._id, title)}><Ionicons name="trash-outline" size={18} color="#e74c3c" /><Text style={[s.btnTxt,{color:'#e74c3c'}]}>Delete</Text></TouchableOpacity>
         </View>
