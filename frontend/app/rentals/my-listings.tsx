@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl, Platform, Alert } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl, Platform, Alert, Image, Switch } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons, Feather } from '@expo/vector-icons';
@@ -17,7 +17,7 @@ export default function MyRentalListingsScreen() {
   const fetchMyVehicles = async () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
-      const response = await fetch('http://10.0.2.2:5000/api/rentals', {
+      const response = await fetch('http://192.168.8.100:5000/api/rentals', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -44,6 +44,56 @@ export default function MyRentalListingsScreen() {
     setRefreshing(true);
     fetchMyVehicles();
   }, []);
+
+  const deleteVehicle = async (id: string) => {
+    Alert.alert(
+      'Delete Listing',
+      'Are you sure you want to remove this vehicle listing? This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Delete', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem('userToken');
+              const response = await fetch(`http://192.168.8.100:5000/api/rentals/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+              });
+              if (response.ok) {
+                Alert.alert('Deleted', 'Vehicle listing removed successfully.');
+                fetchMyVehicles();
+              }
+            } catch (err) {
+              console.error(err);
+              Alert.alert('Error', 'Failed to delete listing.');
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const toggleAvailability = async (id: string, currentStatus: boolean) => {
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      const response = await fetch(`http://192.168.8.100:5000/api/rentals/${id}`, {
+        method: 'PUT',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ availability: !currentStatus })
+      });
+      if (response.ok) {
+        fetchMyVehicles();
+      }
+    } catch (err) {
+      console.error(err);
+      Alert.alert('Error', 'Failed to update availability.');
+    }
+  };
 
   if (loading) {
     return (
@@ -86,12 +136,18 @@ export default function MyRentalListingsScreen() {
               onPress={() => router.push(`/(tabs)/rentals/${item._id}`)}
             >
               <View style={styles.cardImagePlaceholder}>
-                <Ionicons name="car-sport" size={36} color="#10ac84" />
+                {item.images && item.images.length > 0 ? (
+                  <Image source={{ uri: `http://192.168.8.100:5000${item.images[0]}` }} style={{ width: '100%', height: '100%', borderRadius: 12 }} resizeMode="cover" />
+                ) : (
+                  <Ionicons name="car-sport" size={36} color="#10ac84" />
+                )}
               </View>
               <View style={styles.cardBody}>
                 <View style={styles.cardTopRow}>
                   <Text style={styles.vehicleName} numberOfLines={1}>{item.make} {item.model}</Text>
-                  <View style={[styles.statusDot, { backgroundColor: item.availability ? '#27ae60' : '#e74c3c' }]} />
+                  <TouchableOpacity onPress={() => deleteVehicle(item._id)}>
+                    <Feather name="trash-2" size={18} color="#e74c3c" />
+                  </TouchableOpacity>
                 </View>
                 <Text style={styles.vehicleYear}>{item.year} · {item.transmission}</Text>
                 <View style={styles.priceRow}>
@@ -100,13 +156,20 @@ export default function MyRentalListingsScreen() {
                   <Text style={styles.priceTag}>Rs. {item.longTermMonthlyRate}/month</Text>
                 </View>
                 <View style={styles.availRow}>
-                  <Ionicons name={item.availability ? 'checkmark-circle' : 'close-circle'} size={14} color={item.availability ? '#27ae60' : '#e74c3c'} />
-                  <Text style={[styles.availText, { color: item.availability ? '#27ae60' : '#e74c3c' }]}>
-                    {item.availability ? 'Available' : 'Rented Out'}
-                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, flex: 1 }}>
+                    <Ionicons name={item.availability ? 'checkmark-circle' : 'close-circle'} size={14} color={item.availability ? '#27ae60' : '#e74c3c'} />
+                    <Text style={[styles.availText, { color: item.availability ? '#27ae60' : '#e74c3c' }]}>
+                      {item.availability ? 'Available' : 'Rented Out'}
+                    </Text>
+                  </View>
+                  <Switch 
+                    value={item.availability} 
+                    onValueChange={() => toggleAvailability(item._id, item.availability)}
+                    trackColor={{ true: '#10ac84' }}
+                    style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
+                  />
                 </View>
               </View>
-              <Feather name="chevron-right" size={18} color="#dfe6e9" />
             </TouchableOpacity>
           )}
         />

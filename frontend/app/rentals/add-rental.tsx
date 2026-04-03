@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, ScrollView, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Platform, Switch } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -21,6 +21,14 @@ export default function AddRentalScreen() {
   const [deposit, setDeposit] = useState('');
   const [description, setDescription] = useState('');
   const [images, setImages] = useState<any[]>([]);
+
+  const [reqDocs, setReqDocs] = useState({
+    drivingLicense: true,
+    idProof: true,
+    billingProof: true,
+    guarantorId: false,
+    guarantorBilling: false
+  });
 
   const pickImages = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -55,7 +63,9 @@ export default function AddRentalScreen() {
       formData.append('mileageLimitType', mileageLimitType);
       formData.append('extraMileageRate', extraMileageRate);
       formData.append('deposit', deposit);
+      formData.append('deposit', deposit);
       formData.append('description', description);
+      formData.append('requiredDocuments', JSON.stringify(reqDocs));
 
       images.forEach((img, idx) => {
         formData.append('images', {
@@ -65,7 +75,7 @@ export default function AddRentalScreen() {
         } as any);
       });
 
-      const response = await fetch('http://10.0.2.2:5000/api/rentals', {
+      const response = await fetch('http://192.168.8.100:5000/api/rentals', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -190,6 +200,33 @@ export default function AddRentalScreen() {
         </View>
       </View>
 
+      {/* Required Documents Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Required Documents</Text>
+        <Text style={styles.label}>Select what documents renters must submit:</Text>
+
+        <View style={styles.switchRow}>
+          <Text style={styles.switchLabel}>Driving License</Text>
+          <Switch value={reqDocs.drivingLicense} onValueChange={v => setReqDocs({...reqDocs, drivingLicense: v})} trackColor={{ true: '#10ac84' }} />
+        </View>
+        <View style={styles.switchRow}>
+          <Text style={styles.switchLabel}>ID Proof (NIC/Passport)</Text>
+          <Switch value={reqDocs.idProof} onValueChange={v => setReqDocs({...reqDocs, idProof: v})} trackColor={{ true: '#10ac84' }} />
+        </View>
+        <View style={styles.switchRow}>
+          <Text style={styles.switchLabel}>Billing Proof (Utility Bill)</Text>
+          <Switch value={reqDocs.billingProof} onValueChange={v => setReqDocs({...reqDocs, billingProof: v})} trackColor={{ true: '#10ac84' }} />
+        </View>
+        <View style={styles.switchRow}>
+          <Text style={styles.switchLabel}>Guarantor ID</Text>
+          <Switch value={reqDocs.guarantorId} onValueChange={v => setReqDocs({...reqDocs, guarantorId: v})} trackColor={{ true: '#10ac84' }} />
+        </View>
+        <View style={styles.switchRow}>
+          <Text style={styles.switchLabel}>Guarantor Billing Proof</Text>
+          <Switch value={reqDocs.guarantorBilling} onValueChange={v => setReqDocs({...reqDocs, guarantorBilling: v})} trackColor={{ true: '#10ac84' }} />
+        </View>
+      </View>
+
       {/* Images Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Vehicle Images</Text>
@@ -233,6 +270,9 @@ const styles = StyleSheet.create({
 
   row: { flexDirection: 'row', gap: 12 },
   halfCol: { flex: 1 },
+
+  switchRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 8, paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: '#f1f3f5' },
+  switchLabel: { fontSize: 14, fontWeight: '600', color: '#1a1a2e' },
 
   toggleRow: { flexDirection: 'row', gap: 10, marginBottom: 12 },
   toggleBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, backgroundColor: '#f8f9fa', alignItems: 'center', borderWidth: 1, borderColor: '#eee' },

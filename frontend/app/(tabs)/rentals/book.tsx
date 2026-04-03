@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
@@ -20,6 +20,20 @@ export default function BookVehicleScreen() {
   const [guarantorBilling, setGuarantorBilling] = useState<any>(null);
 
   const [loading, setLoading] = useState(false);
+  const [vehicle, setVehicle] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchVehicle = async () => {
+      try {
+        const response = await fetch(`http://192.168.8.100:5000/api/rentals/${vehicleId}`);
+        const data = await response.json();
+        if (response.ok) setVehicle(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    if (vehicleId) fetchVehicle();
+  }, [vehicleId]);
 
   const pickImage = async (setter: any) => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -32,11 +46,18 @@ export default function BookVehicleScreen() {
     }
   };
 
+  const reqDocs = vehicle?.requiredDocuments || { drivingLicense: true, idProof: true, billingProof: true, guarantorId: true, guarantorBilling: true };
+
   const handleBooking = async () => {
-    if (!startDate || !endDate || !guarantorName || !drivingLicense || !idProof || !billingProof || !guarantorId || !guarantorBilling) {
-      Alert.alert('Missing Information', 'Please fill all fields and upload all required documents.');
-      return;
+    if (!startDate || !endDate) { Alert.alert('Missing Information', 'Please provide start and end dates.'); return; }
+    if (reqDocs.drivingLicense && !drivingLicense) { Alert.alert('Missing Information', 'Driving License is required.'); return; }
+    if (reqDocs.idProof && !idProof) { Alert.alert('Missing Information', 'ID Proof is required.'); return; }
+    if (reqDocs.billingProof && !billingProof) { Alert.alert('Missing Information', 'Billing Proof is required.'); return; }
+    if (reqDocs.guarantorId || reqDocs.guarantorBilling) {
+      if (!guarantorName) { Alert.alert('Missing Information', 'Guarantor Name is required.'); return; }
     }
+    if (reqDocs.guarantorId && !guarantorId) { Alert.alert('Missing Information', 'Guarantor ID is required.'); return; }
+    if (reqDocs.guarantorBilling && !guarantorBilling) { Alert.alert('Missing Information', 'Guarantor Billing Proof is required.'); return; }
 
     setLoading(true);
     try {
@@ -57,13 +78,13 @@ export default function BookVehicleScreen() {
         } as any);
       };
 
-      appendFile('drivingLicense', drivingLicense);
-      appendFile('idProof', idProof);
-      appendFile('billingProof', billingProof);
-      appendFile('guarantorId', guarantorId);
-      appendFile('guarantorBilling', guarantorBilling);
+      if (reqDocs.drivingLicense && drivingLicense) appendFile('drivingLicense', drivingLicense);
+      if (reqDocs.idProof && idProof) appendFile('idProof', idProof);
+      if (reqDocs.billingProof && billingProof) appendFile('billingProof', billingProof);
+      if (reqDocs.guarantorId && guarantorId) appendFile('guarantorId', guarantorId);
+      if (reqDocs.guarantorBilling && guarantorBilling) appendFile('guarantorBilling', guarantorBilling);
 
-      const response = await fetch(`http://10.0.2.2:5000/api/rentals/${vehicleId}/book`, {
+      const response = await fetch(`http://192.168.8.100:5000/api/rentals/${vehicleId}/book`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -104,7 +125,21 @@ export default function BookVehicleScreen() {
     </TouchableOpacity>
   );
 
-  const completedCount = [drivingLicense, idProof, billingProof, guarantorId, guarantorBilling].filter(Boolean).length;
+  const totalReq = Object.values(reqDocs).filter(Boolean).length;
+  let completedCount = 0;
+  if (reqDocs.drivingLicense && drivingLicense) completedCount++;
+  if (reqDocs.idProof && idProof) completedCount++;
+  if (reqDocs.billingProof && billingProof) completedCount++;
+  if (reqDocs.guarantorId && guarantorId) completedCount++;
+  if (reqDocs.guarantorBilling && guarantorBilling) completedCount++;
+
+  if (!vehicle) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#10ac84" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -118,9 +153,9 @@ export default function BookVehicleScreen() {
       {/* Progress */}
       <View style={styles.progressWrap}>
         <View style={styles.progressBar}>
-          <View style={[styles.progressFill, { width: `${(completedCount / 5) * 100}%` }]} />
+          <View style={[styles.progressFill, { width: `${totalReq > 0 ? (completedCount / totalReq) * 100 : 100}%` }]} />
         </View>
-        <Text style={styles.progressText}>{completedCount}/5 documents uploaded</Text>
+        <Text style={styles.progressText}>{completedCount}/{totalReq} documents uploaded</Text>
       </View>
 
       {/* Dates Section */}
@@ -144,32 +179,36 @@ export default function BookVehicleScreen() {
       </View>
 
       {/* Your Documents */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Feather name="file" size={18} color="#1a1a2e" />
-          <Text style={styles.sectionTitle}>Your Documents</Text>
+      {(reqDocs.drivingLicense || reqDocs.idProof || reqDocs.billingProof) && (
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Feather name="file" size={18} color="#1a1a2e" />
+            <Text style={styles.sectionTitle}>Your Documents</Text>
+          </View>
+          {reqDocs.drivingLicense && renderUploadBtn('Driving License', 'card-outline', drivingLicense, setDrivingLicense)}
+          {reqDocs.idProof && renderUploadBtn('ID Proof (NIC/Passport)', 'finger-print-outline', idProof, setIdProof)}
+          {reqDocs.billingProof && renderUploadBtn('Billing Proof (Utility Bill)', 'receipt-outline', billingProof, setBillingProof)}
         </View>
-        {renderUploadBtn('Driving License', 'card-outline', drivingLicense, setDrivingLicense)}
-        {renderUploadBtn('ID Proof (NIC/Passport)', 'finger-print-outline', idProof, setIdProof)}
-        {renderUploadBtn('Billing Proof (Utility Bill)', 'receipt-outline', billingProof, setBillingProof)}
-      </View>
+      )}
 
       {/* Guarantor Section */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Feather name="users" size={18} color="#1a1a2e" />
-          <Text style={styles.sectionTitle}>Guarantor Information</Text>
-        </View>
+      {(reqDocs.guarantorId || reqDocs.guarantorBilling) && (
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Feather name="users" size={18} color="#1a1a2e" />
+            <Text style={styles.sectionTitle}>Guarantor Information</Text>
+          </View>
 
-        <Text style={styles.label}>Guarantor Name</Text>
-        <View style={styles.inputWrap}>
-          <Ionicons name="person-outline" size={18} color="#b2bec3" style={{ marginLeft: 14 }} />
-          <TextInput style={styles.input} value={guarantorName} onChangeText={setGuarantorName} placeholder="Full name of your guarantor" placeholderTextColor="#b2bec3" />
-        </View>
+          <Text style={styles.label}>Guarantor Name</Text>
+          <View style={styles.inputWrap}>
+            <Ionicons name="person-outline" size={18} color="#b2bec3" style={{ marginLeft: 14 }} />
+            <TextInput style={styles.input} value={guarantorName} onChangeText={setGuarantorName} placeholder="Full name of your guarantor" placeholderTextColor="#b2bec3" />
+          </View>
 
-        {renderUploadBtn('Guarantor ID Proof', 'person-outline', guarantorId, setGuarantorId)}
-        {renderUploadBtn('Guarantor Billing Proof', 'receipt-outline', guarantorBilling, setGuarantorBilling)}
-      </View>
+          {reqDocs.guarantorId && renderUploadBtn('Guarantor ID Proof', 'person-outline', guarantorId, setGuarantorId)}
+          {reqDocs.guarantorBilling && renderUploadBtn('Guarantor Billing Proof', 'receipt-outline', guarantorBilling, setGuarantorBilling)}
+        </View>
+      )}
 
       {/* Submit */}
       <TouchableOpacity style={styles.submitBtn} onPress={handleBooking} disabled={loading} activeOpacity={0.8}>

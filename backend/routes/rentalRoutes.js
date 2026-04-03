@@ -7,6 +7,7 @@ const {
   requestBooking,
   getOwnerBookings,
   getRenterBookings,
+  getBookingById,
   updateBookingStatus
 } = require('../controllers/rentalController');
 const { protect } = require('../middleware/authMiddleware');
@@ -19,8 +20,13 @@ router.route('/')
 router.get('/owner/bookings', protect, getOwnerBookings);
 router.get('/my-bookings', protect, getRenterBookings);
 
+router.get('/bookings/:id', protect, getBookingById);
+router.put('/bookings/:id/status', protect, updateBookingStatus);
+
 router.route('/:id')
-  .get(getRentalVehicleById);
+  .get(getRentalVehicleById)
+  .put(protect, updateRentalVehicle)
+  .delete(protect, deleteRentalVehicle);
 
 // Multi-file upload configuration for booking proofs
 const bookingUploadFields = [
@@ -32,7 +38,5 @@ const bookingUploadFields = [
 ];
 
 router.post('/:id/book', protect, upload.fields(bookingUploadFields), requestBooking);
-
-router.put('/bookings/:id/status', protect, updateBookingStatus);
 
 module.exports = router;
