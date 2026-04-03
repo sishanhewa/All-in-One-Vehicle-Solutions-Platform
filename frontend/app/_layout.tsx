@@ -20,6 +20,10 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="login" options={{ title: 'Login', presentation: 'modal' }} />
           <Stack.Screen name="register" options={{ title: 'Register', presentation: 'modal' }} />
+          <Stack.Screen name="rentals/add-rental" options={{ title: 'List Vehicle for Rent' }} />
+          <Stack.Screen name="rentals/my-listings" options={{ title: 'My Rental Listings' }} />
+          <Stack.Screen name="rentals/my-bookings" options={{ title: 'My Bookings' }} />
+          <Stack.Screen name="rentals/requests" options={{ title: 'Rental Requests' }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
         </Stack>
         <StatusBar style="auto" />

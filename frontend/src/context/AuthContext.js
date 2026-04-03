@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { loginUserAPI, registerUserAPI } from '../api/authApi';
 
 export const AuthContext = createContext();
@@ -17,7 +18,12 @@ export const AuthProvider = ({ children }) => {
       let foundUserToken = await SecureStore.getItemAsync('userToken');
 
       if (foundUserInfo) setUserInfo(JSON.parse(foundUserInfo));
-      if (foundUserToken) setUserToken(foundUserToken);
+      if (foundUserToken) {
+        setUserToken(foundUserToken);
+        // Sync to AsyncStorage for screens that read from it
+        await AsyncStorage.setItem('userToken', foundUserToken);
+        if (foundUserInfo) await AsyncStorage.setItem('userInfo', foundUserInfo);
+      }
     } catch (e) {
       console.log(`Failed fetching stored user info: ${e}`);
     } finally {
@@ -37,6 +43,9 @@ export const AuthProvider = ({ children }) => {
       setUserToken(resp.token);
       await SecureStore.setItemAsync('userInfo', JSON.stringify(resp));
       await SecureStore.setItemAsync('userToken', resp.token);
+      // Also store in AsyncStorage for rental screens
+      await AsyncStorage.setItem('userToken', resp.token);
+      await AsyncStorage.setItem('userInfo', JSON.stringify(resp));
       return resp;
     } finally {
       setIsLoading(false);
@@ -51,6 +60,9 @@ export const AuthProvider = ({ children }) => {
       setUserToken(resp.token);
       await SecureStore.setItemAsync('userInfo', JSON.stringify(resp));
       await SecureStore.setItemAsync('userToken', resp.token);
+      // Also store in AsyncStorage for rental screens
+      await AsyncStorage.setItem('userToken', resp.token);
+      await AsyncStorage.setItem('userInfo', JSON.stringify(resp));
       return resp;
     } finally {
       setIsLoading(false);
@@ -64,6 +76,9 @@ export const AuthProvider = ({ children }) => {
       setUserToken(null);
       await SecureStore.deleteItemAsync('userInfo');
       await SecureStore.deleteItemAsync('userToken');
+      // Also clear AsyncStorage
+      await AsyncStorage.removeItem('userToken');
+      await AsyncStorage.removeItem('userInfo');
     } finally {
       setIsLoading(false);
     }

@@ -16,8 +16,8 @@ export default function ProfileTab() {
         <View style={styles.guestIconWrap}>
           <Feather name="user" size={40} color="#b2bec3" />
         </View>
-        <Text style={styles.guestTitle}>Welcome to VehicleMarket</Text>
-        <Text style={styles.guestText}>Login or create an account to manage your listings and track your ads</Text>
+        <Text style={styles.guestTitle}>Welcome to VehicleRentals</Text>
+        <Text style={styles.guestText}>Login or create an account to rent vehicles and manage your listings</Text>
         <TouchableOpacity style={styles.guestLoginBtn} activeOpacity={0.8} onPress={() => router.push('/login')}>
           <Feather name="log-in" size={18} color="#fff" />
           <Text style={styles.guestLoginBtnTxt}>Login</Text>
@@ -29,7 +29,7 @@ export default function ProfileTab() {
     );
   }
 
-  const MenuItem = ({ icon, title, subtitle, onPress, iconColor = '#1a1a2e' }) => (
+  const MenuItem = ({ icon, title, subtitle, onPress, iconColor = '#1a1a2e' }: any) => (
     <TouchableOpacity style={styles.menuItem} activeOpacity={0.6} onPress={onPress}>
       <View style={[styles.menuIconWrap, { backgroundColor: `${iconColor}10` }]}>
         <Feather name={icon} size={20} color={iconColor} />
@@ -62,28 +62,18 @@ export default function ProfileTab() {
       {/* Menu */}
       <View style={styles.menu}>
         <MenuItem
-          icon="grid"
-          title="My Listings"
-          subtitle="Manage your active and sold vehicle ads"
-          onPress={() => router.push('/ManageAds')}
-          iconColor="#3498db"
-        />
-        <MenuItem
           icon="plus-circle"
-          title="Post New Ad"
-          subtitle="List a new vehicle on the marketplace"
-          onPress={() => router.push('/CreateListing')}
+          title="List Vehicle for Rent"
+          subtitle="Add a new vehicle to the rental marketplace"
+          onPress={() => router.push('/rentals/add-rental')}
           iconColor="#10ac84"
         />
         <MenuItem
-          icon="user"
-          title="Public Profile"
-          subtitle="See how buyers view your profile"
-          onPress={() => router.push({
-            pathname: '/SellerProfile',
-            params: { sellerId: userInfo._id, sellerName: userInfo.name, sellerPhone: userInfo.phone }
-          })}
-          iconColor="#9b59b6"
+          icon="grid"
+          title="My Rental Listings"
+          subtitle="Manage your listed rental vehicles"
+          onPress={() => router.push('/rentals/my-listings')}
+          iconColor="#3498db"
         />
         <MenuItem
           icon="inbox"
@@ -124,7 +114,7 @@ const styles = StyleSheet.create({
   guestRegBtnTxt: { color: '#10ac84', fontWeight: '700', fontSize: 16 },
 
   profileHeader: { alignItems: 'center', paddingVertical: 30, paddingHorizontal: 20, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#eee' },
-  avatar: { width: 72, height: 72, borderRadius: 36, backgroundColor: '#3498db', justifyContent: 'center', alignItems: 'center', marginBottom: 14, ...Platform.select({ ios: { shadowColor: '#3498db', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8 }, android: { elevation: 4 } }) },
+  avatar: { width: 72, height: 72, borderRadius: 36, backgroundColor: '#10ac84', justifyContent: 'center', alignItems: 'center', marginBottom: 14, ...Platform.select({ ios: { shadowColor: '#10ac84', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8 }, android: { elevation: 4 } }) },
   avatarTxt: { fontSize: 30, color: '#fff', fontWeight: '700' },
   name: { fontSize: 22, fontWeight: '800', color: '#1a1a2e', marginBottom: 4 },
   email: { fontSize: 14, color: '#b2bec3', marginBottom: 4 },
