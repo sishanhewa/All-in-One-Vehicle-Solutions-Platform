@@ -39,6 +39,16 @@ if (fs.existsSync(path.join(__dirname, 'routes/inspectionRoutes.js'))) {
   app.use('/api/inspection', inspectionRoutes);
 }
 
+if (fs.existsSync(path.join(__dirname, 'routes/supportRoutes.js'))) {
+  const supportRoutes = require('./routes/supportRoutes');
+  app.use('/api/support', supportRoutes);
+}
+
+if (fs.existsSync(path.join(__dirname, 'routes/adminRoutes.js'))) {
+  const adminRoutes = require('./routes/adminRoutes');
+  app.use('/api/admin', adminRoutes);
+}
+
 // Test Route
 app.get('/', (req, res) => {
   res.status(200).json({ message: 'Vehicle Management API is up and running!' });
