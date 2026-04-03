@@ -22,14 +22,14 @@ const rentalBookingSchema = new mongoose.Schema({
   totalMonths: { type: Number },
   
   // Renter Proof Documents (Paths)
-  drivingLicensePath: { type: String, required: true },
-  idProofPath: { type: String, required: true },
-  billingProofPath: { type: String, required: true },
+  drivingLicensePath: { type: String },
+  idProofPath: { type: String },
+  billingProofPath: { type: String },
 
   // Guarantor Details
-  guarantorName: { type: String, required: true },
-  guarantorIdPath: { type: String, required: true },
-  guarantorBillingPath: { type: String, required: true },
+  guarantorName: { type: String },
+  guarantorIdPath: { type: String },
+  guarantorBillingPath: { type: String },
 
   status: {
     type: String,

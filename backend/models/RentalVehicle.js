@@ -18,7 +18,14 @@ const rentalVehicleSchema = new mongoose.Schema({
   deposit: { type: Number, required: true },
   images: [{ type: String }], // URLs or file paths
   description: { type: String },
-  availability: { type: Boolean, default: true }
+  availability: { type: Boolean, default: true },
+  requiredDocuments: {
+    drivingLicense: { type: Boolean, default: true },
+    idProof: { type: Boolean, default: true },
+    billingProof: { type: Boolean, default: true },
+    guarantorId: { type: Boolean, default: true },
+    guarantorBilling: { type: Boolean, default: true }
+  }
 }, {
   timestamps: true
 });

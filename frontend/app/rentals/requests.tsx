@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, RefreshControl, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons, Feather } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 const statusConfig: Record<string, { color: string; bg: string; icon: string }> = {
   Pending: { color: '#f39c12', bg: '#fef9e7', icon: 'time-outline' },
@@ -15,6 +16,7 @@ export default function RentalRequestsScreen() {
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     fetchRequests();
@@ -23,7 +25,7 @@ export default function RentalRequestsScreen() {
   const fetchRequests = async () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
-      const response = await fetch('http://10.0.2.2:5000/api/rentals/owner/bookings', {
+      const response = await fetch('http://192.168.8.100:5000/api/rentals/owner/bookings', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -57,7 +59,7 @@ export default function RentalRequestsScreen() {
           onPress: async () => {
             try {
               const token = await AsyncStorage.getItem('userToken');
-              const response = await fetch(`http://10.0.2.2:5000/api/rentals/bookings/${id}/status`, {
+              const response = await fetch(`http://192.168.8.100:5000/api/rentals/bookings/${id}/status`, {
                 method: 'PUT',
                 headers: {
                   'Authorization': `Bearer ${token}`,
@@ -112,7 +114,7 @@ export default function RentalRequestsScreen() {
           renderItem={({ item }) => {
             const config = statusConfig[item.status] || statusConfig.Pending;
             return (
-              <View style={styles.card}>
+              <TouchableOpacity style={styles.card} activeOpacity={0.7} onPress={() => router.push({ pathname: '/rentals/booking-detail', params: { bookingId: item._id } })}>
                 {/* Card Header */}
                 <View style={styles.cardTopRow}>
                   <View style={styles.cardIconWrap}>
@@ -182,7 +184,7 @@ export default function RentalRequestsScreen() {
                     </TouchableOpacity>
                   </View>
                 )}
-              </View>
+              </TouchableOpacity>
             );
           }}
         />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl, Platform } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl, Platform, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,7 +17,7 @@ export default function RentalsListScreen() {
   const fetchVehicles = async () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
-      const response = await fetch('http://10.0.2.2:5000/api/rentals', {
+      const response = await fetch('http://192.168.8.100:5000/api/rentals', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -81,9 +81,12 @@ export default function RentalsListScreen() {
               activeOpacity={0.7}
               onPress={() => router.push(`/(tabs)/rentals/${item._id}`)}
             >
-              {/* Image Placeholder */}
               <View style={styles.cardImageWrap}>
-                <Ionicons name="car-sport" size={40} color="#10ac84" />
+                {item.images && item.images.length > 0 ? (
+                  <Image source={{ uri: `http://192.168.8.100:5000${item.images[0]}` }} style={{ width: '100%', height: '100%', borderRadius: 12 }} resizeMode="cover" />
+                ) : (
+                  <Ionicons name="car-sport" size={40} color="#10ac84" />
+                )}
               </View>
 
               {/* Card Content */}

@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, RefreshControl, Platform } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, RefreshControl, Platform, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons, Feather } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 const statusConfig: Record<string, { color: string; bg: string; icon: string }> = {
   Pending: { color: '#f39c12', bg: '#fef9e7', icon: 'time-outline' },
@@ -15,6 +16,7 @@ export default function MyBookingsScreen() {
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     fetchBookings();
@@ -23,7 +25,7 @@ export default function MyBookingsScreen() {
   const fetchBookings = async () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
-      const response = await fetch('http://10.0.2.2:5000/api/rentals/my-bookings', {
+      const response = await fetch('http://192.168.8.100:5000/api/rentals/my-bookings', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -78,7 +80,7 @@ export default function MyBookingsScreen() {
           renderItem={({ item }) => {
             const config = statusConfig[item.status] || statusConfig.Pending;
             return (
-              <View style={styles.card}>
+              <TouchableOpacity style={styles.card} activeOpacity={0.7} onPress={() => router.push({ pathname: '/rentals/booking-detail', params: { bookingId: item._id } })}>
                 <View style={styles.cardTopRow}>
                   {/* Vehicle Info */}
                   <View style={styles.cardIconWrap}>
@@ -108,7 +110,7 @@ export default function MyBookingsScreen() {
                     </Text>
                   </View>
                 </View>
-              </View>
+              </TouchableOpacity>
             );
           }}
         />

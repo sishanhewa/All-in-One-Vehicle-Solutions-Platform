@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Platform, Linking } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Platform, Linking, Image } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons, Feather } from '@expo/vector-icons';
 
@@ -15,7 +15,7 @@ export default function RentalVehicleDetails() {
 
   const fetchDetail = async () => {
     try {
-      const response = await fetch(`http://10.0.2.2:5000/api/rentals/${id}`);
+      const response = await fetch(`http://192.168.8.100:5000/api/rentals/${id}`);
       const data = await response.json();
       if (response.ok) {
         setVehicle(data);
@@ -59,9 +59,13 @@ export default function RentalVehicleDetails() {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Hero Image Placeholder */}
+      {/* Hero Image */}
       <View style={styles.heroWrap}>
-        <Ionicons name="car-sport" size={64} color="#10ac84" />
+        {vehicle.images && vehicle.images.length > 0 ? (
+          <Image source={{ uri: `http://192.168.8.100:5000${vehicle.images[0]}` }} style={{ width: '100%', height: '100%', position: 'absolute' }} resizeMode="cover" />
+        ) : (
+          <Ionicons name="car-sport" size={64} color="#10ac84" />
+        )}
         <View style={[styles.availBadge, { backgroundColor: vehicle.availability ? '#27ae60' : '#e74c3c' }]}>
           <Ionicons name={vehicle.availability ? 'checkmark-circle' : 'close-circle'} size={14} color="#fff" />
           <Text style={styles.availBadgeText}>{vehicle.availability ? 'Available' : 'Rented Out'}</Text>

@@ -13,6 +13,15 @@ const createRentalVehicle = asyncHandler(async (req, res) => {
     images = req.files.map(file => `/uploads/${file.filename}`);
   }
 
+  let parsedRequiredDocs;
+  if (req.body.requiredDocuments) {
+    try {
+      parsedRequiredDocs = JSON.parse(req.body.requiredDocuments);
+    } catch (e) {
+      console.log('Error parsing required docs:', e);
+    }
+  }
+
   const vehicle = await RentalVehicle.create({
     owner: req.user._id,
     make,
@@ -26,7 +35,8 @@ const createRentalVehicle = asyncHandler(async (req, res) => {
     extraMileageRate,
     deposit,
     description,
-    images
+    images,
+    ...(parsedRequiredDocs && { requiredDocuments: parsedRequiredDocs })
   });
 
   res.status(201).json(vehicle);
@@ -68,11 +78,13 @@ const requestBooking = asyncHandler(async (req, res) => {
 
   // Get uploaded files from multer
   const files = req.files || {};
-  
-  if (!files.drivingLicense || !files.idProof || !files.billingProof || !files.guarantorId || !files.guarantorBilling) {
-    res.status(400);
-    throw new Error('All proof documents are required');
-  }
+  const reqDocs = vehicle.requiredDocuments || {};
+
+  if (reqDocs.drivingLicense && !files.drivingLicense) { res.status(400); throw new Error('Driving License is required'); }
+  if (reqDocs.idProof && !files.idProof) { res.status(400); throw new Error('ID Proof is required'); }
+  if (reqDocs.billingProof && !files.billingProof) { res.status(400); throw new Error('Billing Proof is required'); }
+  if (reqDocs.guarantorId && !files.guarantorId) { res.status(400); throw new Error('Guarantor ID is required'); }
+  if (reqDocs.guarantorBilling && !files.guarantorBilling) { res.status(400); throw new Error('Guarantor Billing is required'); }
 
   const booking = await RentalBooking.create({
     vehicle: vehicleId,
@@ -82,12 +94,12 @@ const requestBooking = asyncHandler(async (req, res) => {
     endDate,
     totalDays,
     totalMonths,
-    drivingLicensePath: `/uploads/${files.drivingLicense[0].filename}`,
-    idProofPath: `/uploads/${files.idProof[0].filename}`,
-    billingProofPath: `/uploads/${files.billingProof[0].filename}`,
+    drivingLicensePath: files.drivingLicense ? `/uploads/${files.drivingLicense[0].filename}` : undefined,
+    idProofPath: files.idProof ? `/uploads/${files.idProof[0].filename}` : undefined,
+    billingProofPath: files.billingProof ? `/uploads/${files.billingProof[0].filename}` : undefined,
     guarantorName,
-    guarantorIdPath: `/uploads/${files.guarantorId[0].filename}`,
-    guarantorBillingPath: `/uploads/${files.guarantorBilling[0].filename}`,
+    guarantorIdPath: files.guarantorId ? `/uploads/${files.guarantorId[0].filename}` : undefined,
+    guarantorBillingPath: files.guarantorBilling ? `/uploads/${files.guarantorBilling[0].filename}` : undefined,
     status: 'Pending'
   });
 
@@ -112,6 +124,30 @@ const getRenterBookings = asyncHandler(async (req, res) => {
     .populate('vehicle', 'make model year images')
     .populate('owner', 'name phone email');
   res.status(200).json(bookings);
+});
+
+// @desc    Get a single booking by ID with full details
+// @route   GET /api/rentals/bookings/:id
+// @access  Private
+const getBookingById = asyncHandler(async (req, res) => {
+  const booking = await RentalBooking.findById(req.params.id)
+    .populate('vehicle', 'make model year transmission images')
+    .populate('renter', 'name phone email')
+    .populate('owner', 'name phone email');
+
+  if (!booking) {
+    res.status(404);
+    throw new Error('Booking not found');
+  }
+
+  // Only the owner or renter should be able to view
+  if (booking.owner._id.toString() !== req.user._id.toString() &&
+      booking.renter._id.toString() !== req.user._id.toString()) {
+    res.status(401);
+    throw new Error('Not authorized to view this booking');
+  }
+
+  res.status(200).json(booking);
 });
 
 // @desc    Update booking status (Accept/Reject/Complete)
@@ -146,6 +182,53 @@ const updateBookingStatus = asyncHandler(async (req, res) => {
   res.status(200).json(booking);
 });
 
+// @desc    Update a rental vehicle
+// @route   PUT /api/rentals/:id
+// @access  Private
+const updateRentalVehicle = asyncHandler(async (req, res) => {
+  const vehicle = await RentalVehicle.findById(req.params.id);
+
+  if (!vehicle) {
+    res.status(404);
+    throw new Error('Vehicle not found');
+  }
+
+  // Ensure only owner can update
+  if (vehicle.owner.toString() !== req.user._id.toString()) {
+    res.status(401);
+    throw new Error('Not authorized to update this vehicle');
+  }
+
+  const updatedVehicle = await RentalVehicle.findByIdAndUpdate(
+    req.params.id,
+    { ...req.body },
+    { new: true }
+  );
+
+  res.status(200).json(updatedVehicle);
+});
+
+// @desc    Delete a rental vehicle
+// @route   DELETE /api/rentals/:id
+// @access  Private
+const deleteRentalVehicle = asyncHandler(async (req, res) => {
+  const vehicle = await RentalVehicle.findById(req.params.id);
+
+  if (!vehicle) {
+    res.status(404);
+    throw new Error('Vehicle not found');
+  }
+
+  // Ensure only owner can delete
+  if (vehicle.owner.toString() !== req.user._id.toString()) {
+    res.status(401);
+    throw new Error('Not authorized to delete this vehicle');
+  }
+
+  await vehicle.deleteOne();
+  res.status(200).json({ message: 'Vehicle removed' });
+});
+
 module.exports = {
   createRentalVehicle,
   getRentalVehicles,
@@ -153,5 +236,8 @@ module.exports = {
   requestBooking,
   getOwnerBookings,
   getRenterBookings,
-  updateBookingStatus
+  getBookingById,
+  updateBookingStatus,
+  updateRentalVehicle,
+  deleteRentalVehicle
 };

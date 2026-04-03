@@ -24,6 +24,7 @@ export default function RootLayout() {
           <Stack.Screen name="rentals/my-listings" options={{ title: 'My Rental Listings' }} />
           <Stack.Screen name="rentals/my-bookings" options={{ title: 'My Bookings' }} />
           <Stack.Screen name="rentals/requests" options={{ title: 'Rental Requests' }} />
+          <Stack.Screen name="rentals/booking-detail" options={{ title: 'Booking Details' }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
         </Stack>
         <StatusBar style="auto" />
