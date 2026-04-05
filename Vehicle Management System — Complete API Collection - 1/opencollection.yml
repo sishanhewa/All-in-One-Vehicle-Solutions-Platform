@@ -33,6 +33,10 @@ request:
       value: ""
     - name: booking_id
       value: ""
+    - name: garage_token
+      value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZjYzMmZlOThhMjkyOWIwNGFkYTVmMSIsImlhdCI6MTc3Nzc0MjU5MCwiZXhwIjoxNzgwMzM0NTkwfQ.df0gvU6I_IWyNxc1cxvwVVJdnJkoJ0Z121ZS1zY39IQ
+    - name: garage_owner_id
+      value: 69f632fe98a2929b04ada5f1
 
 docs:
   content: |-
