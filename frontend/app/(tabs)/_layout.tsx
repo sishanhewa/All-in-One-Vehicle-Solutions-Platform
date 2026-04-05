@@ -49,6 +49,19 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="spareParts"
+        options={{
+          title: 'Spare Parts',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              name={focused ? 'construct' : 'construct-outline'} 
+              size={24} 
+              color={color} 
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="explore"
         options={{
           title: 'Account',
