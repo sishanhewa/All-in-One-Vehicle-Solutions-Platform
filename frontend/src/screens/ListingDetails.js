@@ -40,6 +40,15 @@ const ListingDetails = () => {
     }
   };
 
+  const handleWhatsApp = () => {
+    if (listing?.sellerId?.phone) {
+      // Remove any non-numeric characters from the phone number
+      const phone = listing.sellerId.phone.replace(/[^0-9]/g, '');
+      const msg = `Hi, I'm interested in your ${listing.year} ${listing.make} ${listing.model} listed on VMS.`;
+      Linking.openURL(`whatsapp://send?text=${encodeURIComponent(msg)}&phone=${phone}`);
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.loaderWrap}>
@@ -161,7 +170,11 @@ const ListingDetails = () => {
       <View style={styles.bottomActions}>
         <TouchableOpacity style={styles.contactBtn} activeOpacity={0.8} onPress={handleCall}>
           <Ionicons name="call" size={20} color="#fff" />
-          <Text style={styles.contactBtnText}>Call Seller</Text>
+          <Text style={styles.contactBtnText}>Call</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.contactBtn, { backgroundColor: '#25D366' }]} activeOpacity={0.8} onPress={handleWhatsApp}>
+          <Ionicons name="logo-whatsapp" size={20} color="#fff" />
+          <Text style={styles.contactBtnText}>WhatsApp</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -206,8 +219,8 @@ const styles = StyleSheet.create({
   downloadBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#e67e22', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 10 },
   downloadBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
 
-  bottomActions: { padding: 20 },
-  contactBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#10ac84', paddingVertical: 16, borderRadius: 14, ...Platform.select({ ios: { shadowColor: '#10ac84', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 }, android: { elevation: 4 } }) },
+  bottomActions: { padding: 20, flexDirection: 'row', gap: 12 },
+  contactBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#10ac84', paddingVertical: 16, borderRadius: 14, ...Platform.select({ ios: { shadowColor: '#10ac84', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 }, android: { elevation: 4 } }) },
   contactBtnText: { fontSize: 16, fontWeight: '700', color: '#fff' },
 });
 
