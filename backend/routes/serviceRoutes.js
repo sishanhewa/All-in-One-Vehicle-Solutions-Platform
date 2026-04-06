@@ -4,6 +4,7 @@ const upload = require('../middleware/uploadMiddleware');
 const { protect } = require('../middleware/authMiddleware');
 const { requireRole } = require('../middleware/roleMiddleware');
 const { registerGarage, getAllGarages, getGarageById, getOwnerProfile, updateOwnerProfile } = require('../controllers/serviceProviderController');
+const { createOffering, getMyOfferings, getGarageOfferings, updateOffering, deleteOffering } = require('../controllers/serviceOfferingController');
 
 // Test route
 router.get('/', (req, res) => {
@@ -20,5 +21,12 @@ router.put('/garages/profile', protect, requireRole('GarageOwner'), upload.singl
 // Public garage browsing routes
 router.get('/garages', getAllGarages);
 router.get('/garages/:id', getGarageById);
+
+// Service offering routes
+router.post('/offerings', protect, requireRole('GarageOwner'), createOffering);
+router.get('/offerings/my-offerings', protect, requireRole('GarageOwner'), getMyOfferings);
+router.get('/garages/:garageId/offerings', getGarageOfferings);
+router.put('/offerings/:id', protect, requireRole('GarageOwner'), updateOffering);
+router.delete('/offerings/:id', protect, requireRole('GarageOwner'), deleteOffering);
 
 module.exports = router;
