@@ -61,30 +61,31 @@ export default function ProfileTab() {
 
       {/* Menu */}
       <View style={styles.menu}>
+        {userInfo.role === 'Admin' && (
+          <MenuItem
+            icon="shield"
+            title="Admin Dashboard"
+            subtitle="System administration & oversight"
+            onPress={() => router.push('/AdminDashboard')}
+            iconColor="#e74c3c"
+          />
+        )}
         <MenuItem
-          icon="grid"
-          title="My Listings"
-          subtitle="Manage your active and sold vehicle ads"
-          onPress={() => router.push('/ManageAds')}
+          icon="calendar"
+          title="My Bookings"
+          subtitle="Manage your inspection bookings"
+          onPress={() => router.push('/MyBookings')}
           iconColor="#3498db"
         />
-        <MenuItem
-          icon="plus-circle"
-          title="Post New Ad"
-          subtitle="List a new vehicle on the marketplace"
-          onPress={() => router.push('/CreateListing')}
-          iconColor="#10ac84"
-        />
-        <MenuItem
-          icon="user"
-          title="Public Profile"
-          subtitle="See how buyers view your profile"
-          onPress={() => router.push({
-            pathname: '/SellerProfile',
-            params: { sellerId: userInfo._id, sellerName: userInfo.name, sellerPhone: userInfo.phone }
-          })}
-          iconColor="#9b59b6"
-        />
+        {userInfo.role === 'InspectionCompany' && (
+          <MenuItem
+            icon="briefcase"
+            title="Company Dashboard"
+            subtitle="Manage your inspection center"
+            onPress={() => router.push('/CompanyDashboard')}
+            iconColor="#10ac84"
+          />
+        )}
       </View>
 
       {/* Logout */}
