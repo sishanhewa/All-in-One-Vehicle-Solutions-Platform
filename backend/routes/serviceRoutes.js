@@ -5,6 +5,7 @@ const { protect } = require('../middleware/authMiddleware');
 const { requireRole } = require('../middleware/roleMiddleware');
 const { registerGarage, getAllGarages, getGarageById, getOwnerProfile, updateOwnerProfile } = require('../controllers/serviceProviderController');
 const { createOffering, getMyOfferings, getGarageOfferings, updateOffering, deleteOffering } = require('../controllers/serviceOfferingController');
+const { addMechanic, listMechanics, removeMechanic } = require('../controllers/mechanicController');
 
 // Test route
 router.get('/', (req, res) => {
@@ -28,5 +29,10 @@ router.get('/offerings/my-offerings', protect, requireRole('GarageOwner'), getMy
 router.get('/garages/:garageId/offerings', getGarageOfferings);
 router.put('/offerings/:id', protect, requireRole('GarageOwner'), updateOffering);
 router.delete('/offerings/:id', protect, requireRole('GarageOwner'), deleteOffering);
+
+// Mechanic management routes
+router.get('/mechanics', protect, requireRole('GarageOwner'), listMechanics);
+router.post('/mechanics', protect, requireRole('GarageOwner'), addMechanic);
+router.delete('/mechanics/:id', protect, requireRole('GarageOwner'), removeMechanic);
 
 module.exports = router;
