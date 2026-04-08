@@ -6,6 +6,7 @@ const { requireRole } = require('../middleware/roleMiddleware');
 const { registerGarage, getAllGarages, getGarageById, getOwnerProfile, updateOwnerProfile } = require('../controllers/serviceProviderController');
 const { createOffering, getMyOfferings, getGarageOfferings, updateOffering, deleteOffering } = require('../controllers/serviceOfferingController');
 const { addMechanic, listMechanics, removeMechanic } = require('../controllers/mechanicController');
+const { createBooking, getMyBookings, getBookingQueue, getMyJobs, getBookingById, confirmBooking, declineBooking, startJob, markReadyForPickup, completeBooking, cancelBooking, updateJobNotes } = require('../controllers/repairBookingController');
 
 // Test route
 router.get('/', (req, res) => {
@@ -34,5 +35,21 @@ router.delete('/offerings/:id', protect, requireRole('GarageOwner'), deleteOffer
 router.get('/mechanics', protect, requireRole('GarageOwner'), listMechanics);
 router.post('/mechanics', protect, requireRole('GarageOwner'), addMechanic);
 router.delete('/mechanics/:id', protect, requireRole('GarageOwner'), removeMechanic);
+
+// Repair booking routes
+router.post('/bookings', protect, createBooking);
+router.get('/bookings/my-bookings', protect, getMyBookings);
+router.get('/bookings/queue', protect, requireRole('GarageOwner'), getBookingQueue);
+router.get('/bookings/my-jobs', protect, requireRole('Mechanic'), getMyJobs);
+router.get('/bookings/:id', protect, getBookingById);
+
+// Booking lifecycle routes
+router.put('/bookings/:id/confirm', protect, requireRole('GarageOwner'), confirmBooking);
+router.put('/bookings/:id/decline', protect, requireRole('GarageOwner'), declineBooking);
+router.put('/bookings/:id/start', protect, requireRole('Mechanic'), startJob);
+router.put('/bookings/:id/ready', protect, requireRole('Mechanic'), markReadyForPickup);
+router.put('/bookings/:id/complete', protect, requireRole('GarageOwner'), completeBooking);
+router.put('/bookings/:id/cancel', protect, cancelBooking);
+router.put('/bookings/:id/notes', protect, requireRole('Mechanic'), updateJobNotes);
 
 module.exports = router;
