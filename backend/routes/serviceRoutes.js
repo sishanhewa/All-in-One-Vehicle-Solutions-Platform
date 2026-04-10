@@ -7,6 +7,8 @@ const { registerGarage, getAllGarages, getGarageById, getOwnerProfile, updateOwn
 const { createOffering, getMyOfferings, getGarageOfferings, updateOffering, deleteOffering } = require('../controllers/serviceOfferingController');
 const { addMechanic, listMechanics, removeMechanic } = require('../controllers/mechanicController');
 const { createBooking, getMyBookings, getBookingQueue, getMyJobs, getBookingById, confirmBooking, declineBooking, startJob, markReadyForPickup, completeBooking, cancelBooking, updateJobNotes } = require('../controllers/repairBookingController');
+const { createReview } = require('../controllers/reviewController');
+const { getAllGaragesAdmin, verifyGarage, suspendGarage, getAllBookingsAdmin, getPlatformStats } = require('../controllers/adminServiceController');
 
 // Test route
 router.get('/', (req, res) => {
@@ -51,5 +53,15 @@ router.put('/bookings/:id/ready', protect, requireRole('Mechanic'), markReadyFor
 router.put('/bookings/:id/complete', protect, requireRole('GarageOwner'), completeBooking);
 router.put('/bookings/:id/cancel', protect, cancelBooking);
 router.put('/bookings/:id/notes', protect, requireRole('Mechanic'), updateJobNotes);
+
+// Review routes
+router.post('/bookings/:id/review', protect, createReview);
+
+// Admin routes
+router.get('/admin/garages', protect, requireRole('Admin'), getAllGaragesAdmin);
+router.put('/admin/garages/:id/verify', protect, requireRole('Admin'), verifyGarage);
+router.put('/admin/garages/:id/suspend', protect, requireRole('Admin'), suspendGarage);
+router.get('/admin/bookings', protect, requireRole('Admin'), getAllBookingsAdmin);
+router.get('/admin/stats', protect, requireRole('Admin'), getPlatformStats);
 
 module.exports = router;
