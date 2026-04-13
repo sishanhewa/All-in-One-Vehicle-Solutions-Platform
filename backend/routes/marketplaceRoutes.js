@@ -11,6 +11,7 @@ const {
   updateListing,
   deleteListing,
   getMyListings,
+  getSimilarListings,
 } = require('../controllers/marketplaceController');
 
 // Public: Browse all active listings (supports query filters)
@@ -18,6 +19,9 @@ router.get('/', getListings);
 
 // Private: Get logged-in user's own listings (must be before /:id)
 router.get('/my-listings', protect, getMyListings);
+
+// Public: Get similar listings (MUST be before /:id)
+router.get('/:id/similar', getSimilarListings);
 
 // Public: Get single listing by ID
 router.get('/:id', getListingById);

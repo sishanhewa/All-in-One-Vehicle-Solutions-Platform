@@ -64,6 +64,33 @@ const getListingById = asyncHandler(async (req, res) => {
   res.status(200).json(listing);
 });
 
+// @desc    Get similar listings by make or bodyType
+// @route   GET /api/marketplace/:id/similar
+// @access  Public
+const getSimilarListings = asyncHandler(async (req, res) => {
+  const listing = await Listing.findById(req.params.id);
+  
+  if (!listing) {
+    res.status(404);
+    throw new Error('Listing not found');
+  }
+
+  // Find 3 other available listings with the same make or bodyType
+  const similarListings = await Listing.find({
+    _id: { $ne: listing._id }, // Exclude current listing
+    status: 'Available',
+    $or: [
+      { make: listing.make },
+      { bodyType: listing.bodyType }
+    ]
+  })
+    .limit(3)
+    .populate('sellerId', 'name phone email')
+    .sort({ createdAt: -1 });
+
+  res.status(200).json(similarListings);
+});
+
 // @desc    Create a new vehicle listing
 // @route   POST /api/marketplace
 // @access  Private
@@ -175,4 +202,5 @@ module.exports = {
   updateListing,
   deleteListing,
   getMyListings,
+  getSimilarListings,
 };
