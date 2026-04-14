@@ -4,7 +4,7 @@ import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, ActivityIn
 const { width: screenWidth } = Dimensions.get('window');
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { resolveImageUrl } from '../api/marketplaceApi';
+import { resolveImageUrl, fetchSimilarListings } from '../api/marketplaceApi';
 import { Ionicons, Feather } from '@expo/vector-icons';
 
 const ListingDetails = () => {
@@ -14,6 +14,7 @@ const ListingDetails = () => {
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [similarListings, setSimilarListings] = useState([]);
 
   useEffect(() => {
     loadListing();
@@ -25,6 +26,13 @@ const ListingDetails = () => {
       const response = await fetch(`${API_URL}/${listingId}`);
       const data = await response.json();
       setListing(data);
+      
+      try {
+        const similar = await fetchSimilarListings(listingId);
+        setSimilarListings(similar);
+      } catch (e) {
+        console.log('Failed to load similar listings', e);
+      }
     } catch (error) {
       console.error('Error loading listing:', error);
     } finally {
@@ -166,6 +174,29 @@ const ListingDetails = () => {
         </View>
       </View>
 
+      {/* Similar Vehicles */}
+      {similarListings.length > 0 && (
+        <View style={[styles.section, { paddingBottom: 0 }]}>
+          <Text style={styles.sectionTitle}>Similar Vehicles</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -20, paddingHorizontal: 20 }}>
+            {similarListings.map(sim => (
+              <TouchableOpacity 
+                key={sim._id} 
+                style={styles.similarCard}
+                onPress={() => router.push({ pathname: '/ListingDetails', params: { listingId: sim._id } })}
+              >
+                <Image source={{ uri: sim.images?.[0] ? resolveImageUrl(sim.images[0]) : 'https://via.placeholder.com/150' }} style={styles.similarImg} />
+                <View style={styles.similarInfo}>
+                  <Text style={styles.similarTitle} numberOfLines={1}>{sim.year} {sim.make} {sim.model}</Text>
+                  <Text style={styles.similarPrice}>{formatPrice(sim.price)}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+            <View style={{ width: 40 }} />
+          </ScrollView>
+        </View>
+      )}
+
       {/* Contact Button */}
       <View style={styles.bottomActions}>
         <TouchableOpacity style={styles.contactBtn} activeOpacity={0.8} onPress={handleCall}>
@@ -218,6 +249,12 @@ const styles = StyleSheet.create({
   failText: { color: '#e74c3c' },
   downloadBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#e67e22', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 10 },
   downloadBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
+
+  similarCard: { width: 160, marginRight: 14, backgroundColor: '#fff', borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderColor: '#eee' },
+  similarImg: { width: '100%', height: 100, resizeMode: 'cover' },
+  similarInfo: { padding: 10 },
+  similarTitle: { fontSize: 13, fontWeight: '700', color: '#1a1a2e', marginBottom: 4 },
+  similarPrice: { fontSize: 13, color: '#10ac84', fontWeight: '800' },
 
   bottomActions: { padding: 20, flexDirection: 'row', gap: 12 },
   contactBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#10ac84', paddingVertical: 16, borderRadius: 14, ...Platform.select({ ios: { shadowColor: '#10ac84', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 }, android: { elevation: 4 } }) },

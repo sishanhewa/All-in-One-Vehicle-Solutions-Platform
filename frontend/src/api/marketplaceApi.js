@@ -28,6 +28,12 @@ export const fetchListings = async (queryParams = {}) => {
   return response.json();
 };
 
+export const fetchSimilarListings = async (id) => {
+  const response = await fetch(`${API_URL}/${id}/similar`);
+  if (!response.ok) throw new Error('Failed to fetch similar listings');
+  return response.json();
+};
+
 export const createListing = async (formData) => {
   const token = await SecureStore.getItemAsync('userToken');
 
