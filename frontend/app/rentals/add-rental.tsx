@@ -63,7 +63,6 @@ export default function AddRentalScreen() {
       formData.append('mileageLimitType', mileageLimitType);
       formData.append('extraMileageRate', extraMileageRate);
       formData.append('deposit', deposit);
-      formData.append('deposit', deposit);
       formData.append('description', description);
       formData.append('requiredDocuments', JSON.stringify(reqDocs));
 

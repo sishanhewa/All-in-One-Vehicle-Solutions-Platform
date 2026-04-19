@@ -50,6 +50,14 @@ const getRentalVehicles = asyncHandler(async (req, res) => {
   res.status(200).json(vehicles);
 });
 
+// @desc    Get current user's rental vehicle listings (all, regardless of availability)
+// @route   GET /api/rentals/owner/listings
+// @access  Private
+const getOwnerVehicles = asyncHandler(async (req, res) => {
+  const vehicles = await RentalVehicle.find({ owner: req.user._id });
+  res.status(200).json(vehicles);
+});
+
 // @desc    Get rental vehicle by ID
 // @route   GET /api/rentals/:id
 // @access  Public
@@ -202,7 +210,7 @@ const updateRentalVehicle = asyncHandler(async (req, res) => {
   const updatedVehicle = await RentalVehicle.findByIdAndUpdate(
     req.params.id,
     { ...req.body },
-    { new: true }
+    { returnDocument: 'after' }
   );
 
   res.status(200).json(updatedVehicle);
@@ -239,5 +247,6 @@ module.exports = {
   getBookingById,
   updateBookingStatus,
   updateRentalVehicle,
-  deleteRentalVehicle
+  deleteRentalVehicle,
+  getOwnerVehicles
 };

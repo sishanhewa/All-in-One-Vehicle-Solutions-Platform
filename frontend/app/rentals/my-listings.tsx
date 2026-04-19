@@ -17,20 +17,14 @@ export default function MyRentalListingsScreen() {
   const fetchMyVehicles = async () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
-      const response = await fetch('http://192.168.8.100:5000/api/rentals', {
+      const response = await fetch('http://192.168.8.100:5000/api/rentals/owner/listings', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
       const data = await response.json();
       if (response.ok) {
-        // Get current user ID from stored info
-        const userInfoStr = await AsyncStorage.getItem('userInfo');
-        if (userInfoStr) {
-          const userInfo = JSON.parse(userInfoStr);
-          const myVehicles = data.filter((v: any) => v.owner?._id === userInfo._id);
-          setVehicles(myVehicles);
-        }
+        setVehicles(data);
       }
     } catch (error) {
       console.error(error);
