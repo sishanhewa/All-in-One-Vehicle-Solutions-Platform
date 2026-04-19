@@ -5,10 +5,10 @@ const {
   getRentalVehicles,
   getRentalVehicleById,
   requestBooking,
-  getOwnerBookings,
-  getRenterBookings,
-  getBookingById,
-  updateBookingStatus
+  updateBookingStatus,
+  updateRentalVehicle,
+  deleteRentalVehicle,
+  getOwnerVehicles
 } = require('../controllers/rentalController');
 const { protect } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
@@ -18,6 +18,7 @@ router.route('/')
   .get(getRentalVehicles);
 
 router.get('/owner/bookings', protect, getOwnerBookings);
+router.get('/owner/listings', protect, getOwnerVehicles);
 router.get('/my-bookings', protect, getRenterBookings);
 
 router.get('/bookings/:id', protect, getBookingById);
