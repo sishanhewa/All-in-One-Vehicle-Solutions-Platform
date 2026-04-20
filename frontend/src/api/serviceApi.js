@@ -1,26 +1,29 @@
 import * as SecureStore from 'expo-secure-store';
 
-// Base URL for service API - uses EXPO_PUBLIC_API_URL env variable
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:5000';
-export const SERVICE_API_URL = `${API_URL}/api/service`;
+/** API origin (no trailing slash). */
+export const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:5000';
 
-// Helper to resolve service image URLs
-export const resolveServiceImageUrl = (imagePath) => {
-  if (!imagePath) return 'https://via.placeholder.com/400x200?text=No+Image';
-  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
-  return `${API_URL}${imagePath}`;
+export const SERVICE_API_URL = `${BASE_URL}/api/service`;
+
+export const resolveServiceImageUrl = (path) => {
+  if (!path) return 'https://via.placeholder.com/400x200?text=No+Image';
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  return `${BASE_URL}${path}`;
 };
 
-// Helper to get auth header
 const getAuthHeader = async () => {
   const token = await SecureStore.getItemAsync('userToken');
-  return { 'Authorization': `Bearer ${token}` };
+  return { Authorization: `Bearer ${token}` };
 };
 
-// ==========================================
-// GARAGE APIs
-// Public list/detail return ServiceProvider-shaped garages; garageId elsewhere is ServiceProvider._id.
-// ==========================================
+/** Backend expects `{ reason }` for decline/cancel; accept a string or a full body object. */
+const declineOrCancelBody = (reason) => {
+  if (reason == null) return {};
+  if (typeof reason === 'object') return reason;
+  return { reason: String(reason) };
+};
+
+// --- Garages (public + owner; garageId in app = ServiceProvider._id) ---
 
 export const fetchAllGarages = async (params = {}) => {
   const queryParams = new URLSearchParams();
@@ -35,13 +38,13 @@ export const fetchAllGarages = async (params = {}) => {
   return response.json();
 };
 
-export const fetchGarageById = async (garageId) => {
-  const response = await fetch(`${SERVICE_API_URL}/garages/${garageId}`);
+export const fetchGarageById = async (id) => {
+  const response = await fetch(`${SERVICE_API_URL}/garages/${id}`);
   if (!response.ok) throw new Error('Failed to fetch garage details');
   return response.json();
 };
 
-/** Multipart register; response includes token, user fields, and serviceProvider object. */
+/** Multipart FormData; response includes user, token, and `serviceProvider` (not embedded profile). */
 export const registerGarage = async (formData) => {
   const response = await fetch(`${SERVICE_API_URL}/garages/register`, {
     method: 'POST',
@@ -52,6 +55,7 @@ export const registerGarage = async (formData) => {
   return result;
 };
 
+/** Legacy: GET /garages/profile — same data model as ServiceProvider; prefer fetchOwnerGarage when possible. */
 export const fetchOwnerProfile = async () => {
   const auth = await getAuthHeader();
   const response = await fetch(`${SERVICE_API_URL}/garages/profile`, {
@@ -62,6 +66,7 @@ export const fetchOwnerProfile = async () => {
   return response.json();
 };
 
+/** Legacy: PUT /garages/profile (multipart). Prefer updateOwnerGarage for new code. */
 export const updateOwnerProfile = async (formData) => {
   const auth = await getAuthHeader();
   const response = await fetch(`${SERVICE_API_URL}/garages/profile`, {
@@ -74,7 +79,6 @@ export const updateOwnerProfile = async (formData) => {
   return result;
 };
 
-/** GET /garages/me — current GarageOwner’s ServiceProvider (requires GarageOwner token). */
 export const fetchOwnerGarage = async () => {
   const auth = await getAuthHeader();
   const response = await fetch(`${SERVICE_API_URL}/garages/me`, {
@@ -85,10 +89,7 @@ export const fetchOwnerGarage = async () => {
   return response.json();
 };
 
-/**
- * PUT /garages/me — update garage fields (multipart FormData; optional `logo` file).
- * Do not set Content-Type; fetch sets multipart boundary.
- */
+/** Multipart FormData; optional `logo` file. Do not set Content-Type on the request. */
 export const updateOwnerGarage = async (formData) => {
   const auth = await getAuthHeader();
   const response = await fetch(`${SERVICE_API_URL}/garages/me`, {
@@ -101,16 +102,14 @@ export const updateOwnerGarage = async (formData) => {
   return result;
 };
 
-// ==========================================
-// OFFERING APIs (POST/PUT/DELETE require GarageOwner token)
-// ==========================================
+// --- Offerings (GarageOwner token for mutations) ---
 
-export const createOffering = async (offeringData) => {
+export const createOffering = async (data) => {
   const auth = await getAuthHeader();
   const response = await fetch(`${SERVICE_API_URL}/offerings`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...auth },
-    body: JSON.stringify(offeringData),
+    body: JSON.stringify(data),
   });
   const result = await response.json();
   if (!response.ok) throw new Error(result.message || 'Failed to create offering');
@@ -156,16 +155,14 @@ export const deleteOffering = async (offeringId) => {
   return result;
 };
 
-// ==========================================
-// MECHANIC APIs
-// ==========================================
+// --- Mechanics ---
 
-export const addMechanic = async (mechanicData) => {
+export const addMechanic = async (data) => {
   const auth = await getAuthHeader();
   const response = await fetch(`${SERVICE_API_URL}/mechanics`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...auth },
-    body: JSON.stringify(mechanicData),
+    body: JSON.stringify(data),
   });
   const result = await response.json();
   if (!response.ok) throw new Error(result.message || 'Failed to add mechanic');
@@ -182,9 +179,9 @@ export const fetchMyMechanics = async () => {
   return response.json();
 };
 
-export const removeMechanic = async (mechanicId) => {
+export const removeMechanic = async (id) => {
   const auth = await getAuthHeader();
-  const response = await fetch(`${SERVICE_API_URL}/mechanics/${mechanicId}`, {
+  const response = await fetch(`${SERVICE_API_URL}/mechanics/${id}`, {
     method: 'DELETE',
     headers: { ...auth },
   });
@@ -193,16 +190,14 @@ export const removeMechanic = async (mechanicId) => {
   return result;
 };
 
-// ==========================================
-// BOOKING APIs (bookingData.garageId = ServiceProvider._id)
-// ==========================================
+// --- Bookings (createRepairBooking.data.garageId = ServiceProvider._id) ---
 
-export const createRepairBooking = async (bookingData) => {
+export const createRepairBooking = async (data) => {
   const auth = await getAuthHeader();
   const response = await fetch(`${SERVICE_API_URL}/bookings`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...auth },
-    body: JSON.stringify(bookingData),
+    body: JSON.stringify(data),
   });
   const result = await response.json();
   if (!response.ok) throw new Error(result.message || 'Failed to create booking');
@@ -211,7 +206,7 @@ export const createRepairBooking = async (bookingData) => {
 
 export const fetchMyRepairBookings = async (status = '') => {
   const auth = await getAuthHeader();
-  const params = status && status !== 'All' ? `?status=${status}` : '';
+  const params = status && status !== 'All' ? `?status=${encodeURIComponent(status)}` : '';
   const response = await fetch(`${SERVICE_API_URL}/bookings/my-bookings${params}`, {
     method: 'GET',
     headers: { ...auth },
@@ -224,7 +219,10 @@ export const fetchBookingQueue = async (filters = {}) => {
   const auth = await getAuthHeader();
   const params = new URLSearchParams();
   if (filters.status && filters.status !== 'All') params.append('status', filters.status);
-  if (filters.date) params.append('date', filters.date);
+  if (filters.mechanicId) params.append('mechanicId', filters.mechanicId);
+  if (filters.dateFrom) params.append('dateFrom', filters.dateFrom);
+  if (filters.dateTo) params.append('dateTo', filters.dateTo);
+  if (filters.date && !filters.dateFrom) params.append('dateFrom', filters.date);
   const queryString = params.toString();
   const response = await fetch(`${SERVICE_API_URL}/bookings/queue${queryString ? `?${queryString}` : ''}`, {
     method: 'GET',
@@ -236,7 +234,7 @@ export const fetchBookingQueue = async (filters = {}) => {
 
 export const fetchMyJobs = async (status = '') => {
   const auth = await getAuthHeader();
-  const params = status && status !== 'All' ? `?status=${status}` : '';
+  const params = status && status !== 'All' ? `?status=${encodeURIComponent(status)}` : '';
   const response = await fetch(`${SERVICE_API_URL}/bookings/my-jobs${params}`, {
     method: 'GET',
     headers: { ...auth },
@@ -245,9 +243,9 @@ export const fetchMyJobs = async (status = '') => {
   return response.json();
 };
 
-export const fetchRepairBookingById = async (bookingId) => {
+export const fetchRepairBookingById = async (id) => {
   const auth = await getAuthHeader();
-  const response = await fetch(`${SERVICE_API_URL}/bookings/${bookingId}`, {
+  const response = await fetch(`${SERVICE_API_URL}/bookings/${id}`, {
     method: 'GET',
     headers: { ...auth },
   });
@@ -255,9 +253,9 @@ export const fetchRepairBookingById = async (bookingId) => {
   return response.json();
 };
 
-export const confirmRepairBooking = async (bookingId, data) => {
+export const confirmRepairBooking = async (id, data) => {
   const auth = await getAuthHeader();
-  const response = await fetch(`${SERVICE_API_URL}/bookings/${bookingId}/confirm`, {
+  const response = await fetch(`${SERVICE_API_URL}/bookings/${id}/confirm`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...auth },
     body: JSON.stringify(data),
@@ -267,21 +265,21 @@ export const confirmRepairBooking = async (bookingId, data) => {
   return result;
 };
 
-export const declineRepairBooking = async (bookingId, data) => {
+export const declineRepairBooking = async (id, reason) => {
   const auth = await getAuthHeader();
-  const response = await fetch(`${SERVICE_API_URL}/bookings/${bookingId}/decline`, {
+  const response = await fetch(`${SERVICE_API_URL}/bookings/${id}/decline`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...auth },
-    body: JSON.stringify(data),
+    body: JSON.stringify(declineOrCancelBody(reason)),
   });
   const result = await response.json();
   if (!response.ok) throw new Error(result.message || 'Failed to decline booking');
   return result;
 };
 
-export const startJob = async (bookingId) => {
+export const startJob = async (id) => {
   const auth = await getAuthHeader();
-  const response = await fetch(`${SERVICE_API_URL}/bookings/${bookingId}/start`, {
+  const response = await fetch(`${SERVICE_API_URL}/bookings/${id}/start`, {
     method: 'PUT',
     headers: { ...auth },
   });
@@ -290,9 +288,9 @@ export const startJob = async (bookingId) => {
   return result;
 };
 
-export const markJobReady = async (bookingId) => {
+export const markJobReady = async (id) => {
   const auth = await getAuthHeader();
-  const response = await fetch(`${SERVICE_API_URL}/bookings/${bookingId}/ready`, {
+  const response = await fetch(`${SERVICE_API_URL}/bookings/${id}/ready`, {
     method: 'PUT',
     headers: { ...auth },
   });
@@ -301,33 +299,33 @@ export const markJobReady = async (bookingId) => {
   return result;
 };
 
-export const completeJob = async (bookingId, data) => {
+export const completeJob = async (id, invoiceData) => {
   const auth = await getAuthHeader();
-  const response = await fetch(`${SERVICE_API_URL}/bookings/${bookingId}/complete`, {
+  const response = await fetch(`${SERVICE_API_URL}/bookings/${id}/complete`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...auth },
-    body: JSON.stringify(data),
+    body: JSON.stringify(invoiceData),
   });
   const result = await response.json();
   if (!response.ok) throw new Error(result.message || 'Failed to complete job');
   return result;
 };
 
-export const cancelRepairBooking = async (bookingId, data) => {
+export const cancelRepairBooking = async (id, reason) => {
   const auth = await getAuthHeader();
-  const response = await fetch(`${SERVICE_API_URL}/bookings/${bookingId}/cancel`, {
+  const response = await fetch(`${SERVICE_API_URL}/bookings/${id}/cancel`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...auth },
-    body: JSON.stringify(data),
+    body: JSON.stringify(declineOrCancelBody(reason)),
   });
   const result = await response.json();
   if (!response.ok) throw new Error(result.message || 'Failed to cancel booking');
   return result;
 };
 
-export const updateJobNotes = async (bookingId, data) => {
+export const updateJobNotes = async (id, data) => {
   const auth = await getAuthHeader();
-  const response = await fetch(`${SERVICE_API_URL}/bookings/${bookingId}/notes`, {
+  const response = await fetch(`${SERVICE_API_URL}/bookings/${id}/notes`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...auth },
     body: JSON.stringify(data),
