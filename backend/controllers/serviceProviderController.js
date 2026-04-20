@@ -1,15 +1,23 @@
 const asyncHandler = require('express-async-handler');
+const mongoose = require('mongoose');
 const User = require('../models/User');
+const ServiceProvider = require('../models/ServiceProvider');
 const ServiceOffering = require('../models/ServiceOffering');
 const Review = require('../models/Review');
 const jwt = require('jsonwebtoken');
 
 // Helper to generate JWT Token
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || 'wmt-fallback-super-secret-key-2026', {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is required for garage registration');
+  }
+
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: '30d',
   });
 };
+
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 // @desc    Register a new Garage Owner account
 // @route   POST /api/service/garages/register
@@ -32,27 +40,56 @@ const registerGarage = asyncHandler(async (req, res) => {
   // Handle logo upload
   const logo = req.file ? `/uploads/${req.file.filename}` : '';
 
-  const user = await User.create({
-    name,
-    email,
-    password,
-    phone,
-    role: 'GarageOwner',
-    serviceProviderProfile: {
-      garageName,
-      description: description || '',
-      address: address || '',
-      city,
-      logo,
-      operatingHours: operatingHours || 'Mon-Sat 8:00 AM - 6:00 PM',
-      website: website || '',
-      phone,
-      rating: 0,
-      totalReviews: 0,
-      isVerified: false,
-      isActive: true,
-    },
-  });
+  const session = await mongoose.startSession();
+  let user;
+  let serviceProvider;
+
+  try {
+    await session.withTransaction(async () => {
+      [user] = await User.create([
+        {
+          name,
+          email,
+          password,
+          phone,
+          role: 'GarageOwner',
+        },
+      ], { session });
+
+      [serviceProvider] = await ServiceProvider.create([
+        {
+          ownerId: user._id,
+          garageName,
+          description: description || '',
+          address: address || '',
+          city,
+          logo,
+          operatingHours: operatingHours || 'Mon-Sat 8:00 AM - 6:00 PM',
+          website: website || '',
+          phone,
+          rating: 0,
+          totalReviews: 0,
+          isVerified: false,
+          isActive: true,
+        },
+      ], { session });
+
+      await User.findByIdAndUpdate(
+        user._id,
+        { $set: { garageId: serviceProvider._id } },
+        { session }
+      );
+    });
+  } catch (error) {
+    if (error && error.code === 11000) {
+      res.status(400);
+      throw new Error('User already exists with this email');
+    }
+
+    throw error;
+  } finally {
+    await session.endSession();
+  }
 
   if (user) {
     res.status(201).json({
@@ -61,8 +98,8 @@ const registerGarage = asyncHandler(async (req, res) => {
       email: user.email,
       phone: user.phone,
       role: user.role,
-      serviceProviderProfile: user.serviceProviderProfile,
       token: generateToken(user._id),
+      serviceProvider: serviceProvider.toObject(),
     });
   } else {
     res.status(400);
@@ -76,91 +113,92 @@ const registerGarage = asyncHandler(async (req, res) => {
 const getAllGarages = asyncHandler(async (req, res) => {
   const { city, search, category, page = 1, limit = 20 } = req.query;
 
-  // Build base filter
+  // Category filtering not implemented yet
+  if (category) {
+    res.status(400);
+    throw new Error('category filtering is not yet implemented');
+  }
+
+  // Build base filter: only verified, active garages
   const filter = {
-    role: 'GarageOwner',
-    'serviceProviderProfile.isVerified': true,
-    'serviceProviderProfile.isActive': true,
+    isVerified: true,
+    isActive: true,
   };
 
-  // City filter
+  // Optional city filter
   if (city) {
-    filter['serviceProviderProfile.city'] = { $regex: city, $options: 'i' };
+    filter.city = { $regex: escapeRegex(city), $options: 'i' };
   }
 
-  // Search filter
+  // Optional search filter: garageName or description
   if (search) {
+    const escapedSearch = escapeRegex(search);
     filter.$or = [
-      { 'serviceProviderProfile.garageName': { $regex: search, $options: 'i' } },
-      { 'serviceProviderProfile.description': { $regex: search, $options: 'i' } },
-      { 'serviceProviderProfile.serviceCategories': { $regex: search, $options: 'i' } },
+      { garageName: { $regex: escapedSearch, $options: 'i' } },
+      { description: { $regex: escapedSearch, $options: 'i' } },
     ];
-  }
-
-  // Category filter
-  if (category) {
-    filter['serviceProviderProfile.serviceCategories'] = { $in: [category] };
   }
 
   const pageNum = Number(page);
   const limitNum = Number(limit);
 
-  // Fetch garages
-  const garages = await User.find(filter)
-    .select('-password')
+  // Fetch ServiceProviders with pagination
+  const serviceProviders = await ServiceProvider.find(filter)
+    .populate('ownerId', 'name email phone')
     .skip((pageNum - 1) * limitNum)
     .limit(limitNum);
 
-  // Count service offerings for each garage
-  const garageIds = garages.map((g) => g._id);
-  const offeringCounts = await ServiceOffering.aggregate([
-    { $match: { garageId: { $in: garageIds }, isActive: true } },
-    { $group: { _id: '$garageId', count: { $sum: 1 } } },
-  ]);
+  // Count active service offerings for each garage
+  const garagesWithOfferings = [];
+  for (const sp of serviceProviders) {
+    const offeringCount = await ServiceOffering.countDocuments({
+      garageId: sp._id,
+      isActive: true,
+    });
 
-  // Merge offering counts
-  const offeringCountMap = {};
-  offeringCounts.forEach((item) => {
-    offeringCountMap[item._id.toString()] = item.count;
-  });
-
-  const garagesWithCounts = garages.map((garage) => ({
-    ...garage.toObject(),
-    offeringCount: offeringCountMap[garage._id.toString()] || 0,
-  }));
+    garagesWithOfferings.push({
+      ...sp.toObject(),
+      offeringCount,
+    });
+  }
 
   // Total count for pagination
-  const total = await User.countDocuments(filter);
+  const total = await ServiceProvider.countDocuments(filter);
+  const pages = Math.ceil(total / limitNum);
 
   res.status(200).json({
-    garages: garagesWithCounts,
+    garages: garagesWithOfferings,
     total,
     page: pageNum,
-    pages: Math.ceil(total / limitNum),
+    pages,
   });
 });
 
 // @desc    Get single garage by ID with offerings and reviews
 // @route   GET /api/service/garages/:id
 // @access  Public
+// @desc    Get garage by ID (public garage details page)
+// @route   GET /api/service/garages/:id
+// @access  Public
 const getGarageById = asyncHandler(async (req, res) => {
-  const garage = await User.findById(req.params.id).select('-password');
+  // Find and populate ServiceProvider
+  const garage = await ServiceProvider.findById(req.params.id).populate('ownerId', 'name email phone');
 
-  if (!garage || garage.role !== 'GarageOwner') {
+  if (!garage) {
     res.status(404);
     throw new Error('Garage not found');
   }
 
-  // Fetch active service offerings
+  // Find active service offerings for this garage
   const offerings = await ServiceOffering.find({
-    garageId: req.params.id,
+    garageId: garage._id,
     isActive: true,
   });
 
-  // Fetch latest 10 reviews
-  const reviews = await Review.find({ garageId: req.params.id })
+  // Find latest 10 reviews for this garage
+  const reviews = await Review.find({ garageId: garage._id })
     .populate('customerId', 'name')
-    .sort({ createdAt: -1 })
+    .sort('-createdAt')
     .limit(10);
 
   res.status(200).json({
@@ -174,62 +212,121 @@ const getGarageById = asyncHandler(async (req, res) => {
 // @route   GET /api/service/garages/profile
 // @access  Private (GarageOwner only)
 const getOwnerProfile = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user._id).select('-password');
+  const serviceProvider = await ServiceProvider.findOne({ ownerId: req.user._id }).populate('ownerId', 'name email phone role');
 
-  if (!user || user.role !== 'GarageOwner') {
+  if (!serviceProvider) {
     res.status(404);
     throw new Error('Garage owner profile not found');
   }
 
-  res.status(200).json(user);
+  res.status(200).json(serviceProvider.toObject());
 });
 
 // @desc    Update own garage owner profile
 // @route   PUT /api/service/garages/profile
 // @access  Private (GarageOwner only)
 const updateOwnerProfile = asyncHandler(async (req, res) => {
-  const { garageName, description, address, city, operatingHours, website, phone, serviceCategories } = req.body;
+  const body = req.body != null && typeof req.body === 'object' ? req.body : {};
+  const { garageName, description, address, city, operatingHours, website, phone, serviceCategories } = body;
 
   const updateFields = {};
 
-  if (garageName) updateFields['serviceProviderProfile.garageName'] = garageName;
-  if (description) updateFields['serviceProviderProfile.description'] = description;
-  if (address) updateFields['serviceProviderProfile.address'] = address;
-  if (city) updateFields['serviceProviderProfile.city'] = city;
-  if (operatingHours) updateFields['serviceProviderProfile.operatingHours'] = operatingHours;
-  if (website) updateFields['serviceProviderProfile.website'] = website;
-  if (phone) updateFields['serviceProviderProfile.phone'] = phone;
+  if (garageName) updateFields.garageName = garageName;
+  if (description) updateFields.description = description;
+  if (address) updateFields.address = address;
+  if (city) updateFields.city = city;
+  if (operatingHours) updateFields.operatingHours = operatingHours;
+  if (website) updateFields.website = website;
+  if (phone) updateFields.phone = phone;
 
-  // Parse serviceCategories if string
-  if (serviceCategories) {
-    let parsedCategories = serviceCategories;
-    if (typeof serviceCategories === 'string') {
-      try {
-        parsedCategories = JSON.parse(serviceCategories);
-      } catch (e) {
-        parsedCategories = [serviceCategories];
-      }
-    }
-    updateFields['serviceProviderProfile.serviceCategories'] = parsedCategories;
-  }
+  // Backwards-compatible no-op for legacy forms that still submit this field.
+  void serviceCategories;
 
   // Handle logo upload
   if (req.file) {
-    updateFields['serviceProviderProfile.logo'] = `/uploads/${req.file.filename}`;
+    updateFields.logo = `/uploads/${req.file.filename}`;
   }
 
-  const user = await User.findByIdAndUpdate(
-    req.user._id,
+  if (Object.keys(updateFields).length === 0) {
+    const serviceProvider = await ServiceProvider.findOne({ ownerId: req.user._id }).populate('ownerId', 'name email phone role');
+    if (!serviceProvider) {
+      res.status(404);
+      throw new Error('Garage owner profile not found');
+    }
+    return res.status(200).json(serviceProvider.toObject());
+  }
+
+  const serviceProvider = await ServiceProvider.findOneAndUpdate(
+    { ownerId: req.user._id },
     { $set: updateFields },
     { new: true }
-  ).select('-password');
+  ).populate('ownerId', 'name email phone role');
 
-  if (!user) {
+  if (!serviceProvider) {
     res.status(404);
     throw new Error('Garage owner profile not found');
   }
 
-  res.status(200).json(user);
+  res.status(200).json(serviceProvider.toObject());
+});
+
+// @desc    Get owner's garage details
+// @route   GET /api/service/garages/me
+// @access  Private (GarageOwner)
+const getOwnerGarage = asyncHandler(async (req, res) => {
+  const garage = await ServiceProvider.findOne({ ownerId: req.user._id }).populate('ownerId', 'name email phone');
+
+  if (!garage) {
+    res.status(404);
+    throw new Error('Garage not found');
+  }
+
+  res.status(200).json(garage.toObject());
+});
+
+// @desc    Update owner's garage details
+// @route   PUT /api/service/garages/me
+// @access  Private (GarageOwner)
+const updateOwnerGarage = asyncHandler(async (req, res) => {
+  const body = req.body != null && typeof req.body === 'object' ? req.body : {};
+  const { garageName, description, address, city, operatingHours, website, phone } = body;
+
+  // Build update object with whitelisted fields only
+  const updateFields = {};
+  if (garageName) updateFields.garageName = garageName;
+  if (description) updateFields.description = description;
+  if (address) updateFields.address = address;
+  if (city) updateFields.city = city;
+  if (operatingHours) updateFields.operatingHours = operatingHours;
+  if (website) updateFields.website = website;
+  if (phone) updateFields.phone = phone;
+
+  // Handle logo upload
+  if (req.file) {
+    updateFields.logo = `/uploads/${req.file.filename}`;
+  }
+
+  if (Object.keys(updateFields).length === 0) {
+    const garage = await ServiceProvider.findOne({ ownerId: req.user._id }).populate('ownerId', 'name email phone');
+    if (!garage) {
+      res.status(404);
+      throw new Error('Garage not found');
+    }
+    return res.status(200).json(garage.toObject());
+  }
+
+  const garage = await ServiceProvider.findOneAndUpdate(
+    { ownerId: req.user._id },
+    { $set: updateFields },
+    { new: true }
+  ).populate('ownerId', 'name email phone');
+
+  if (!garage) {
+    res.status(404);
+    throw new Error('Garage not found');
+  }
+
+  res.status(200).json(garage.toObject());
 });
 
 module.exports = {
@@ -238,4 +335,6 @@ module.exports = {
   getGarageById,
   getOwnerProfile,
   updateOwnerProfile,
+  getOwnerGarage,
+  updateOwnerGarage,
 };
