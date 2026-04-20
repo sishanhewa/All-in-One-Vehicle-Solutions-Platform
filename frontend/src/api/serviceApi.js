@@ -19,6 +19,7 @@ const getAuthHeader = async () => {
 
 // ==========================================
 // GARAGE APIs
+// Public list/detail return ServiceProvider-shaped garages; garageId elsewhere is ServiceProvider._id.
 // ==========================================
 
 export const fetchAllGarages = async (params = {}) => {
@@ -40,6 +41,7 @@ export const fetchGarageById = async (garageId) => {
   return response.json();
 };
 
+/** Multipart register; response includes token, user fields, and serviceProvider object. */
 export const registerGarage = async (formData) => {
   const response = await fetch(`${SERVICE_API_URL}/garages/register`, {
     method: 'POST',
@@ -72,8 +74,35 @@ export const updateOwnerProfile = async (formData) => {
   return result;
 };
 
+/** GET /garages/me — current GarageOwner’s ServiceProvider (requires GarageOwner token). */
+export const fetchOwnerGarage = async () => {
+  const auth = await getAuthHeader();
+  const response = await fetch(`${SERVICE_API_URL}/garages/me`, {
+    method: 'GET',
+    headers: { ...auth },
+  });
+  if (!response.ok) throw new Error('Failed to fetch owner garage');
+  return response.json();
+};
+
+/**
+ * PUT /garages/me — update garage fields (multipart FormData; optional `logo` file).
+ * Do not set Content-Type; fetch sets multipart boundary.
+ */
+export const updateOwnerGarage = async (formData) => {
+  const auth = await getAuthHeader();
+  const response = await fetch(`${SERVICE_API_URL}/garages/me`, {
+    method: 'PUT',
+    headers: { ...auth },
+    body: formData,
+  });
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || 'Failed to update garage');
+  return result;
+};
+
 // ==========================================
-// OFFERING APIs
+// OFFERING APIs (POST/PUT/DELETE require GarageOwner token)
 // ==========================================
 
 export const createOffering = async (offeringData) => {
@@ -165,7 +194,7 @@ export const removeMechanic = async (mechanicId) => {
 };
 
 // ==========================================
-// BOOKING APIs
+// BOOKING APIs (bookingData.garageId = ServiceProvider._id)
 // ==========================================
 
 export const createRepairBooking = async (bookingData) => {
