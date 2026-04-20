@@ -3,6 +3,21 @@ const mongoose = require('mongoose');
 const RepairBooking = require('../models/RepairBooking');
 const ServiceOffering = require('../models/ServiceOffering');
 const User = require('../models/User');
+const ServiceProvider = require('../models/ServiceProvider');
+
+const getMyGarageForOwner = async (res, user) => {
+  const myGarage = await ServiceProvider.findOne({ ownerId: user._id });
+  if (!myGarage) {
+    res.status(404);
+    throw new Error('You do not own a registered garage');
+  }
+  return myGarage;
+};
+
+const toNonNegativeNumber = (value) => {
+  const number = Number(value);
+  return Number.isFinite(number) && number >= 0 ? number : null;
+};
 
 // Helper: Assert booking status (returns true or throws with res.status set)
 const assertBookingStatus = (res, booking, expectedStatuses, errorMsg) => {
@@ -57,11 +72,10 @@ const createBooking = asyncHandler(async (req, res) => {
   }
 
   // Validate garage - must be verified and active GarageOwner
-  const garage = await User.findOne({
+  const garage = await ServiceProvider.findOne({
     _id: garageId,
-    role: 'GarageOwner',
-    'serviceProviderProfile.isVerified': true,
-    'serviceProviderProfile.isActive': true,
+    isVerified: true,
+    isActive: true,
   });
 
   if (!garage) {
@@ -112,7 +126,7 @@ const createBooking = asyncHandler(async (req, res) => {
   // Populate references
   await booking.populate([
     { path: 'customerId', select: 'name email phone' },
-    { path: 'garageId', select: 'name serviceProviderProfile' },
+    { path: 'garageId', select: 'garageName city logo ownerId' },
     { path: 'serviceOfferingIds', select: 'name estimatedPrice estimatedDuration category' },
   ]);
 
@@ -131,7 +145,7 @@ const getMyBookings = asyncHandler(async (req, res) => {
   }
 
   const bookings = await RepairBooking.find(query)
-    .populate('garageId', 'name serviceProviderProfile.garageName serviceProviderProfile.city serviceProviderProfile.logo')
+    .populate('garageId', 'garageName city logo ownerId')
     .populate('serviceOfferingIds', 'name category')
     .populate('assignedMechanicId', 'name')
     .sort({ createdAt: -1 });
@@ -145,7 +159,8 @@ const getMyBookings = asyncHandler(async (req, res) => {
 const getBookingQueue = asyncHandler(async (req, res) => {
   const { status, mechanicId, dateFrom, dateTo } = req.query;
 
-  let query = { garageId: req.user._id };
+  const myGarage = await getMyGarageForOwner(res, req.user);
+  let query = { garageId: myGarage._id };
 
   if (status) {
     query.status = status;
@@ -169,7 +184,7 @@ const getBookingQueue = asyncHandler(async (req, res) => {
 
   // Count bookings per status
   const counts = await RepairBooking.aggregate([
-    { $match: { garageId: req.user._id } },
+    { $match: { garageId: myGarage._id } },
     { $group: { _id: '$status', count: { $sum: 1 } } },
   ]);
 
@@ -178,6 +193,8 @@ const getBookingQueue = asyncHandler(async (req, res) => {
     confirmed: 0,
     in_progress: 0,
     ready_for_pickup: 0,
+    completed: 0,
+    cancelled: 0,
   };
 
   counts.forEach((item) => {
@@ -201,7 +218,7 @@ const getMyJobs = asyncHandler(async (req, res) => {
 
   const bookings = await RepairBooking.find(query)
     .populate('customerId', 'name phone')
-    .populate('garageId', 'name serviceProviderProfile.garageName')
+    .populate('garageId', 'garageName city logo ownerId')
     .populate('serviceOfferingIds', 'name category estimatedDuration')
     .sort({ preferredDate: 1 });
 
@@ -214,7 +231,7 @@ const getMyJobs = asyncHandler(async (req, res) => {
 const getBookingById = asyncHandler(async (req, res) => {
   const booking = await RepairBooking.findById(req.params.id)
     .populate('customerId', 'name email phone')
-    .populate('garageId', 'name serviceProviderProfile')
+    .populate('garageId', 'garageName city logo ownerId')
     .populate('serviceOfferingIds', 'name category estimatedPrice estimatedDuration')
     .populate('assignedMechanicId', 'name phone');
 
@@ -233,7 +250,8 @@ const getBookingById = asyncHandler(async (req, res) => {
   } else if (userRole === 'User') {
     hasAccess = booking.customerId._id.toString() === userId;
   } else if (userRole === 'GarageOwner') {
-    hasAccess = booking.garageId._id.toString() === userId;
+    const myGarage = await ServiceProvider.findOne({ ownerId: req.user._id });
+    hasAccess = Boolean(myGarage && booking.garageId._id.toString() === myGarage._id.toString());
   } else if (userRole === 'Mechanic') {
     hasAccess = booking.assignedMechanicId && booking.assignedMechanicId._id.toString() === userId;
   }
@@ -250,13 +268,15 @@ const getBookingById = asyncHandler(async (req, res) => {
 // @route   PUT /api/service/bookings/:id/confirm
 // @access  Private (GarageOwner)
 const confirmBooking = asyncHandler(async (req, res) => {
+  const myGarage = await getMyGarageForOwner(res, req.user);
+
   const booking = await RepairBooking.findById(req.params.id);
   if (!booking) {
     res.status(404);
     throw new Error('Booking not found');
   }
 
-  if (booking.garageId.toString() !== req.user._id.toString()) {
+  if (booking.garageId.toString() !== myGarage._id.toString()) {
     res.status(403);
     throw new Error('Not authorized');
   }
@@ -268,9 +288,9 @@ const confirmBooking = asyncHandler(async (req, res) => {
   // Validate mechanic belongs to this garage
   if (assignedMechanicId) {
     const mechanic = await User.findById(assignedMechanicId);
-    if (!mechanic || mechanic.role !== 'Mechanic' || mechanic.garageId.toString() !== req.user._id.toString()) {
+    if (!mechanic || mechanic.role !== 'Mechanic' || mechanic.garageId.toString() !== myGarage._id.toString()) {
       res.status(400);
-      throw new Error('Invalid mechanic');
+      throw new Error('Invalid mechanic or mechanic not in your garage');
     }
     booking.assignedMechanicId = mechanic._id;
   }
@@ -289,13 +309,15 @@ const confirmBooking = asyncHandler(async (req, res) => {
 // @route   PUT /api/service/bookings/:id/decline
 // @access  Private (GarageOwner)
 const declineBooking = asyncHandler(async (req, res) => {
+  const myGarage = await getMyGarageForOwner(res, req.user);
+
   const booking = await RepairBooking.findById(req.params.id);
   if (!booking) {
     res.status(404);
     throw new Error('Booking not found');
   }
 
-  if (booking.garageId.toString() !== req.user._id.toString()) {
+  if (booking.garageId.toString() !== myGarage._id.toString()) {
     res.status(403);
     throw new Error('Not authorized');
   }
@@ -360,20 +382,28 @@ const markReadyForPickup = asyncHandler(async (req, res) => {
 // @route   PUT /api/service/bookings/:id/complete
 // @access  Private (GarageOwner)
 const completeBooking = asyncHandler(async (req, res) => {
+  const myGarage = await getMyGarageForOwner(res, req.user);
+
   const booking = await RepairBooking.findById(req.params.id);
   if (!booking) {
     res.status(404);
     throw new Error('Booking not found');
   }
 
-  if (booking.garageId.toString() !== req.user._id.toString()) {
+  if (booking.garageId.toString() !== myGarage._id.toString()) {
     res.status(403);
     throw new Error('Not authorized');
   }
 
   assertBookingStatus(res, booking, ['ready_for_pickup']);
 
-  booking.finalInvoiceAmount = req.body.finalInvoiceAmount || 0;
+  const parsedFinalInvoiceAmount = toNonNegativeNumber(req.body.finalInvoiceAmount || 0);
+  if (parsedFinalInvoiceAmount === null) {
+    res.status(400);
+    throw new Error('finalInvoiceAmount must be a non-negative number');
+  }
+
+  booking.finalInvoiceAmount = parsedFinalInvoiceAmount;
   addStatusHistory(booking, 'completed', req.user._id, 'Job completed');
   await booking.save();
 
@@ -390,11 +420,17 @@ const cancelBooking = asyncHandler(async (req, res) => {
     throw new Error('Booking not found');
   }
 
-  // Authorization: customer or garage owner
+  // Authorization: customer or garage owner (role must be GarageOwner for garage-side cancel)
   const isCustomer = booking.customerId.toString() === req.user._id.toString();
-  const isGarageOwner = booking.garageId.toString() === req.user._id.toString();
+  let isGarageOwnerForBooking = false;
+  if (req.user.role === 'GarageOwner') {
+    const myGarage = await ServiceProvider.findOne({ ownerId: req.user._id });
+    isGarageOwnerForBooking = Boolean(
+      myGarage && booking.garageId.toString() === myGarage._id.toString(),
+    );
+  }
 
-  if (!isCustomer && !isGarageOwner) {
+  if (!isCustomer && !isGarageOwnerForBooking) {
     res.status(403);
     throw new Error('Not authorized');
   }
