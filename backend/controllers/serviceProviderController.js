@@ -93,12 +93,13 @@ const registerGarage = asyncHandler(async (req, res) => {
 
   if (user) {
     res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      role: user.role,
-      token: generateToken(user._id),
+      _id:      user._id,
+      name:     user.name,
+      email:    user.email,
+      phone:    user.phone,
+      role:     user.role,
+      garageId: serviceProvider._id,   // ← critical: lets AuthContext store garageId
+      token:    generateToken(user._id),
       serviceProvider: serviceProvider.toObject(),
     });
   } else {
@@ -113,24 +114,13 @@ const registerGarage = asyncHandler(async (req, res) => {
 const getAllGarages = asyncHandler(async (req, res) => {
   const { city, search, category, page = 1, limit = 20 } = req.query;
 
-  // Category filtering not implemented yet
-  if (category) {
-    res.status(400);
-    throw new Error('category filtering is not yet implemented');
-  }
-
   // Build base filter: only verified, active garages
-  const filter = {
-    isVerified: true,
-    isActive: true,
-  };
+  const filter = { isVerified: true, isActive: true };
 
-  // Optional city filter
   if (city) {
     filter.city = { $regex: escapeRegex(city), $options: 'i' };
   }
 
-  // Optional search filter: garageName or description
   if (search) {
     const escapedSearch = escapeRegex(search);
     filter.$or = [
@@ -139,45 +129,61 @@ const getAllGarages = asyncHandler(async (req, res) => {
     ];
   }
 
-  const pageNum = Number(page);
-  const limitNum = Number(limit);
-
-  // Fetch ServiceProviders with pagination
-  const serviceProviders = await ServiceProvider.find(filter)
-    .populate('ownerId', 'name email phone')
-    .skip((pageNum - 1) * limitNum)
-    .limit(limitNum);
-
-  // Count active service offerings for each garage
-  const garagesWithOfferings = [];
-  for (const sp of serviceProviders) {
-    const offeringCount = await ServiceOffering.countDocuments({
-      garageId: sp._id,
+  // Category filter: find garageIds that have an active offering in this category
+  if (category) {
+    const matchingOfferings = await ServiceOffering.distinct('garageId', {
+      category,
       isActive: true,
     });
-
-    garagesWithOfferings.push({
-      ...sp.toObject(),
-      offeringCount,
-    });
+    filter._id = { $in: matchingOfferings };
   }
 
-  // Total count for pagination
-  const total = await ServiceProvider.countDocuments(filter);
-  const pages = Math.ceil(total / limitNum);
+  const pageNum  = Number(page);
+  const limitNum = Number(limit);
+
+  // Use aggregation to count active offerings per garage in a single query (no N+1)
+  const pipeline = [
+    { $match: filter },
+    {
+      $lookup: {
+        from: 'serviceofferings',
+        let: { gid: '$_id' },
+        pipeline: [
+          { $match: { $expr: { $and: [
+            { $eq: ['$garageId', '$$gid'] },
+            { $eq: ['$isActive', true] },
+          ]}}},
+          { $count: 'n' },
+        ],
+        as: '_offeringCountArr',
+      },
+    },
+    {
+      $addFields: {
+        offeringCount: { $ifNull: [{ $arrayElemAt: ['$_offeringCountArr.n', 0] }, 0] },
+      },
+    },
+    { $project: { _offeringCountArr: 0 } },
+    { $sort: { rating: -1, createdAt: -1 } },
+    { $skip: (pageNum - 1) * limitNum },
+    { $limit: limitNum },
+  ];
+
+  const garages = await ServiceProvider.aggregate(pipeline);
+  const total   = await ServiceProvider.countDocuments(filter);
+  const pages   = Math.ceil(total / limitNum);
 
   res.status(200).json({
-    garages: garagesWithOfferings,
+    garages,
     total,
     page: pageNum,
     pages,
   });
 });
 
+
+
 // @desc    Get single garage by ID with offerings and reviews
-// @route   GET /api/service/garages/:id
-// @access  Public
-// @desc    Get garage by ID (public garage details page)
 // @route   GET /api/service/garages/:id
 // @access  Public
 const getGarageById = asyncHandler(async (req, res) => {
@@ -206,68 +212,6 @@ const getGarageById = asyncHandler(async (req, res) => {
     offerings,
     reviews,
   });
-});
-
-// @desc    Get own garage owner profile
-// @route   GET /api/service/garages/profile
-// @access  Private (GarageOwner only)
-const getOwnerProfile = asyncHandler(async (req, res) => {
-  const serviceProvider = await ServiceProvider.findOne({ ownerId: req.user._id }).populate('ownerId', 'name email phone role');
-
-  if (!serviceProvider) {
-    res.status(404);
-    throw new Error('Garage owner profile not found');
-  }
-
-  res.status(200).json(serviceProvider.toObject());
-});
-
-// @desc    Update own garage owner profile
-// @route   PUT /api/service/garages/profile
-// @access  Private (GarageOwner only)
-const updateOwnerProfile = asyncHandler(async (req, res) => {
-  const body = req.body != null && typeof req.body === 'object' ? req.body : {};
-  const { garageName, description, address, city, operatingHours, website, phone, serviceCategories } = body;
-
-  const updateFields = {};
-
-  if (garageName) updateFields.garageName = garageName;
-  if (description) updateFields.description = description;
-  if (address) updateFields.address = address;
-  if (city) updateFields.city = city;
-  if (operatingHours) updateFields.operatingHours = operatingHours;
-  if (website) updateFields.website = website;
-  if (phone) updateFields.phone = phone;
-
-  // Backwards-compatible no-op for legacy forms that still submit this field.
-  void serviceCategories;
-
-  // Handle logo upload
-  if (req.file) {
-    updateFields.logo = `/uploads/${req.file.filename}`;
-  }
-
-  if (Object.keys(updateFields).length === 0) {
-    const serviceProvider = await ServiceProvider.findOne({ ownerId: req.user._id }).populate('ownerId', 'name email phone role');
-    if (!serviceProvider) {
-      res.status(404);
-      throw new Error('Garage owner profile not found');
-    }
-    return res.status(200).json(serviceProvider.toObject());
-  }
-
-  const serviceProvider = await ServiceProvider.findOneAndUpdate(
-    { ownerId: req.user._id },
-    { $set: updateFields },
-    { new: true }
-  ).populate('ownerId', 'name email phone role');
-
-  if (!serviceProvider) {
-    res.status(404);
-    throw new Error('Garage owner profile not found');
-  }
-
-  res.status(200).json(serviceProvider.toObject());
 });
 
 // @desc    Get owner's garage details
@@ -333,8 +277,6 @@ module.exports = {
   registerGarage,
   getAllGarages,
   getGarageById,
-  getOwnerProfile,
-  updateOwnerProfile,
   getOwnerGarage,
   updateOwnerGarage,
 };

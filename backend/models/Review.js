@@ -5,7 +5,6 @@ const reviewSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'RepairBooking',
     required: true,
-    unique: true,
   },
   customerId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -14,7 +13,7 @@ const reviewSchema = new mongoose.Schema({
   },
   garageId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'ServiceProvider',
     required: true,
   },
   mechanicId: {
@@ -40,5 +39,11 @@ const reviewSchema = new mongoose.Schema({
     maxlength: 1000,
   },
 }, { timestamps: true });
+
+// Compound unique index to prevent duplicate reviews and handle race conditions
+reviewSchema.index({ bookingId: 1, customerId: 1 }, { unique: true });
+
+// Index for efficient garage rating lookups
+reviewSchema.index({ garageId: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Review', reviewSchema);

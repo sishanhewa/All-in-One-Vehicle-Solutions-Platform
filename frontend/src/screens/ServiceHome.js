@@ -20,6 +20,7 @@ import { fetchAllGarages, resolveServiceImageUrl } from '../api/serviceApi';
 import { AuthContext } from '../context/AuthContext';
 
 const CITIES = ['All Cities', 'Colombo', 'Kandy', 'Gampaha', 'Kurunegala', 'Kalutara', 'Galle', 'Matara', 'Ratnapura', 'Anuradhapura', 'Jaffna', 'Batticaloa', 'Badulla'];
+const CATEGORIES = ['All', 'Oil Change', 'Engine', 'Brakes', 'Tires', 'AC', 'Electrical', 'Bodywork', 'Diagnostics', 'Transmission'];
 
 const ACCENT = '#8e44ad';
 
@@ -33,6 +34,7 @@ const ServiceHome = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [selectedCity, setSelectedCity] = useState('All Cities');
+  const [selectedCategory, setSelectedCategory] = useState('All');
 
   const searchTextRef = useRef(searchText);
   searchTextRef.current = searchText;
@@ -46,9 +48,8 @@ const ServiceHome = () => {
       }
       try {
         const params = {};
-        if (selectedCity !== 'All Cities') {
-          params.city = selectedCity;
-        }
+        if (selectedCity !== 'All Cities') params.city = selectedCity;
+        if (selectedCategory !== 'All') params.category = selectedCategory;
         const term = searchTextRef.current.trim();
         if (term) {
           params.search = term;
@@ -66,7 +67,7 @@ const ServiceHome = () => {
         }
       }
     },
-    [selectedCity]
+    [selectedCity, selectedCategory]
   );
 
   useFocusEffect(
@@ -131,6 +132,20 @@ const ServiceHome = () => {
               </Text>
             </View>
             <Text style={styles.offeringLine}>{offeringCount} services</Text>
+            {Array.isArray(garage.serviceCategories) && garage.serviceCategories.length > 0 && (
+              <View style={styles.catChipRow}>
+                {garage.serviceCategories.slice(0, 3).map((cat) => (
+                  <View key={cat} style={styles.catChip}>
+                    <Text style={styles.catChipText}>{cat}</Text>
+                  </View>
+                ))}
+                {garage.serviceCategories.length > 3 && (
+                  <View style={styles.catChip}>
+                    <Text style={styles.catChipText}>+{garage.serviceCategories.length - 3}</Text>
+                  </View>
+                )}
+              </View>
+            )}
           </View>
         </View>
       </TouchableOpacity>
@@ -151,10 +166,10 @@ const ServiceHome = () => {
     );
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
         <Text style={styles.logo}>
           Vehicle <Text style={styles.logoAccent}>Services</Text>
         </Text>
@@ -187,6 +202,20 @@ const ServiceHome = () => {
               onPress={() => setSelectedCity(city)}
             >
               <Text style={[styles.chipText, selectedCity === city && styles.chipTextActive]}>{city}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {/* ── Category chips ── */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={[styles.chipScroll, { marginTop: 8 }]} contentContainerStyle={styles.chipContainer}>
+          {CATEGORIES.map((cat) => (
+            <TouchableOpacity
+              key={cat}
+              style={[styles.chip, selectedCategory === cat && styles.chipCatActive]}
+              activeOpacity={0.7}
+              onPress={() => setSelectedCategory(cat)}
+            >
+              <Text style={[styles.chipText, selectedCategory === cat && styles.chipCatTextActive]}>{cat}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -234,7 +263,6 @@ const styles = StyleSheet.create({
 
   header: {
     paddingHorizontal: 20,
-    paddingTop: 14,
     paddingBottom: 16,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
@@ -278,9 +306,15 @@ const styles = StyleSheet.create({
   chipScroll: { marginHorizontal: -20, paddingHorizontal: 0 },
   chipContainer: { paddingHorizontal: 20, gap: 8 },
   chip: { paddingVertical: 8, paddingHorizontal: 16, borderRadius: 20, backgroundColor: '#f1f3f5', borderWidth: 1, borderColor: '#e9ecef' },
-  chipActive: { backgroundColor: '#f4ecf7', borderColor: ACCENT },
-  chipText: { fontSize: 13, color: '#636e72', fontWeight: '600' },
-  chipTextActive: { color: ACCENT },
+  chipActive:        { backgroundColor: '#f4ecf7', borderColor: ACCENT },
+  chipCatActive:     { backgroundColor: '#fff5ed', borderColor: '#e67e22' },
+  chipText:          { fontSize: 13, color: '#636e72', fontWeight: '600' },
+  chipTextActive:    { color: ACCENT },
+  chipCatTextActive: { color: '#e67e22' },
+
+  catChipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 },
+  catChip:    { backgroundColor: '#f4ecf7', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+  catChipText: { fontSize: 10, color: ACCENT, fontWeight: '700' },
 
   resultBar: { paddingHorizontal: 20, paddingVertical: 10, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#eee' },
   resultTxt: { color: '#636e72', fontSize: 13, fontWeight: '600' },

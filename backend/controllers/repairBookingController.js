@@ -46,9 +46,9 @@ const createBooking = asyncHandler(async (req, res) => {
   const { garageId, serviceOfferingIds, preferredDate, preferredTime, vehicleInfo, customerNotes } = req.body;
 
   // Validate required fields
-  if (!garageId || !serviceOfferingIds || !preferredDate || !preferredTime) {
+  if (!garageId || !serviceOfferingIds || !preferredDate) {
     res.status(400);
-    throw new Error('Please provide: garageId, serviceOfferingIds, preferredDate, and preferredTime');
+    throw new Error('Please provide: garageId, serviceOfferingIds, and preferredDate');
   }
 
   // Validate serviceOfferingIds is a non-empty array
@@ -71,7 +71,7 @@ const createBooking = asyncHandler(async (req, res) => {
     throw new Error('Please provide vehicleInfo with make, model, year, and plateNumber');
   }
 
-  // Validate garage - must be verified and active GarageOwner
+  // Validate garage - must be verified and active
   const garage = await ServiceProvider.findOne({
     _id: garageId,
     isVerified: true,
@@ -83,21 +83,32 @@ const createBooking = asyncHandler(async (req, res) => {
     throw new Error('Garage not found or not accepting bookings');
   }
 
-  // Validate each service offering
+  // Duplicate booking guard: block if an active booking already exists for same customer + garage + date
+  const existingBooking = await RepairBooking.findOne({
+    customerId: req.user._id,
+    garageId,
+    preferredDate: new Date(preferredDate),
+    status: { $nin: ['cancelled', 'completed'] },
+  });
+  if (existingBooking) {
+    res.status(409);
+    throw new Error('You already have an active booking at this garage for the same date. Please choose a different date or cancel the existing booking.');
+  }
+
+  // Validate each service offering in parallel (single round-trip)
+  const offeringResults = await Promise.all(
+    serviceOfferingIds.map((offeringId) =>
+      ServiceOffering.findOne({ _id: offeringId, garageId, isActive: true })
+    )
+  );
+
   let estimatedTotal = 0;
-  for (const offeringId of serviceOfferingIds) {
-    const offering = await ServiceOffering.findOne({
-      _id: offeringId,
-      garageId,
-      isActive: true,
-    });
-
-    if (!offering) {
+  for (let i = 0; i < offeringResults.length; i++) {
+    if (!offeringResults[i]) {
       res.status(404);
-      throw new Error(`Service offering ${offeringId} not found or unavailable`);
+      throw new Error(`Service offering ${serviceOfferingIds[i]} not found or unavailable`);
     }
-
-    estimatedTotal += offering.estimatedPrice;
+    estimatedTotal += offeringResults[i].estimatedPrice;
   }
 
   // Create the booking
@@ -140,9 +151,7 @@ const getMyBookings = asyncHandler(async (req, res) => {
   const { status } = req.query;
 
   let query = { customerId: req.user._id };
-  if (status) {
-    query.status = status;
-  }
+  if (status) query.status = status;
 
   const bookings = await RepairBooking.find(query)
     .populate('garageId', 'garageName city logo ownerId')
@@ -150,7 +159,18 @@ const getMyBookings = asyncHandler(async (req, res) => {
     .populate('assignedMechanicId', 'name')
     .sort({ createdAt: -1 });
 
-  res.status(200).json(bookings);
+  // Attach review presence without N+1 — single query on Review collection
+  const Review = require('../models/Review');
+  const bookingIds = bookings.map((b) => b._id);
+  const reviews = await Review.find({ bookingId: { $in: bookingIds } }, 'bookingId').lean();
+  const reviewedSet = new Set(reviews.map((r) => r.bookingId.toString()));
+
+  const result = bookings.map((b) => ({
+    ...b.toObject(),
+    hasReview: reviewedSet.has(b._id.toString()),
+  }));
+
+  res.status(200).json(result);
 });
 
 // @desc    Get garage owner's booking queue
@@ -182,6 +202,7 @@ const getBookingQueue = asyncHandler(async (req, res) => {
     .populate('assignedMechanicId', 'name phone')
     .sort({ createdAt: -1 });
 
+
   // Count bookings per status
   const counts = await RepairBooking.aggregate([
     { $match: { garageId: myGarage._id } },
@@ -210,11 +231,19 @@ const getBookingQueue = asyncHandler(async (req, res) => {
 const getMyJobs = asyncHandler(async (req, res) => {
   const { status } = req.query;
 
+  // Active statuses: what a mechanic cares about day-to-day
+  const ACTIVE_STATUSES = ['confirmed', 'in_progress', 'ready_for_pickup'];
+
   let query = { assignedMechanicId: req.user._id };
 
-  if (status) {
+  if (status && status !== 'All') {
+    // Explicit filter requested
     query.status = status;
+  } else if (!status) {
+    // Default: only active jobs (no cancelled/completed noise)
+    query.status = { $in: ACTIVE_STATUSES };
   }
+  // status === 'All' → no status filter, show everything
 
   const bookings = await RepairBooking.find(query)
     .populate('customerId', 'name phone')
@@ -467,7 +496,108 @@ const updateJobNotes = asyncHandler(async (req, res) => {
   }
 
   if (req.body.partsUsed !== undefined) {
+    // Validate partsUsed structure
+    if (!Array.isArray(req.body.partsUsed)) {
+      res.status(400);
+      throw new Error('partsUsed must be an array');
+    }
+    
+    // Validate each part has required fields
+    for (let i = 0; i < req.body.partsUsed.length; i++) {
+      const part = req.body.partsUsed[i];
+      if (!part.name || typeof part.name !== 'string') {
+        res.status(400);
+        throw new Error(`Part at index ${i} must have a valid name`);
+      }
+      if (typeof part.quantity !== 'number' || part.quantity < 1 || !Number.isInteger(part.quantity)) {
+        res.status(400);
+        throw new Error(`Part "${part.name}" must have a valid quantity (positive integer)`);
+      }
+      if (typeof part.price !== 'number' || part.price < 0) {
+        res.status(400);
+        throw new Error(`Part "${part.name}" must have a valid price (non-negative number)`);
+      }
+    }
+    
     booking.partsUsed = req.body.partsUsed;
+  }
+
+  await booking.save();
+  res.status(200).json(booking);
+});
+
+// @desc    Reassign a mechanic on an already-confirmed booking (GarageOwner)
+// @route   PUT /api/service/bookings/:id/reassign
+// @access  Private (GarageOwner)
+const reassignMechanic = asyncHandler(async (req, res) => {
+  const myGarage = await getMyGarageForOwner(res, req.user);
+
+  const booking = await RepairBooking.findById(req.params.id);
+  if (!booking) {
+    res.status(404);
+    throw new Error('Booking not found');
+  }
+
+  if (booking.garageId.toString() !== myGarage._id.toString()) {
+    res.status(403);
+    throw new Error('Not authorized');
+  }
+
+  // Only allow reassignment on active (non-terminal) bookings
+  assertBookingStatus(res, booking, ['confirmed', 'in_progress'], 'Can only reassign mechanic on confirmed or in-progress bookings');
+
+  const { assignedMechanicId, note } = req.body;
+  if (!assignedMechanicId) {
+    res.status(400);
+    throw new Error('Please provide assignedMechanicId');
+  }
+
+  // Validate mechanic belongs to this garage
+  const mechanic = await User.findById(assignedMechanicId);
+  if (!mechanic || mechanic.role !== 'Mechanic' || mechanic.garageId?.toString() !== myGarage._id.toString()) {
+    res.status(400);
+    throw new Error('Invalid mechanic or mechanic not in your garage');
+  }
+
+  booking.assignedMechanicId = mechanic._id;
+  booking.statusHistory.push({
+    status: booking.status,
+    changedBy: req.user._id,
+    changedAt: new Date(),
+    note: note || `Mechanic reassigned to ${mechanic.name}`,
+  });
+
+  await booking.save();
+  res.status(200).json(booking);
+});
+
+// @desc    Customer updates a pending booking (date / time / vehicle / notes)
+// @route   PUT /api/service/bookings/:id
+// @access  Private (User — customer only)
+const updatePendingBooking = asyncHandler(async (req, res) => {
+  const booking = await RepairBooking.findById(req.params.id);
+  if (!booking) {
+    res.status(404);
+    throw new Error('Booking not found');
+  }
+
+  // Only the owning customer can edit
+  if (booking.customerId.toString() !== req.user._id.toString()) {
+    res.status(403);
+    throw new Error('Not authorized');
+  }
+
+  assertBookingStatus(res, booking, ['pending_confirmation'], 'Booking can only be edited while pending confirmation');
+
+  const { preferredDate, preferredTime, vehicleInfo, customerNotes } = req.body;
+
+  if (preferredDate) booking.preferredDate = new Date(preferredDate);
+  if (preferredTime) booking.preferredTime = preferredTime;
+  if (customerNotes !== undefined) booking.customerNotes = customerNotes;
+
+  // Partial vehicleInfo update — only fields provided are overwritten
+  if (vehicleInfo && typeof vehicleInfo === 'object') {
+    Object.assign(booking.vehicleInfo, vehicleInfo);
   }
 
   await booking.save();
@@ -487,4 +617,6 @@ module.exports = {
   completeBooking,
   cancelBooking,
   updateJobNotes,
+  reassignMechanic,
+  updatePendingBooking,
 };

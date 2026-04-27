@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const Review = require('../models/Review');
 const RepairBooking = require('../models/RepairBooking');
-const User = require('../models/User');
+const ServiceProvider = require('../models/ServiceProvider');
 
 // @desc    Create a review for a completed booking
 // @route   POST /api/service/bookings/:id/review
@@ -63,11 +63,15 @@ const createReview = asyncHandler(async (req, res) => {
   ]);
 
   if (result.length > 0) {
-    await User.findByIdAndUpdate(booking.garageId, {
-      'serviceProviderProfile.rating': Math.round(result[0].avgRating * 10) / 10,
-      'serviceProviderProfile.totalReviews': result[0].count,
+    await ServiceProvider.findByIdAndUpdate(booking.garageId, {
+      rating: Math.round(result[0].avgRating * 10) / 10,
+      totalReviews: result[0].count,
     });
   }
+
+  // Stamp the review reference on the booking so clients can check booking.review
+  booking.review = review._id;
+  await booking.save();
 
   res.status(201).json(review);
 });

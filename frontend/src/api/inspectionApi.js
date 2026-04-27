@@ -7,7 +7,7 @@ export const INSPECTION_API_URL = 'http://192.168.1.9:5000/api/inspection';
 export const resolveInspectionImageUrl = (imagePath) => {
   if (!imagePath) return 'https://via.placeholder.com/400x200?text=No+Image';
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
-  return `http://10.0.2.2:5000${imagePath}`;
+  return `http://192.168.1.9:5000${imagePath}`;
 };
 
 // Helper to get auth header

@@ -6,7 +6,7 @@ import * as SecureStore from 'expo-secure-store';
 export const resolveImageUrl = (imagePath) => {
   if (!imagePath) return 'https://via.placeholder.com/400x200?text=No+Image';
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
-  return `http://10.0.2.2:5000${imagePath}`;
+  return `http://192.168.1.9:5000${imagePath}`;
 };
 
 // Strips default "Any ..." placeholder values before sending to API

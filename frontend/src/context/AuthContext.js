@@ -57,6 +57,24 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  /**
+   * loginWithToken — used by GarageRegister (and any other screen that gets back
+   * a full user payload + token directly from a registration endpoint) to commit
+   * the session without going through the normal /api/auth/login flow.
+   */
+  const loginWithToken = async (userData) => {
+    setIsLoading(true);
+    try {
+      setUserInfo(userData);
+      setUserToken(userData.token);
+      await SecureStore.setItemAsync('userInfo', JSON.stringify(userData));
+      await SecureStore.setItemAsync('userToken', userData.token);
+      return userData;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = async () => {
     setIsLoading(true);
     try {
@@ -70,7 +88,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ login, register, logout, isLoading, userToken, userInfo }}>
+    <AuthContext.Provider value={{ login, register, loginWithToken, logout, isLoading, userToken, userInfo }}>
       {children}
     </AuthContext.Provider>
   );

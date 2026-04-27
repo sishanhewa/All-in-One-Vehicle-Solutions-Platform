@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const serviceOfferingSchema = new mongoose.Schema({
   garageId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'ServiceProvider',
     required: true,
   },
   name: { type: String, required: [true, 'Service name is required'], trim: true },

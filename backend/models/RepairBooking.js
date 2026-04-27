@@ -8,7 +8,7 @@ const repairBookingSchema = new mongoose.Schema({
   },
   garageId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'ServiceProvider',
     required: true,
   },
   serviceOfferingIds: {
@@ -37,12 +37,12 @@ const repairBookingSchema = new mongoose.Schema({
     plateNumber: { type: String, required: true, uppercase: true, trim: true },
     vehicleType: {
       type: String,
-      enum: ['Car', 'SUV', 'Van', 'Motorcycle', 'Truck'],
+      enum: ['Car', 'SUV', 'Van', 'Motorcycle', 'Truck', 'Any'],
       default: 'Car',
     },
   },
   preferredDate: { type: Date, required: true },
-  preferredTime: { type: String, required: true }, // e.g., "10:00 AM"
+  preferredTime: { type: String, default: '' }, // e.g., "10:00 AM" — optional
   status: {
     type: String,
     enum: ['pending_confirmation', 'confirmed', 'in_progress', 'ready_for_pickup', 'completed', 'cancelled'],
@@ -58,9 +58,9 @@ const repairBookingSchema = new mongoose.Schema({
   mechanicNotes: { type: String, default: '' },
   ownerNotes: { type: String, default: '' },
   partsUsed: [{
-    name: { type: String, required: true },
-    quantity: { type: Number, required: true, min: 1 },
-    unitPrice: { type: Number, required: true, min: 0 },
+    name:     { type: String, required: true },
+    quantity:  { type: Number, required: true, min: 1 },
+    price:     { type: Number, required: true, min: 0 }, // what was charged per unit
   }],
   estimatedTotal: { type: Number, default: 0 },
   finalInvoiceAmount: { type: Number, default: 0 },
@@ -70,6 +70,18 @@ const repairBookingSchema = new mongoose.Schema({
     ref: 'User',
     default: null,
   },
+  // Set by reviewController after customer leaves a review — used to hide the "Leave Review" button
+  review: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Review',
+    default: null,
+  },
 }, { timestamps: true });
+
+// Indexes for performance - support the most common query patterns
+repairBookingSchema.index({ customerId: 1, status: 1, createdAt: -1 }); // For getMyBookings
+repairBookingSchema.index({ garageId: 1, status: 1, createdAt: -1 }); // For getBookingQueue
+repairBookingSchema.index({ assignedMechanicId: 1, status: 1, preferredDate: 1 }); // For getMyJobs
+repairBookingSchema.index({ customerId: 1, garageId: 1, preferredDate: 1, status: 1 }); // For duplicate booking guard
 
 module.exports = mongoose.model('RepairBooking', repairBookingSchema);

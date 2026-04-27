@@ -48,8 +48,25 @@ export default function WelcomeScreen() {
           <Text style={styles.cardTitle}>Inspections</Text>
           <Text style={styles.cardDesc}>Book professional vehicle inspections before you buy.</Text>
           <View style={styles.cardFooter}>
-             <Text style={[styles.cardAction, { color: '#e67e22' }]}>Find Services</Text>
+             <Text style={[styles.cardAction, { color: '#e67e22' }]}>Book Now</Text>
              <Feather name="arrow-right" size={16} color="#e67e22" />
+          </View>
+        </TouchableOpacity>
+
+        {/* Services & Repair Card */}
+        <TouchableOpacity 
+          style={[styles.card, { backgroundColor: '#fdf4ff' }]} 
+          activeOpacity={0.8}
+          onPress={() => router.push('/services')}
+        >
+          <View style={[styles.iconWrap, { backgroundColor: '#8e44ad' }]}>
+            <Ionicons name="construct" size={28} color="#fff" />
+          </View>
+          <Text style={styles.cardTitle}>Service & Repair</Text>
+          <Text style={styles.cardDesc}>Find trusted garages and book repairs across the country.</Text>
+          <View style={styles.cardFooter}>
+             <Text style={[styles.cardAction, { color: '#8e44ad' }]}>Find Services</Text>
+             <Feather name="arrow-right" size={16} color="#8e44ad" />
           </View>
         </TouchableOpacity>
 
