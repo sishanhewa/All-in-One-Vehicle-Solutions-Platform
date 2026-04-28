@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Linking, Platform, Alert, Dimensions } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Linking, Platform, Alert, Dimensions, Share } from 'react-native';
 
 const { width: screenWidth } = Dimensions.get('window');
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -54,6 +54,16 @@ const ListingDetails = () => {
       const phone = listing.sellerId.phone.replace(/[^0-9]/g, '');
       const msg = `Hi, I'm interested in your ${listing.year} ${listing.make} ${listing.model} listed on VMS.`;
       Linking.openURL(`whatsapp://send?text=${encodeURIComponent(msg)}&phone=${phone}`);
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: `Check out this ${listing.year} ${listing.make} ${listing.model} for ${formatPrice(listing.price)} on VMS!`,
+      });
+    } catch (error) {
+      console.log('Error sharing', error);
     }
   };
 
@@ -207,6 +217,10 @@ const ListingDetails = () => {
           <Ionicons name="logo-whatsapp" size={20} color="#fff" />
           <Text style={styles.contactBtnText}>WhatsApp</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={[styles.contactBtn, { backgroundColor: '#34495e' }]} activeOpacity={0.8} onPress={handleShare}>
+          <Ionicons name="share-social-outline" size={20} color="#fff" />
+          <Text style={styles.contactBtnText}>Share</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -256,9 +270,9 @@ const styles = StyleSheet.create({
   similarTitle: { fontSize: 13, fontWeight: '700', color: '#1a1a2e', marginBottom: 4 },
   similarPrice: { fontSize: 13, color: '#10ac84', fontWeight: '800' },
 
-  bottomActions: { padding: 20, flexDirection: 'row', gap: 12 },
-  contactBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#10ac84', paddingVertical: 16, borderRadius: 14, ...Platform.select({ ios: { shadowColor: '#10ac84', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 }, android: { elevation: 4 } }) },
-  contactBtnText: { fontSize: 16, fontWeight: '700', color: '#fff' },
+  bottomActions: { padding: 20, flexDirection: 'row', gap: 8 },
+  contactBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#10ac84', paddingVertical: 14, borderRadius: 12, ...Platform.select({ ios: { shadowColor: '#10ac84', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 }, android: { elevation: 4 } }) },
+  contactBtnText: { fontSize: 13, fontWeight: '700', color: '#fff' },
 });
 
 export default ListingDetails;
