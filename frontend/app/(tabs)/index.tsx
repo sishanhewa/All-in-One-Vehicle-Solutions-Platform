@@ -103,6 +103,23 @@ export default function WelcomeScreen() {
              <Feather name="arrow-right" size={16} color="#e67e22" />
           </View>
         </TouchableOpacity>
+
+        {/* Support Card */}
+        <TouchableOpacity 
+          style={[styles.card, { backgroundColor: '#fde8e8' }]} 
+          activeOpacity={0.8}
+          onPress={() => router.push('/support')}
+        >
+          <View style={[styles.iconWrap, { backgroundColor: '#e74c3c' }]}>
+            <Ionicons name="chatbubble-ellipses" size={28} color="#fff" />
+          </View>
+          <Text style={styles.cardTitle}>Support</Text>
+          <Text style={styles.cardDesc}>Submit complaints, report issues, and get help.</Text>
+          <View style={styles.cardFooter}>
+             <Text style={[styles.cardAction, { color: '#e74c3c' }]}>Get Help</Text>
+             <Feather name="arrow-right" size={16} color="#e74c3c" />
+          </View>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.versionInfo}>
