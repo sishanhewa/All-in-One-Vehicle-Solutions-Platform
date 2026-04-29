@@ -128,7 +128,7 @@ const OwnerDashboard = () => {
         ready_for_pickup:     serverCounts.ready_for_pickup     ?? list.filter((b) => b.status === 'ready_for_pickup').length,
       });
     } catch (e) {
-      Alert.alert('Error', 'Could not load dashboard data.');
+      Alert.alert('Error', e?.message || 'Could not load dashboard data.');
     } finally {
       setLoading(false);
     }

@@ -3,6 +3,27 @@ const ServiceProvider = require('../models/ServiceProvider');
 const User = require('../models/User');
 const RepairBooking = require('../models/RepairBooking');
 
+// Helper: normalize phone number to international format (+94 for Sri Lanka)
+const normalizePhone = (phone) => {
+  if (!phone || typeof phone !== 'string') return phone;
+  // Remove all non-numeric characters
+  let digits = phone.replace(/\D/g, '');
+  // Convert local Sri Lankan format (0771234567) to international (+94771234567)
+  if (digits.length === 10 && digits.startsWith('0')) {
+    digits = '94' + digits.substring(1);
+  }
+  // If already has country code without +, add it
+  if (digits.length === 11 && digits.startsWith('94')) {
+    return '+' + digits;
+  }
+  // If already has +, just return cleaned version
+  if (phone.trim().startsWith('+')) {
+    return '+' + digits;
+  }
+  // Return as-is if doesn't match known patterns
+  return phone.trim();
+};
+
 // Helper: get the garage owned by the current user or throw 404
 const getMyGarage = async (res, user) => {
   const garage = await ServiceProvider.findOne({ ownerId: user._id });
@@ -55,10 +76,10 @@ const addMechanic = asyncHandler(async (req, res) => {
   }
 
   const mechanic = await User.create({
-    name,
-    email,
+    name: name.trim(),
+    email: email.trim().toLowerCase(),
     password,
-    phone,
+    phone: normalizePhone(phone),
     role: 'Mechanic',
     garageId: myGarage._id,
     isActive: true,
@@ -89,7 +110,7 @@ const updateMechanic = asyncHandler(async (req, res) => {
 
   const { name, phone, newPassword } = req.body;
   if (name)  mechanic.name  = name.trim();
-  if (phone) mechanic.phone = phone.trim();
+  if (phone) mechanic.phone = normalizePhone(phone);
 
   // Owner-initiated password reset (no current password needed — owner authority)
   if (newPassword) {
@@ -196,7 +217,7 @@ const updateMyMechanicProfile = asyncHandler(async (req, res) => {
   const mechanic = await User.findById(req.user._id);
 
   if (name)  mechanic.name  = name.trim();
-  if (phone) mechanic.phone = phone.trim();
+  if (phone) mechanic.phone = normalizePhone(phone);
 
   // Option 1: Simple direct password set (MechanicProfile screen uses this)
   if (password && !newPassword) {

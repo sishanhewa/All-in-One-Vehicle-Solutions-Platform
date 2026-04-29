@@ -76,6 +76,11 @@ const ServiceHome = () => {
     }, [loadGarages])
   );
 
+  // Reload when category changes (useFocusEffect doesn't run on state changes)
+  useEffect(() => {
+    loadGarages(false);
+  }, [selectedCategory]);
+
   const handleSearch = () => {
     loadGarages(false);
   };

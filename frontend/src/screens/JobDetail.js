@@ -42,9 +42,9 @@ const fmt = (d, opts) => {
   } catch { return d; }
 };
 
-const safeJoin = (arr) => {
+const safeJoin = (arr, key = 'name') => {
   if (!Array.isArray(arr) || !arr.length) return '—';
-  return arr.map((s) => (typeof s === 'object' ? s.name || '' : s)).filter(Boolean).join(', ');
+  return arr.map((s) => (typeof s === 'object' ? s[key] || '' : s)).filter(Boolean).join(', ');
 };
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
@@ -155,8 +155,8 @@ const JobDetail = () => {
     try {
       const data = await fetchRepairBookingById(bookingId);
       setBooking(data);
-    } catch {
-      Alert.alert('Error', 'Could not load job details.');
+    } catch (e) {
+      Alert.alert('Error', e?.message || 'Could not load job details.');
     } finally {
       setLoading(false);
     }

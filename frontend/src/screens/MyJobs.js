@@ -76,9 +76,11 @@ const MyJobs = () => {
       // No param (initial) → backend defaults to active statuses only (confirmed/in_progress/ready).
       const filterValue = activeTab === 'All' ? 'All' : activeTab;
       const data = await fetchMyJobs(filterValue);
-      setJobs(Array.isArray(data) ? data : (data.jobs ?? []));
-    } catch {
-      Alert.alert('Error', 'Could not load your jobs.');
+      // Handle both old format (array) and new paginated format
+      const list = Array.isArray(data) ? data : (data.bookings || data.jobs || []);
+      setJobs(list);
+    } catch (e) {
+      Alert.alert('Error', e?.message || 'Could not load your jobs.');
     } finally {
       setLoading(false);
     }

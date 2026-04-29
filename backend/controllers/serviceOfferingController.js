@@ -55,6 +55,18 @@ const createOffering = asyncHandler(async (req, res) => {
     throw new Error('estimatedPrice and estimatedDuration must be positive numbers');
   }
 
+  // Validate reasonable price range (max 1 million rupees)
+  if (parsedEstimatedPrice > 1000000) {
+    res.status(400);
+    throw new Error('estimatedPrice cannot exceed Rs. 1,000,000');
+  }
+
+  // Validate reasonable duration (max 7 days = 10080 minutes)
+  if (parsedEstimatedDuration > 10080) {
+    res.status(400);
+    throw new Error('estimatedDuration cannot exceed 7 days (10080 minutes)');
+  }
+
   const offering = await ServiceOffering.create({
     garageId: myGarage._id,
     name,
@@ -141,6 +153,10 @@ const updateOffering = asyncHandler(async (req, res) => {
       res.status(400);
       throw new Error('estimatedPrice must be a positive number');
     }
+    if (parsedEstimatedPrice > 1000000) {
+      res.status(400);
+      throw new Error('estimatedPrice cannot exceed Rs. 1,000,000');
+    }
     safeUpdates.estimatedPrice = parsedEstimatedPrice;
   }
   if (updateData.estimatedDuration !== undefined) {
@@ -148,6 +164,10 @@ const updateOffering = asyncHandler(async (req, res) => {
     if (parsedEstimatedDuration === null) {
       res.status(400);
       throw new Error('estimatedDuration must be a positive number');
+    }
+    if (parsedEstimatedDuration > 10080) {
+      res.status(400);
+      throw new Error('estimatedDuration cannot exceed 7 days (10080 minutes)');
     }
     safeUpdates.estimatedDuration = parsedEstimatedDuration;
   }

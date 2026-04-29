@@ -57,6 +57,19 @@ const safeJoin = (arr, key) => {
   return arr.map((s) => (typeof s === 'object' ? s[key] || '' : s)).filter(Boolean).join(', ');
 };
 
+const formatDuration = (minutes) => {
+  if (!minutes || minutes <= 0) return null;
+  if (minutes < 60) return `${minutes} min`;
+  const hrs = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return mins > 0 ? `${hrs}h ${mins}m` : `${hrs}h`;
+};
+
+const getTotalDuration = (serviceOfferings) => {
+  if (!Array.isArray(serviceOfferings)) return 0;
+  return serviceOfferings.reduce((sum, s) => sum + (s.estimatedDuration || 0), 0);
+};
+
 // ─── Main Screen ───────────────────────────────────────────────────────────────
 
 const MyRepairs = () => {
@@ -83,7 +96,8 @@ const MyRepairs = () => {
     try {
       const filterValue = activeTab === 'All' ? '' : activeTab;
       const data = await fetchMyRepairBookings(filterValue);
-      const list = Array.isArray(data) ? data : [];
+      // Handle both old format (array) and new paginated format
+      const list = Array.isArray(data) ? data : (data.bookings || []);
       setBookings(list);
 
       // Stats only computed from the full unfiltered list
@@ -96,7 +110,7 @@ const MyRepairs = () => {
         });
       }
     } catch (error) {
-      Alert.alert('Error', 'Could not fetch your repair bookings.');
+      Alert.alert('Error', error?.message || 'Could not fetch your repair bookings.');
     } finally {
       setLoading(false);
     }
@@ -145,6 +159,12 @@ const MyRepairs = () => {
           <View style={styles.detailRow}>
             <Feather name="tool" size={13} color="#636e72" />
             <Text style={styles.detailText} numberOfLines={2}>{services}</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Ionicons name="time-outline" size={13} color="#636e72" />
+            <Text style={styles.detailText}>
+              Est. {formatDuration(getTotalDuration(item.serviceOfferingIds))}
+            </Text>
           </View>
           <View style={styles.detailRow}>
             <Ionicons name="calendar-outline" size={13} color="#636e72" />

@@ -24,7 +24,7 @@ const serviceProviderSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Indexes for performance
-serviceProviderSchema.index({ ownerId: 1 }, { unique: true }); // Ensure one garage per owner
+// Note: ownerId unique index is auto-created by unique: true in schema above
 serviceProviderSchema.index({ city: 1, isVerified: 1, isActive: 1 }); // For city filtering queries
 serviceProviderSchema.index({ isVerified: 1, isActive: 1, rating: -1 }); // For browse/listing queries
 serviceProviderSchema.index({ garageName: 'text', description: 'text' }); // For search functionality

@@ -64,8 +64,8 @@ const ManageOfferings = () => {
     try {
       const data = await fetchMyOfferings();
       setOfferings(Array.isArray(data) ? data : (data.offerings ?? []));
-    } catch {
-      Alert.alert('Error', 'Could not load your service offerings.');
+    } catch (e) {
+      Alert.alert('Error', e?.message || 'Could not load your service offerings.');
     } finally {
       setLoading(false);
     }
@@ -140,6 +140,7 @@ const ManageOfferings = () => {
       resetForm();
       load();
     } catch (e) {
+      console.error('Error submitting offering:', e);
       Alert.alert('Failed', e.message || 'Something went wrong.');
     } finally {
       setSubmitting(false);
@@ -157,7 +158,8 @@ const ManageOfferings = () => {
             await deleteOffering(id);
             setOfferings((prev) => prev.filter((o) => o._id !== id));
           } catch (e) {
-            Alert.alert('Failed', e.message || 'Could not delete offering.');
+            console.error('Error deleting offering:', e);
+            Alert.alert('Error', e.message || 'Could not delete offering.');
           }
         },
       },

@@ -107,8 +107,8 @@ const RecordWork = () => {
             unitPrice: String(p.price     ?? p.unitPrice ?? ''),
           }))
         );
-      } catch {
-        Alert.alert('Error', 'Could not load job data.');
+      } catch (e) {
+        Alert.alert('Error', e?.message || 'Could not load job data.');
       } finally {
         setLoading(false);
       }

@@ -148,39 +148,63 @@ const createBooking = asyncHandler(async (req, res) => {
 // @route   GET /api/service/bookings/my-bookings
 // @access  Private
 const getMyBookings = asyncHandler(async (req, res) => {
-  const { status } = req.query;
+  const { status, page = 1, limit = 20 } = req.query;
 
   let query = { customerId: req.user._id };
   if (status) query.status = status;
 
+  const pageNum = Math.max(1, parseInt(page, 10) || 1);
+  const limitNum = Math.min(50, Math.max(1, parseInt(limit, 10) || 20));
+
   const bookings = await RepairBooking.find(query)
     .populate('garageId', 'garageName city logo ownerId')
-    .populate('serviceOfferingIds', 'name category')
+    .populate('serviceOfferingIds', 'name category estimatedPrice estimatedDuration')
     .populate('assignedMechanicId', 'name')
-    .sort({ createdAt: -1 });
+    .populate('cancelledBy', 'name role')
+    .sort({ createdAt: -1 })
+    .skip((pageNum - 1) * limitNum)
+    .limit(limitNum);
 
-  // Attach review presence without N+1 — single query on Review collection
+  const total = await RepairBooking.countDocuments(query);
+
+  // Attach review data without N+1 — single query on Review collection
   const Review = require('../models/Review');
   const bookingIds = bookings.map((b) => b._id);
-  const reviews = await Review.find({ bookingId: { $in: bookingIds } }, 'bookingId').lean();
-  const reviewedSet = new Set(reviews.map((r) => r.bookingId.toString()));
+  const reviews = await Review.find({ bookingId: { $in: bookingIds } }).lean();
+  const reviewMap = new Map(reviews.map((r) => [r.bookingId.toString(), r]));
 
-  const result = bookings.map((b) => ({
-    ...b.toObject(),
-    hasReview: reviewedSet.has(b._id.toString()),
-  }));
+  const result = bookings.map((b) => {
+    const bookingObj = b.toObject();
+    const review = reviewMap.get(b._id.toString());
+    return {
+      ...bookingObj,
+      hasReview: !!review,
+      review: review || null,
+    };
+  });
 
-  res.status(200).json(result);
+  res.status(200).json({
+    bookings: result,
+    pagination: {
+      page: pageNum,
+      limit: limitNum,
+      total,
+      pages: Math.ceil(total / limitNum),
+    },
+  });
 });
 
 // @desc    Get garage owner's booking queue
 // @route   GET /api/service/bookings/queue
 // @access  Private (GarageOwner)
 const getBookingQueue = asyncHandler(async (req, res) => {
-  const { status, mechanicId, dateFrom, dateTo } = req.query;
+  const { status, mechanicId, dateFrom, dateTo, page = 1, limit = 20 } = req.query;
 
   const myGarage = await getMyGarageForOwner(res, req.user);
   let query = { garageId: myGarage._id };
+
+  const pageNum = Math.max(1, parseInt(page, 10) || 1);
+  const limitNum = Math.min(50, Math.max(1, parseInt(limit, 10) || 20));
 
   if (status) {
     query.status = status;
@@ -200,12 +224,24 @@ const getBookingQueue = asyncHandler(async (req, res) => {
     .populate('customerId', 'name email phone')
     .populate('serviceOfferingIds', 'name estimatedPrice')
     .populate('assignedMechanicId', 'name phone')
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .skip((pageNum - 1) * limitNum)
+    .limit(limitNum);
 
+  const total = await RepairBooking.countDocuments(query);
 
-  // Count bookings per status
+  // Build base counts query (same filters as bookings, excluding status filter)
+  const countsQuery = { garageId: myGarage._id };
+  if (mechanicId) countsQuery.assignedMechanicId = mechanicId;
+  if (dateFrom || dateTo) {
+    countsQuery.preferredDate = {};
+    if (dateFrom) countsQuery.preferredDate.$gte = new Date(dateFrom);
+    if (dateTo) countsQuery.preferredDate.$lte = new Date(dateTo);
+  }
+
+  // Count bookings per status (respecting the same filters)
   const counts = await RepairBooking.aggregate([
-    { $match: { garageId: myGarage._id } },
+    { $match: countsQuery },
     { $group: { _id: '$status', count: { $sum: 1 } } },
   ]);
 
@@ -222,14 +258,23 @@ const getBookingQueue = asyncHandler(async (req, res) => {
     countsMap[item._id] = item.count;
   });
 
-  res.status(200).json({ bookings, counts: countsMap });
+  res.status(200).json({
+    bookings,
+    counts: countsMap,
+    pagination: {
+      page: pageNum,
+      limit: limitNum,
+      total,
+      pages: Math.ceil(total / limitNum),
+    },
+  });
 });
 
 // @desc    Get mechanic's assigned jobs
 // @route   GET /api/service/bookings/my-jobs
 // @access  Private (Mechanic)
 const getMyJobs = asyncHandler(async (req, res) => {
-  const { status } = req.query;
+  const { status, page = 1, limit = 20 } = req.query;
 
   // Active statuses: what a mechanic cares about day-to-day
   const ACTIVE_STATUSES = ['confirmed', 'in_progress', 'ready_for_pickup'];
@@ -245,13 +290,28 @@ const getMyJobs = asyncHandler(async (req, res) => {
   }
   // status === 'All' → no status filter, show everything
 
+  const pageNum = Math.max(1, parseInt(page, 10) || 1);
+  const limitNum = Math.min(50, Math.max(1, parseInt(limit, 10) || 20));
+
   const bookings = await RepairBooking.find(query)
     .populate('customerId', 'name phone')
     .populate('garageId', 'garageName city logo ownerId')
     .populate('serviceOfferingIds', 'name category estimatedDuration')
-    .sort({ preferredDate: 1 });
+    .sort({ preferredDate: 1 })
+    .skip((pageNum - 1) * limitNum)
+    .limit(limitNum);
 
-  res.status(200).json(bookings);
+  const total = await RepairBooking.countDocuments(query);
+
+  res.status(200).json({
+    bookings,
+    pagination: {
+      page: pageNum,
+      limit: limitNum,
+      total,
+      pages: Math.ceil(total / limitNum),
+    },
+  });
 });
 
 // @desc    Get single booking by ID (scoped by role)
@@ -432,6 +492,17 @@ const completeBooking = asyncHandler(async (req, res) => {
     throw new Error('finalInvoiceAmount must be a non-negative number');
   }
 
+  // Calculate total parts cost
+  const partsCost = Array.isArray(booking.partsUsed)
+    ? booking.partsUsed.reduce((sum, part) => sum + ((part.price || 0) * (part.quantity || 0)), 0)
+    : 0;
+
+  // Warn if invoice is less than parts cost (data integrity issue)
+  if (parsedFinalInvoiceAmount < partsCost) {
+    res.status(400);
+    throw new Error(`Final invoice amount (Rs. ${parsedFinalInvoiceAmount}) cannot be less than parts cost (Rs. ${partsCost}). Please verify parts used or adjust the invoice amount.`);
+  }
+
   booking.finalInvoiceAmount = parsedFinalInvoiceAmount;
   addStatusHistory(booking, 'completed', req.user._id, 'Job completed');
   await booking.save();
@@ -571,7 +642,7 @@ const reassignMechanic = asyncHandler(async (req, res) => {
   res.status(200).json(booking);
 });
 
-// @desc    Customer updates a pending booking (date / time / vehicle / notes)
+// @desc    Customer updates a pending booking (date / time / vehicle / notes / services)
 // @route   PUT /api/service/bookings/:id
 // @access  Private (User — customer only)
 const updatePendingBooking = asyncHandler(async (req, res) => {
@@ -589,9 +660,34 @@ const updatePendingBooking = asyncHandler(async (req, res) => {
 
   assertBookingStatus(res, booking, ['pending_confirmation'], 'Booking can only be edited while pending confirmation');
 
-  const { preferredDate, preferredTime, vehicleInfo, customerNotes } = req.body;
+  const { preferredDate, preferredTime, vehicleInfo, customerNotes, serviceOfferingIds } = req.body;
 
-  if (preferredDate) booking.preferredDate = new Date(preferredDate);
+  // Validate and update preferredDate (must be today or future)
+  if (preferredDate) {
+    const newDate = new Date(preferredDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (newDate < today) {
+      res.status(400);
+      throw new Error('Preferred date cannot be in the past');
+    }
+
+    // Duplicate booking guard: block if another active booking exists for same customer + garage + date
+    const existingBooking = await RepairBooking.findOne({
+      _id: { $ne: booking._id }, // Exclude current booking
+      customerId: req.user._id,
+      garageId: booking.garageId,
+      preferredDate: newDate,
+      status: { $nin: ['cancelled', 'completed'] },
+    });
+    if (existingBooking) {
+      res.status(409);
+      throw new Error('You already have another active booking at this garage for the same date. Please choose a different date.');
+    }
+
+    booking.preferredDate = newDate;
+  }
+
   if (preferredTime) booking.preferredTime = preferredTime;
   if (customerNotes !== undefined) booking.customerNotes = customerNotes;
 
@@ -600,7 +696,36 @@ const updatePendingBooking = asyncHandler(async (req, res) => {
     Object.assign(booking.vehicleInfo, vehicleInfo);
   }
 
+  // Update service offerings and recalculate estimated total
+  if (serviceOfferingIds && Array.isArray(serviceOfferingIds) && serviceOfferingIds.length > 0) {
+    const offeringResults = await Promise.all(
+      serviceOfferingIds.map((offeringId) =>
+        ServiceOffering.findOne({ _id: offeringId, garageId: booking.garageId, isActive: true })
+      )
+    );
+
+    let estimatedTotal = 0;
+    for (let i = 0; i < offeringResults.length; i++) {
+      if (!offeringResults[i]) {
+        res.status(404);
+        throw new Error(`Service offering ${serviceOfferingIds[i]} not found or unavailable at this garage`);
+      }
+      estimatedTotal += offeringResults[i].estimatedPrice;
+    }
+
+    booking.serviceOfferingIds = serviceOfferingIds;
+    booking.estimatedTotal = estimatedTotal;
+  }
+
   await booking.save();
+
+  // Populate references before returning
+  await booking.populate([
+    { path: 'garageId', select: 'garageName city address phone' },
+    { path: 'serviceOfferingIds', select: 'name category estimatedPrice estimatedDuration' },
+    { path: 'assignedMechanicId', select: 'name phone' },
+  ]);
+
   res.status(200).json(booking);
 });
 

@@ -49,9 +49,9 @@ const fmtDate = (d) => {
   } catch { return d; }
 };
 
-const safeJoin = (arr) => {
+const safeJoin = (arr, key = 'name') => {
   if (!Array.isArray(arr) || !arr.length) return 'Service';
-  return arr.map((s) => (typeof s === 'object' ? s.name || '' : s)).filter(Boolean).join(', ');
+  return arr.map((s) => (typeof s === 'object' ? s[key] || '' : s)).filter(Boolean).join(', ');
 };
 
 // ─── Mechanic Picker Modal ─────────────────────────────────────────────────────
@@ -94,9 +94,6 @@ const MechanicPickerModal = ({ visible, mechanics, loadingMechanics, onSelect, o
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.mechanicName}>{item.name}</Text>
-                  {item.specialization
-                    ? <Text style={styles.mechanicSpec}>{item.specialization}</Text>
-                    : null}
                 </View>
                 <TouchableOpacity
                   style={styles.selectBtn}
@@ -119,6 +116,57 @@ const MechanicPickerModal = ({ visible, mechanics, loadingMechanics, onSelect, o
     </View>
   </Modal>
 );
+
+// ─── Decline Reason Modal ──────────────────────────────────────────────────────
+
+const DeclineReasonModal = ({ visible, onConfirm, onClose }) => {
+  const [reason, setReason] = useState('');
+
+  const handleConfirm = () => {
+    onConfirm(reason.trim());
+    setReason('');
+  };
+
+  const handleClose = () => {
+    setReason('');
+    onClose();
+  };
+
+  return (
+    <Modal visible={visible} animationType="fade" transparent onRequestClose={handleClose}>
+      <View style={styles.modalOverlay}>
+        <View style={styles.declineModal}>
+          <View style={styles.declineIconWrap}>
+            <Feather name="x-circle" size={26} color="#e74c3c" />
+          </View>
+          <Text style={styles.declineTitle}>Decline Booking</Text>
+          <Text style={styles.declineSubtitle}>Please provide a reason for declining (optional)</Text>
+
+          <TextInput
+            style={styles.declineInput}
+            placeholder="e.g., Fully booked, service not available..."
+            placeholderTextColor="#b2bec3"
+            value={reason}
+            onChangeText={setReason}
+            multiline
+            numberOfLines={3}
+            autoFocus
+          />
+
+          <View style={styles.declineActions}>
+            <TouchableOpacity style={styles.declineCancelBtn} onPress={handleClose} activeOpacity={0.7}>
+              <Text style={styles.declineCancelText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.declineConfirmBtn} onPress={handleConfirm} activeOpacity={0.85}>
+              <Feather name="x" size={16} color="#fff" />
+              <Text style={styles.declineConfirmText}>Decline</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+};
 
 // ─── Invoice Prompt ────────────────────────────────────────────────────────────
 
@@ -199,6 +247,10 @@ const BookingQueue = () => {
   // Reassign mode flag — when true the mechanic picker calls reassign, not confirm
   const [isReassignMode,   setIsReassignMode]   = useState(false);
 
+  // Decline reason modal
+  const [declineModal,     setDeclineModal]     = useState(false);
+  const [declineBookingId, setDeclineBookingId] = useState(null);
+
   useFocusEffect(
     useCallback(() => {
       if (userInfo) loadQueue();
@@ -212,8 +264,8 @@ const BookingQueue = () => {
       const data = await fetchBookingQueue(filterValue);
       const list = Array.isArray(data) ? data : (data.bookings ?? []);
       setQueue(list);
-    } catch {
-      Alert.alert('Error', 'Could not load booking queue.');
+    } catch (e) {
+      Alert.alert('Error', e?.message || 'Could not load booking queue.');
     } finally {
       setLoading(false);
     }
@@ -299,24 +351,25 @@ const BookingQueue = () => {
   };
 
   const promptDeclineReason = (bookingId) => {
-    Alert.prompt(
-      'Reason for Declining',
-      'Enter a brief reason (optional):',
-      async (reason) => {
-        setActionLoading(bookingId);
-        try {
-          await declineRepairBooking(bookingId, reason || 'Declined by garage');
-          Alert.alert('Booking Declined', 'The customer has been notified.');
-          loadQueue();
-        } catch (e) {
-          Alert.alert('Failed', e.message || 'Could not decline booking.');
-        } finally {
-          setActionLoading(null);
-        }
-      },
-      'plain-text',
-      '',
-    );
+    setDeclineBookingId(bookingId);
+    setDeclineModal(true);
+  };
+
+  const handleDeclineConfirm = async (reason) => {
+    setDeclineModal(false);
+    const id = declineBookingId;
+    setDeclineBookingId(null);
+
+    setActionLoading(id);
+    try {
+      await declineRepairBooking(id, reason || 'Declined by garage');
+      Alert.alert('Booking Declined', 'The customer has been notified.');
+      loadQueue();
+    } catch (e) {
+      Alert.alert('Failed', e.message || 'Could not decline booking.');
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   // ── Complete job ──
@@ -536,6 +589,12 @@ const BookingQueue = () => {
         onConfirm={handleInvoiceConfirm}
         onClose={() => { setInvoiceModal(false); setInvoiceBookingId(null); }}
       />
+
+      <DeclineReasonModal
+        visible={declineModal}
+        onConfirm={handleDeclineConfirm}
+        onClose={() => { setDeclineModal(false); setDeclineBookingId(null); }}
+      />
     </View>
   );
 };
@@ -624,7 +683,6 @@ const styles = StyleSheet.create({
   mechanicRow:   { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14 },
   mechanicAvatar:{ width: 42, height: 42, borderRadius: 12, backgroundColor: '#f4ecf7', justifyContent: 'center', alignItems: 'center' },
   mechanicName:  { fontSize: 15, fontWeight: '700', color: '#1a1a2e' },
-  mechanicSpec:  { fontSize: 12, color: '#636e72', marginTop: 2 },
   selectBtn:     { paddingVertical: 8, paddingHorizontal: 18, backgroundColor: ACCENT, borderRadius: 10 },
   selectBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
   separator:     { height: 1, backgroundColor: '#f1f3f5', marginLeft: 56 },
@@ -652,6 +710,25 @@ const styles = StyleSheet.create({
   invoiceCancelText: { fontSize: 15, color: '#636e72', fontWeight: '600' },
   invoiceConfirmBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 12, backgroundColor: ACCENT },
   invoiceConfirmText:{ fontSize: 15, color: '#fff', fontWeight: '700' },
+
+  // ── Decline modal ──
+  declineModal: {
+    backgroundColor: '#fff', borderRadius: 24, margin: 24, padding: 28,
+    alignItems: 'center', gap: 10,
+    ...Platform.select({
+      ios:     { shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.15, shadowRadius: 20 },
+      android: { elevation: 10 },
+    }),
+  },
+  declineIconWrap: { width: 60, height: 60, borderRadius: 18, backgroundColor: '#fff0f0', justifyContent: 'center', alignItems: 'center', marginBottom: 4 },
+  declineTitle:    { fontSize: 20, fontWeight: '800', color: '#1a1a2e' },
+  declineSubtitle: { fontSize: 13, color: '#b2bec3', textAlign: 'center', marginBottom: 8 },
+  declineInput:    { borderWidth: 1, borderColor: '#e9ecef', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12, width: '100%', fontSize: 15, color: '#1a1a2e', minHeight: 80, textAlignVertical: 'top' },
+  declineActions:  { flexDirection: 'row', gap: 12, width: '100%', marginTop: 8 },
+  declineCancelBtn:  { flex: 1, paddingVertical: 14, borderRadius: 12, borderWidth: 1, borderColor: '#e9ecef', alignItems: 'center' },
+  declineCancelText: { fontSize: 15, color: '#636e72', fontWeight: '600' },
+  declineConfirmBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 12, backgroundColor: '#e74c3c' },
+  declineConfirmText:{ fontSize: 15, color: '#fff', fontWeight: '700' },
 });
 
 export default BookingQueue;

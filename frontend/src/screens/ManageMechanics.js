@@ -34,6 +34,9 @@ const AddMechanicModal = ({ visible, onClose, onAdded }) => {
     if (!form.email.trim())                    e.email    = 'Email is required.';
     else if (!/\S+@\S+\.\S+/.test(form.email)) e.email   = 'Enter a valid email.';
     if (!form.phone.trim())                    e.phone    = 'Phone number is required.';
+    else if (!/^\+?[0-9\s-]{10,15}$/.test(form.phone.replace(/\s/g, ''))) {
+      e.phone = 'Enter a valid phone number (e.g., +94 77 123 4567 or 077-123-4567).';
+    }
     if (!form.password)                        e.password = 'Password is required.';
     else if (form.password.length < 6)         e.password = 'Min. 6 characters.';
     setErrors(e);
@@ -131,6 +134,9 @@ const EditMechanicModal = ({ visible, mechanic, onClose, onUpdated }) => {
     const e = {};
     if (!form.name.trim())  e.name  = 'Name is required.';
     if (!form.phone.trim()) e.phone = 'Phone is required.';
+    else if (!/^\+?[0-9\s-]{10,15}$/.test(form.phone.replace(/\s/g, ''))) {
+      e.phone = 'Enter a valid phone number (e.g., +94 77 123 4567 or 077-123-4567).';
+    }
     if (form.newPassword && form.newPassword.length < 6) e.newPassword = 'Min. 6 characters.';
     setErrors(e);
     return Object.keys(e).length === 0;

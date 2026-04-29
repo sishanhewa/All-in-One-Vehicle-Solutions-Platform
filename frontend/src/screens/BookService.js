@@ -142,6 +142,26 @@ const BookService = () => {
       return;
     }
 
+    // Validate year is reasonable (1900 to next year)
+    const currentYear = new Date().getFullYear();
+    const yearNum = parseInt(year, 10);
+    if (isNaN(yearNum) || yearNum < 1900 || yearNum > currentYear + 1) {
+      Alert.alert('Invalid Year', `Please enter a valid year between 1900 and ${currentYear + 1}.`);
+      return;
+    }
+
+    // Validate vehicle type is compatible with the service offering
+    if (offering && offering.vehicleTypes && offering.vehicleTypes.length > 0) {
+      const compatibleTypes = offering.vehicleTypes;
+      if (!compatibleTypes.includes('Any') && !compatibleTypes.includes(vehicleType)) {
+        Alert.alert(
+          'Vehicle Type Not Supported',
+          `This service is only available for: ${compatibleTypes.join(', ')}. Please select a compatible vehicle type or choose a different service.`
+        );
+        return;
+      }
+    }
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const selectedDate = new Date(dateObj);
@@ -150,6 +170,20 @@ const BookService = () => {
     if (selectedDate < today) {
       Alert.alert('Invalid Date', 'Please select a future date for your appointment.');
       return;
+    }
+
+    // Validate time is in the future for same-day bookings
+    if (selectedDate.getTime() === today.getTime()) {
+      const now = new Date();
+      now.setSeconds(0, 0);
+      const selectedTime = new Date(timeObj);
+      selectedTime.setSeconds(0, 0);
+      // Compare hours and minutes (seconds stripped for accurate comparison)
+      if (selectedTime.getHours() < now.getHours() ||
+          (selectedTime.getHours() === now.getHours() && selectedTime.getMinutes() <= now.getMinutes())) {
+        Alert.alert('Invalid Time', 'Please select a future time for today\'s appointment.');
+        return;
+      }
     }
 
     setSubmitting(true);

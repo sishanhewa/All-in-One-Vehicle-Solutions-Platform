@@ -264,10 +264,14 @@ export const createRepairBooking = async (data) => {
   return result;
 };
 
-export const fetchMyRepairBookings = async (status = '') => {
+export const fetchMyRepairBookings = async (status = '', page = 1, limit = 20) => {
   const auth = await getAuthHeader();
-  const params = status && status !== 'All' ? `?status=${encodeURIComponent(status)}` : '';
-  const response = await fetch(`${SERVICE_API_URL}/bookings/my-bookings${params}`, {
+  const params = new URLSearchParams();
+  if (status && status !== 'All') params.append('status', status);
+  if (page > 1) params.append('page', page.toString());
+  if (limit !== 20) params.append('limit', limit.toString());
+  const queryString = params.toString();
+  const response = await fetch(`${SERVICE_API_URL}/bookings/my-bookings${queryString ? `?${queryString}` : ''}`, {
     method: 'GET',
     headers: { ...auth },
   });
@@ -275,13 +279,15 @@ export const fetchMyRepairBookings = async (status = '') => {
   return response.json();
 };
 
-export const fetchBookingQueue = async (filters = {}) => {
+export const fetchBookingQueue = async (filters = {}, page = 1, limit = 20) => {
   const auth = await getAuthHeader();
   const params = new URLSearchParams();
   if (filters.status && filters.status !== 'All') params.append('status', filters.status);
   if (filters.mechanicId) params.append('mechanicId', filters.mechanicId);
   if (filters.dateFrom) params.append('dateFrom', filters.dateFrom);
   if (filters.dateTo)   params.append('dateTo',   filters.dateTo);
+  if (page > 1) params.append('page', page.toString());
+  if (limit !== 20) params.append('limit', limit.toString());
 
   const queryString = params.toString();
   const response = await fetch(`${SERVICE_API_URL}/bookings/queue${queryString ? `?${queryString}` : ''}`, {
@@ -292,10 +298,14 @@ export const fetchBookingQueue = async (filters = {}) => {
   return response.json();
 };
 
-export const fetchMyJobs = async (status = '') => {
+export const fetchMyJobs = async (status = '', page = 1, limit = 20) => {
   const auth = await getAuthHeader();
-  const params = status && status !== 'All' ? `?status=${encodeURIComponent(status)}` : '';
-  const response = await fetch(`${SERVICE_API_URL}/bookings/my-jobs${params}`, {
+  const params = new URLSearchParams();
+  if (status && status !== 'All') params.append('status', status);
+  if (page > 1) params.append('page', page.toString());
+  if (limit !== 20) params.append('limit', limit.toString());
+  const queryString = params.toString();
+  const response = await fetch(`${SERVICE_API_URL}/bookings/my-jobs${queryString ? `?${queryString}` : ''}`, {
     method: 'GET',
     headers: { ...auth },
   });

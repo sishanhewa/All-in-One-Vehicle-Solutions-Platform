@@ -6,6 +6,49 @@ const ServiceOffering = require('../models/ServiceOffering');
 const Review = require('../models/Review');
 const jwt = require('jsonwebtoken');
 
+// Helper: normalize phone number to international format (+94 for Sri Lanka)
+const normalizePhone = (phone) => {
+  if (!phone || typeof phone !== 'string') return phone;
+  let digits = phone.replace(/\D/g, '');
+  if (digits.length === 10 && digits.startsWith('0')) {
+    digits = '94' + digits.substring(1);
+  }
+  if (digits.length === 11 && digits.startsWith('94')) {
+    return '+' + digits;
+  }
+  if (phone.trim().startsWith('+')) {
+    return '+' + digits;
+  }
+  return phone.trim();
+};
+
+// Helper: sanitize and validate string length
+const sanitizeString = (str, maxLength = 500, fieldName = 'Field') => {
+  if (!str || typeof str !== 'string') return str;
+  const trimmed = str.trim();
+  if (trimmed.length > maxLength) {
+    throw new Error(`${fieldName} exceeds maximum length of ${maxLength} characters`);
+  }
+  return trimmed;
+};
+
+// Helper: validate city against predefined list (Sri Lankan major cities)
+const VALID_CITIES = [
+  'Colombo', 'Kandy', 'Galle', 'Negombo', 'Jaffna', 'Anuradhapura', 'Trincomalee',
+  'Batticaloa', 'Matara', 'Kurunegala', 'Ratnapura', 'Badulla', 'Polonnaruwa',
+  'Hambantota', 'Kalutara', 'Gampaha', 'Matale', 'Nuwara Eliya', 'Ampara',
+  'Monaragala', 'Kegalle', 'Puttalam', 'Vavuniya', 'Mannar', 'Kilinochchi',
+  'Mullaitivu', 'Chilaw', 'Katunayake', 'Maharagama', 'Moratuwa', 'Panadura',
+  'Beruwala', 'Bentota', 'Weligama', 'Hikkaduwa', 'Tangalle', 'Kataragama',
+];
+
+const validateCity = (city) => {
+  if (!city || typeof city !== 'string') return false;
+  const trimmed = city.trim();
+  // Case-insensitive comparison
+  return VALID_CITIES.some(validCity => validCity.toLowerCase() === trimmed.toLowerCase());
+};
+
 // Helper to generate JWT Token
 const generateToken = (id) => {
   if (!process.env.JWT_SECRET) {
@@ -30,6 +73,12 @@ const registerGarage = asyncHandler(async (req, res) => {
     throw new Error('Please provide: name, email, password, phone, garageName, and city');
   }
 
+  // Validate city against predefined list
+  if (!validateCity(city)) {
+    res.status(400);
+    throw new Error(`Invalid city. Please select from: ${VALID_CITIES.slice(0, 10).join(', ')}...`);
+  }
+
   // Check if account already exists
   const userExists = await User.findOne({ email });
   if (userExists) {
@@ -46,12 +95,13 @@ const registerGarage = asyncHandler(async (req, res) => {
 
   try {
     await session.withTransaction(async () => {
+      const normalizedPhone = normalizePhone(phone);
       [user] = await User.create([
         {
-          name,
-          email,
+          name: sanitizeString(name, 100, 'Name'),
+          email: sanitizeString(email, 100, 'Email').toLowerCase(),
           password,
-          phone,
+          phone: normalizedPhone,
           role: 'GarageOwner',
         },
       ], { session });
@@ -59,14 +109,14 @@ const registerGarage = asyncHandler(async (req, res) => {
       [serviceProvider] = await ServiceProvider.create([
         {
           ownerId: user._id,
-          garageName,
-          description: description || '',
-          address: address || '',
-          city,
+          garageName: sanitizeString(garageName, 100, 'Garage name'),
+          description: description ? sanitizeString(description, 1000, 'Description') : '',
+          address: address ? sanitizeString(address, 200, 'Address') : '',
+          city: sanitizeString(city, 50, 'City'),
           logo,
-          operatingHours: operatingHours || 'Mon-Sat 8:00 AM - 6:00 PM',
-          website: website || '',
-          phone,
+          operatingHours: operatingHours ? sanitizeString(operatingHours, 50, 'Operating hours') : 'Mon-Sat 8:00 AM - 6:00 PM',
+          website: website ? sanitizeString(website, 200, 'Website') : '',
+          phone: normalizedPhone,
           rating: 0,
           totalReviews: 0,
           isVerified: false,
@@ -235,15 +285,21 @@ const updateOwnerGarage = asyncHandler(async (req, res) => {
   const body = req.body != null && typeof req.body === 'object' ? req.body : {};
   const { garageName, description, address, city, operatingHours, website, phone } = body;
 
+  // Validate city if provided
+  if (city && !validateCity(city)) {
+    res.status(400);
+    throw new Error(`Invalid city. Please select from: ${VALID_CITIES.slice(0, 10).join(', ')}...`);
+  }
+
   // Build update object with whitelisted fields only
   const updateFields = {};
-  if (garageName) updateFields.garageName = garageName;
-  if (description) updateFields.description = description;
-  if (address) updateFields.address = address;
-  if (city) updateFields.city = city;
-  if (operatingHours) updateFields.operatingHours = operatingHours;
-  if (website) updateFields.website = website;
-  if (phone) updateFields.phone = phone;
+  if (garageName) updateFields.garageName = sanitizeString(garageName, 100, 'Garage name');
+  if (description) updateFields.description = sanitizeString(description, 1000, 'Description');
+  if (address) updateFields.address = sanitizeString(address, 200, 'Address');
+  if (city) updateFields.city = sanitizeString(city, 50, 'City');
+  if (operatingHours) updateFields.operatingHours = sanitizeString(operatingHours, 50, 'Operating hours');
+  if (website) updateFields.website = sanitizeString(website, 200, 'Website');
+  if (phone) updateFields.phone = normalizePhone(phone);
 
   // Handle logo upload
   if (req.file) {

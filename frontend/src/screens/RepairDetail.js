@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  ActivityIndicator, Alert, Platform, TextInput,
+  ActivityIndicator, Alert, Platform,
 } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Feather, Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { fetchRepairBookingById, cancelRepairBooking, updateRepairBooking } from '../api/serviceApi';
 
 const ACCENT = '#8e44ad';
@@ -49,9 +50,9 @@ const fmtTime = (ts) => {
   } catch { return ''; }
 };
 
-const safeJoin = (arr) => {
+const safeJoin = (arr, key = 'name') => {
   if (!Array.isArray(arr) || !arr.length) return '—';
-  return arr.map((s) => (typeof s === 'object' ? s.name || '' : s)).filter(Boolean).join(', ');
+  return arr.map((s) => (typeof s === 'object' ? s[key] || '' : s)).filter(Boolean).join(', ');
 };
 
 const Card = ({ children, style }) => (
@@ -150,7 +151,8 @@ const RepairDetail = () => {
   const [loading,    setLoading]    = useState(true);
   const [cancelling, setCancelling] = useState(false);
   const [editing,    setEditing]    = useState(false);
-  const [editDate,   setEditDate]   = useState('');
+  const [editDate,   setEditDate]   = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [savingEdit, setSavingEdit] = useState(false);
 
   useEffect(() => { load(); }, [bookingId]);
@@ -232,28 +234,24 @@ const RepairDetail = () => {
   const hasReview   = !!booking.review || booking.hasReview === true;
 
   const handleEdit = () => {
-    setEditDate(booking.preferredDate ? booking.preferredDate.slice(0, 10) : '');
+    const initialDate = booking.preferredDate ? new Date(booking.preferredDate) : new Date();
+    initialDate.setHours(0, 0, 0, 0);
+    setEditDate(initialDate);
     setEditing(true);
   };
 
   const handleSaveEdit = async () => {
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!editDate.trim() || !dateRegex.test(editDate.trim())) {
-      Alert.alert('Invalid Date', 'Please enter a date in YYYY-MM-DD format (e.g. 2025-12-31).');
-      return;
-    }
-    const parsed = new Date(editDate.trim());
-    if (isNaN(parsed.getTime())) {
-      Alert.alert('Invalid Date', 'That date does not exist. Please check and try again.');
-      return;
-    }
-    if (parsed < new Date(new Date().toDateString())) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (editDate < today) {
       Alert.alert('Invalid Date', 'Preferred date cannot be in the past.');
       return;
     }
+    
     setSavingEdit(true);
     try {
-      const updated = await updateRepairBooking(bookingId, { preferredDate: parsed.toISOString() });
+      const updated = await updateRepairBooking(bookingId, { preferredDate: editDate.toISOString() });
       setBooking(updated);
       setEditing(false);
       Alert.alert('Updated ✅', 'Your preferred date has been updated.');
@@ -261,6 +259,13 @@ const RepairDetail = () => {
       Alert.alert('Failed', e.message || 'Could not update booking.');
     } finally {
       setSavingEdit(false);
+    }
+  };
+
+  const onDateChange = (event, selectedDate) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setEditDate(selectedDate);
     }
   };
 
@@ -437,15 +442,32 @@ const RepairDetail = () => {
           editing ? (
             <View style={styles.editCard}>
               <Text style={styles.editCardTitle}>Change Preferred Date</Text>
-              <TextInput
-                style={styles.editInput}
-                value={editDate}
-                onChangeText={setEditDate}
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor="#b2bec3"
-                keyboardType="numbers-and-punctuation"
-                autoFocus
-              />
+              
+              <TouchableOpacity 
+                style={styles.datePickerButton}
+                onPress={() => setShowDatePicker(true)}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="calendar-outline" size={20} color={ACCENT} />
+                <Text style={styles.datePickerButtonText}>
+                  {editDate.toLocaleDateString('en-US', { 
+                    weekday: 'short', 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                  })}
+                </Text>
+              </TouchableOpacity>
+
+              {showDatePicker && (
+                <DateTimePicker
+                  value={editDate}
+                  mode="date"
+                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                  minimumDate={new Date()}
+                  onChange={onDateChange}
+                />
+              )}
               <View style={styles.editRow}>
                 <TouchableOpacity
                   style={styles.editCancelBtn}
@@ -625,6 +647,19 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#e8d5f5', marginBottom: 12,
   },
   editBtnText: { color: ACCENT, fontWeight: '700', fontSize: 16 },
+
+  datePickerButton: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    backgroundColor: '#f8f9fa', borderRadius: 12,
+    padding: 14, marginBottom: 12,
+    borderWidth: 1, borderColor: '#e9ecef',
+  },
+  datePickerButtonText: {
+    flex: 1,
+    fontSize: 15,
+    color: '#1a1a2e',
+    fontWeight: '500',
+  },
 
   cancelBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,

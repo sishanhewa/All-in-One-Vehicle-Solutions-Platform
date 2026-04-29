@@ -3,7 +3,7 @@
  * Run: node seedServiceProviders.js
  * 
  * Creates a realistic multi-sided automotive service marketplace with:
- * - 6 Diverse Garages (different specializations, cities, sizes)
+ * - 6 Diverse Garages (different service categories, cities, sizes)
  * - 15+ Mechanics (varied skills, experience levels)
  * - 12+ Customers (different booking patterns)
  * - 50+ Service Offerings (comprehensive service catalog)
@@ -184,10 +184,10 @@ const garages = [
             { name: 'Hybrid Battery Service', description: 'Hybrid system diagnostic, battery health check, cell balancing', category: 'Electrical', estimatedPrice: 8500, estimatedDuration: 90, vehicleTypes: ['Car'] },
         ],
         mechanics: [
-            { name: 'Kasun Bandara', email: 'kasun@cityauto.lk', password: 'Mech123', phone: '0771234567', specialization: 'Engine & Diagnostics', experience: '8 years', isActive: true },
-            { name: 'Nuwan Dissanayake', email: 'nuwan@cityauto.lk', password: 'Mech123', phone: '0771234568', specialization: 'Brakes & Suspension', experience: '6 years', isActive: true },
-            { name: 'Lakmal Perera', email: 'lakmal@cityauto.lk', password: 'Mech123', phone: '0771234569', specialization: 'AC & Electrical', experience: '5 years', isActive: true },
-            { name: 'Chathura Senanayake', email: 'chathura@cityauto.lk', password: 'Mech123', phone: '0771234570', specialization: 'Transmission', experience: '7 years', isActive: true },
+            { name: 'Kasun Bandara', email: 'kasun@cityauto.lk', password: 'Mech123', phone: '0771234567', experience: '8 years', isActive: true },
+            { name: 'Nuwan Dissanayake', email: 'nuwan@cityauto.lk', password: 'Mech123', phone: '0771234568', experience: '6 years', isActive: true },
+            { name: 'Lakmal Perera', email: 'lakmal@cityauto.lk', password: 'Mech123', phone: '0771234569', experience: '5 years', isActive: true },
+            { name: 'Chathura Senanayake', email: 'chathura@cityauto.lk', password: 'Mech123', phone: '0771234570', experience: '7 years', isActive: true },
         ]
     },
     
@@ -214,9 +214,9 @@ const garages = [
             { name: 'Battery Testing & Replacement', description: 'Battery health test, terminal cleaning, replacement if needed', category: 'Electrical', estimatedPrice: 3500, estimatedDuration: 30, vehicleTypes: ['Car', 'SUV'] },
         ],
         mechanics: [
-            { name: 'Thilak Rajapaksa', email: 'thilak@kandymotors.lk', password: 'Mech123', phone: '0773456789', specialization: 'Brakes & Steering', experience: '10 years', isActive: true },
-            { name: 'Sanjeewa Kumara', email: 'sanjeewa@kandymotors.lk', password: 'Mech123', phone: '0773456790', specialization: 'Suspension Systems', experience: '7 years', isActive: true },
-            { name: 'Mahesh Ekanayake', email: 'mahesh@kandymotors.lk', password: 'Mech123', phone: '0773456791', specialization: 'General Service', experience: '4 years', isActive: true },
+            { name: 'Thilak Rajapaksa', email: 'thilak@kandymotors.lk', password: 'Mech123', phone: '0773456789', experience: '10 years', isActive: true },
+            { name: 'Sanjeewa Kumara', email: 'sanjeewa@kandymotors.lk', password: 'Mech123', phone: '0773456790', experience: '7 years', isActive: true },
+            { name: 'Mahesh Ekanayake', email: 'mahesh@kandymotors.lk', password: 'Mech123', phone: '0773456791', experience: '4 years', isActive: true },
         ]
     },
     
@@ -244,9 +244,9 @@ const garages = [
             { name: 'Turbo Service & Upgrade', description: 'Turbo inspection, intercooler cleaning, boost pressure optimization', category: 'Engine', estimatedPrice: 25000, estimatedDuration: 120, vehicleTypes: ['Car'] },
         ],
         mechanics: [
-            { name: 'Dinesh Wickramasinghe', email: 'dinesh@galleauto.lk', password: 'Mech123', phone: '0774567890', specialization: 'Performance Tuning', experience: '12 years', isActive: true },
-            { name: 'Ruwan Kalpage', email: 'ruwan@galleauto.lk', password: 'Mech123', phone: '0774567891', specialization: 'Exhaust & Fabrication', experience: '8 years', isActive: true },
-            { name: 'Ishan Madushanka', email: 'ishan@galleauto.lk', password: 'Mech123', phone: '0774567892', specialization: 'Luxury Diagnostics', experience: '6 years', isActive: true },
+            { name: 'Dinesh Wickramasinghe', email: 'dinesh@galleauto.lk', password: 'Mech123', phone: '0774567890', experience: '12 years', isActive: true },
+            { name: 'Ruwan Kalpage', email: 'ruwan@galleauto.lk', password: 'Mech123', phone: '0774567891', experience: '8 years', isActive: true },
+            { name: 'Ishan Madushanka', email: 'ishan@galleauto.lk', password: 'Mech123', phone: '0774567892', experience: '6 years', isActive: true },
         ]
     },
     
@@ -273,10 +273,10 @@ const garages = [
             { name: 'Van Commercial Service', description: 'Heavy-duty service for commercial vans, multiple filters', category: 'Oil Change', estimatedPrice: 7500, estimatedDuration: 90, vehicleTypes: ['Van'] },
         ],
         mechanics: [
-            { name: 'Samantha Rajapakse', email: 'samantha@negombogarage.lk', password: 'Mech123', phone: '0775678901', specialization: 'Motorcycle Specialist', experience: '9 years', isActive: true },
-            { name: 'Roshan Silva', email: 'roshan@negombogarage.lk', password: 'Mech123', phone: '0775678902', specialization: 'Motorcycle Engine', experience: '6 years', isActive: true },
-            { name: 'Nimal Jayasinghe', email: 'nimal@negombogarage.lk', password: 'Mech123', phone: '0775678903', specialization: 'Car General Service', experience: '5 years', isActive: true },
-            { name: 'Ajith Fernando', email: 'ajith@negombogarage.lk', password: 'Mech123', phone: '0775678904', specialization: 'Van & Commercial', experience: '7 years', isActive: true },
+            { name: 'Samantha Rajapakse', email: 'samantha@negombogarage.lk', password: 'Mech123', phone: '0775678901', experience: '9 years', isActive: true },
+            { name: 'Roshan Silva', email: 'roshan@negombogarage.lk', password: 'Mech123', phone: '0775678902', experience: '6 years', isActive: true },
+            { name: 'Nimal Jayasinghe', email: 'nimal@negombogarage.lk', password: 'Mech123', phone: '0775678903', experience: '5 years', isActive: true },
+            { name: 'Ajith Fernando', email: 'ajith@negombogarage.lk', password: 'Mech123', phone: '0775678904', experience: '7 years', isActive: true },
         ]
     },
     
@@ -301,8 +301,8 @@ const garages = [
             { name: 'Battery & Electrical', description: 'Battery test, charging system check, electrical diagnostics', category: 'Electrical', estimatedPrice: 2500, estimatedDuration: 30, vehicleTypes: ['Car', 'SUV', 'Van'] },
         ],
         mechanics: [
-            { name: 'Tharmalingam Sivakumar', email: 'tharma@jaffnatech.lk', password: 'Mech123', phone: '0776789012', specialization: 'Diagnostics & Electrical', experience: '5 years', isActive: true },
-            { name: 'Karthik Rajan', email: 'karthik@jaffnatech.lk', password: 'Mech123', phone: '0776789013', specialization: 'General Service', experience: '4 years', isActive: true },
+            { name: 'Tharmalingam Sivakumar', email: 'tharma@jaffnatech.lk', password: 'Mech123', phone: '0776789012', experience: '5 years', isActive: true },
+            { name: 'Karthik Rajan', email: 'karthik@jaffnatech.lk', password: 'Mech123', phone: '0776789013', experience: '4 years', isActive: true },
         ]
     },
     
@@ -326,12 +326,12 @@ const garages = [
             { name: 'Hydraulic System Repair', description: 'Tipper hydraulic system, pumps, cylinders, hoses service', category: 'Engine', estimatedPrice: 25000, estimatedDuration: 180, vehicleTypes: ['Truck'] },
             { name: 'Commercial AC Service', description: 'Bus AC system, heavy-duty compressor service', category: 'AC', estimatedPrice: 12500, estimatedDuration: 90, vehicleTypes: ['Truck'] },
             { name: '24/7 Breakdown Service', description: 'Emergency roadside assistance for commercial vehicles', category: 'Diagnostics', estimatedPrice: 5000, estimatedDuration: 60, vehicleTypes: ['Truck'] },
-            { name: 'Fleet Maintenance Contract', description: 'Monthly contract for 5+ vehicle fleets', category: 'Oil Change', estimatedPrice: 0, estimatedDuration: 0, vehicleTypes: ['Truck'] },
+            { name: 'Fleet Maintenance Contract', description: 'Monthly contract for 5+ vehicle fleets', category: 'Oil Change', estimatedPrice: 0, estimatedDuration: 60, vehicleTypes: ['Truck'] },
         ],
         mechanics: [
-            { name: 'Wijepala Karunaratne', email: 'wije@anuradhapuratrucks.lk', password: 'Mech123', phone: '0777890123', specialization: 'Diesel Engines', experience: '15 years', isActive: true },
-            { name: 'Gunawardena Silva', email: 'guna@anuradhapuratrucks.lk', password: 'Mech123', phone: '0777890124', specialization: 'Hydraulics', experience: '11 years', isActive: true },
-            { name: 'Somaratne Perera', email: 'soma@anuradhapuratrucks.lk', password: 'Mech123', phone: '0777890125', specialization: 'Air Brakes', experience: '8 years', isActive: true },
+            { name: 'Wijepala Karunaratne', email: 'wije@anuradhapuratrucks.lk', password: 'Mech123', phone: '0777890123', experience: '15 years', isActive: true },
+            { name: 'Gunawardena Silva', email: 'guna@anuradhapuratrucks.lk', password: 'Mech123', phone: '0777890124', experience: '11 years', isActive: true },
+            { name: 'Somaratne Perera', email: 'soma@anuradhapuratrucks.lk', password: 'Mech123', phone: '0777890125', experience: '8 years', isActive: true },
         ]
     }
 ];
@@ -407,7 +407,6 @@ async function seed() {
                 createdMechanics.push({
                     _id: mech._id,
                     name: mechanic.name,
-                    specialization: mechanic.specialization,
                     experience: mechanic.experience
                 });
             }
@@ -600,7 +599,7 @@ async function seed() {
                 preferredTime: randomPick(['9:00 AM', '11:00 AM', '2:00 PM']),
                 status: 'confirmed',
                 customerNotes: 'Confirmed appointment. See you then!',
-                ownerNotes: `Assigned to ${mechanic.name} (${mechanic.specialization})`,
+                ownerNotes: `Assigned to ${mechanic.name}`,
                 statusHistory: [
                     { status: 'pending_confirmation', changedBy: customer._id, changedAt: daysAgo(3), note: 'Booking created' },
                     { status: 'confirmed', changedBy: garage.ownerId, changedAt: daysAgo(2), note: `Confirmed - assigned to ${mechanic.name}` }
@@ -698,7 +697,7 @@ async function seed() {
         const declineReasons = [
             'Fully booked for requested date. Suggested alternative date.',
             'Service temporarily unavailable due to equipment maintenance.',
-            'Vehicle type outside our specialization range.',
+            'Vehicle type not serviced at this garage.',
             'Parts not available for this rare model.',
             'Emergency closure due to staff shortage.'
         ];
