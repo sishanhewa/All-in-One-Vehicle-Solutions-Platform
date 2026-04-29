@@ -76,6 +76,13 @@ export default function ProfileTab() {
           iconColor="#10ac84"
         />
         <MenuItem
+          icon="tool"
+          title="My Spare Parts"
+          subtitle="Manage your spare part listings"
+          onPress={() => router.push('/MySparePartsDashboard')}
+          iconColor="#e67e22"
+        />
+        <MenuItem
           icon="user"
           title="Public Profile"
           subtitle="See how buyers view your profile"
