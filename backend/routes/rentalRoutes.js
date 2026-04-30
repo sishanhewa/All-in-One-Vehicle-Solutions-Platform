@@ -8,7 +8,10 @@ const {
   updateBookingStatus,
   updateRentalVehicle,
   deleteRentalVehicle,
-  getOwnerVehicles
+  getOwnerVehicles,
+  getOwnerBookings,
+  getRenterBookings,
+  getBookingById
 } = require('../controllers/rentalController');
 const { protect } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
