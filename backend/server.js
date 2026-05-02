@@ -51,6 +51,16 @@ app.get('/', (req, res) => {
   res.status(200).json({ message: 'Vehicle Management API is up and running!' });
 });
 
+if (fs.existsSync(path.join(__dirname, 'routes/supportRoutes.js'))) {
+  const supportRoutes = require('./routes/supportRoutes');
+  app.use('/api/support', supportRoutes);
+}
+
+if (fs.existsSync(path.join(__dirname, 'routes/adminRoutes.js'))) {
+  const adminRoutes = require('./routes/adminRoutes');
+  app.use('/api/admin', adminRoutes);
+}
+
 // JSON Error Handling Middleware (Catches errors from express-async-handler)
 app.use((err, req, res, next) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;

@@ -44,6 +44,15 @@ export default function RootLayout() {
           <Stack.Screen name="rentals/requests" options={{ title: 'Rental Requests' }} />
           <Stack.Screen name="rentals/booking-detail" options={{ title: 'Booking Details' }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+          
+          <Stack.Screen name="AdminDashboard" options={{ title: 'Admin Panel' }} />
+          <Stack.Screen name="AdminUserManagement" options={{ title: 'User Management' }} />
+          <Stack.Screen name="AdminUserDetail" options={{ title: 'User Details' }} />
+          <Stack.Screen name="AdminAdManagement" options={{ title: 'Ad Management' }} />
+          <Stack.Screen name="AdminAdDetail" options={{ title: 'Ad Details' }} />
+          <Stack.Screen name="AdminTicketManagement" options={{ title: 'Support Queue' }} />
+          <Stack.Screen name="AdminTicketDetail" options={{ title: 'Admin Ticket View' }} />
+          <Stack.Screen name="AdminInspectionManagement" options={{ title: 'Inspections Oversight' }} />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
