@@ -2,7 +2,9 @@ const express = require('express');
 const dotenv = require('dotenv');
 const path = require('path');
 const cors = require('cors');
+const fs = require('fs');
 const connectDB = require('./config/db');
+
 
 // Import Routes
 const authRoutes = require('./routes/authRoutes');
@@ -27,6 +29,22 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 // Mount the API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/rentals', rentalRoutes);
+
+// Dynamically load feature routes depending on which branch you are on
+if (fs.existsSync(path.join(__dirname, 'routes/marketplaceRoutes.js'))) {
+  const marketplaceRoutes = require('./routes/marketplaceRoutes');
+  app.use('/api/marketplace', marketplaceRoutes);
+}
+
+if (fs.existsSync(path.join(__dirname, 'routes/inspectionRoutes.js'))) {
+  const inspectionRoutes = require('./routes/inspectionRoutes');
+  app.use('/api/inspection', inspectionRoutes);
+}
+
+if (fs.existsSync(path.join(__dirname, 'routes/sparePartsRoutes.js'))) {
+  const sparePartsRoutes = require('./routes/sparePartsRoutes');
+  app.use('/api/spare-parts', sparePartsRoutes);
+}
 
 // Test Route
 app.get('/', (req, res) => {
