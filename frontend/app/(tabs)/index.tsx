@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Platform, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons, Feather } from '@expo/vector-icons';
@@ -32,23 +32,53 @@ export default function WelcomeScreen() {
           <Text style={styles.cardDesc}>Browse and buy quality spare parts and compatibility items.</Text>
           <View style={styles.cardFooter}>
              <Text style={[styles.cardAction, { color: '#10ac84' }]}>Explore Parts</Text>
-             <Feather name="arrow-right" size={16} color="#10ac84" />
-          </View>
-        </TouchableOpacity>
-
         {/* Marketplace Card */}
         <TouchableOpacity 
-          style={[styles.card, { backgroundColor: '#eff2f7' }]} 
+          style={[styles.card, { backgroundColor: '#e8f8f5' }]} 
           activeOpacity={0.8}
-          onPress={() => router.push('/(tabs)')}
+          onPress={() => router.push('/marketplace')}
         >
-          <View style={[styles.iconWrap, { backgroundColor: '#3498db' }]}>
+          <View style={[styles.iconWrap, { backgroundColor: '#10ac84' }]}>
             <Ionicons name="cart" size={28} color="#fff" />
           </View>
           <Text style={styles.cardTitle}>Marketplace</Text>
           <Text style={styles.cardDesc}>Browse and buy quality vehicles from trusted sellers.</Text>
           <View style={styles.cardFooter}>
-             <Text style={[styles.cardAction, { color: '#3498db' }]}>Explore Listings</Text>
+             <Text style={[styles.cardAction, { color: '#10ac84' }]}>Explore Listings</Text>
+             <Feather name="arrow-right" size={16} color="#10ac84" />
+          </View>
+        </TouchableOpacity>
+
+        {/* Inspections Card */}
+        <TouchableOpacity 
+          style={[styles.card, { backgroundColor: '#fef0e3' }]} 
+          activeOpacity={0.8}
+          onPress={() => router.push('/inspections')}
+        >
+          <View style={[styles.iconWrap, { backgroundColor: '#e67e22' }]}>
+            <Ionicons name="shield-checkmark" size={28} color="#fff" />
+          </View>
+          <Text style={styles.cardTitle}>Inspections</Text>
+          <Text style={styles.cardDesc}>Book professional vehicle inspections before you buy.</Text>
+          <View style={styles.cardFooter}>
+             <Text style={[styles.cardAction, { color: '#e67e22' }]}>Find Services</Text>
+             <Feather name="arrow-right" size={16} color="#e67e22" />
+          </View>
+        </TouchableOpacity>
+
+        {/* Sell Card */}
+        <TouchableOpacity 
+          style={[styles.card, { backgroundColor: '#eff2f7' }]} 
+          activeOpacity={0.8}
+          onPress={() => router.push('/CreateListing')}
+        >
+          <View style={[styles.iconWrap, { backgroundColor: '#3498db' }]}>
+            <Ionicons name="add-circle" size={28} color="#fff" />
+          </View>
+          <Text style={styles.cardTitle}>Sell Vehicle</Text>
+          <Text style={styles.cardDesc}>Post your ad for free and reach thousands of buyers.</Text>
+          <View style={styles.cardFooter}>
+             <Text style={[styles.cardAction, { color: '#3498db' }]}>Post Ad</Text>
              <Feather name="arrow-right" size={16} color="#3498db" />
           </View>
         </TouchableOpacity>

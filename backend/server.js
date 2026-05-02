@@ -5,6 +5,8 @@ const cors = require('cors');
 const fs = require('fs');
 const connectDB = require('./config/db');
 
+const fs = require('fs');
+
 // Import Routes
 const authRoutes = require('./routes/authRoutes');
 
