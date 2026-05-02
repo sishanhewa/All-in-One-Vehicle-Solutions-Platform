@@ -49,6 +49,19 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="rentals"
+        options={{
+          title: 'Rentals',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              name={focused ? 'car-sport' : 'car-sport-outline'} 
+              size={24} 
+              color={color} 
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="inspections"
         options={{
           title: 'Inspections',

@@ -38,6 +38,11 @@ export default function RootLayout() {
           <Stack.Screen name="EditSparePart" options={{ title: 'Edit Part' }} />
           <Stack.Screen name="MySparePartsDashboard" options={{ title: 'My Spare Parts' }} />
           <Stack.Screen name="SparePartSellerProfile" options={{ title: 'Seller Parts' }} />
+          <Stack.Screen name="rentals/add-rental" options={{ title: 'List Vehicle for Rent' }} />
+          <Stack.Screen name="rentals/my-listings" options={{ title: 'My Rental Listings' }} />
+          <Stack.Screen name="rentals/my-bookings" options={{ title: 'My Bookings' }} />
+          <Stack.Screen name="rentals/requests" options={{ title: 'Rental Requests' }} />
+          <Stack.Screen name="rentals/booking-detail" options={{ title: 'Booking Details' }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
         </Stack>
         <StatusBar style="auto" />

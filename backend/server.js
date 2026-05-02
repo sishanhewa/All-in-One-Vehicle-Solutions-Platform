@@ -8,6 +8,7 @@ const connectDB = require('./config/db');
 
 // Import Routes
 const authRoutes = require('./routes/authRoutes');
+const rentalRoutes = require('./routes/rentalRoutes');
 
 // Load enviornment variables
 dotenv.config();
@@ -27,6 +28,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // Mount the API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/rentals', rentalRoutes);
 
 // Dynamically load feature routes depending on which branch you are on
 if (fs.existsSync(path.join(__dirname, 'routes/marketplaceRoutes.js'))) {

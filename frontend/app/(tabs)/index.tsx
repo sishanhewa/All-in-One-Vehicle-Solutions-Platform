@@ -86,6 +86,23 @@ export default function WelcomeScreen() {
              <Feather name="arrow-right" size={16} color="#3498db" />
           </View>
         </TouchableOpacity>
+
+        {/* Rentals Card */}
+        <TouchableOpacity 
+          style={[styles.card, { backgroundColor: '#fdf2e9' }]} 
+          activeOpacity={0.8}
+          onPress={() => router.push('/rentals')}
+        >
+          <View style={[styles.iconWrap, { backgroundColor: '#e67e22' }]}>
+            <Ionicons name="car-sport" size={28} color="#fff" />
+          </View>
+          <Text style={styles.cardTitle}>Rentals</Text>
+          <Text style={styles.cardDesc}>Rent a vehicle or list your own for others to rent.</Text>
+          <View style={styles.cardFooter}>
+             <Text style={[styles.cardAction, { color: '#e67e22' }]}>Explore Rentals</Text>
+             <Feather name="arrow-right" size={16} color="#e67e22" />
+          </View>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.versionInfo}>
