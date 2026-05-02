@@ -20,6 +20,24 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="login" options={{ title: 'Login', presentation: 'modal' }} />
           <Stack.Screen name="register" options={{ title: 'Register', presentation: 'modal' }} />
+          <Stack.Screen name="CreateListing" options={{ title: 'Post Free Ad' }} />
+          <Stack.Screen name="ListingDetails" options={{ title: 'Vehicle Details' }} />
+          <Stack.Screen name="ManageAds" options={{ title: 'Seller Dashboard' }} />
+          <Stack.Screen name="SellerProfile" options={{ title: 'Seller Profile' }} />
+          <Stack.Screen name="EditListing" options={{ title: 'Edit Listing' }} />
+          <Stack.Screen name="CompanyDetails" options={{ title: 'Company Profile' }} />
+          <Stack.Screen name="BookInspection" options={{ title: 'Book Inspection' }} />
+          <Stack.Screen name="MyBookings" options={{ title: 'My Bookings' }} />
+          <Stack.Screen name="BookingDetails" options={{ title: 'Booking Details' }} />
+          <Stack.Screen name="CompanyDashboard" options={{ title: 'Company Dashboard' }} />
+          <Stack.Screen name="ManagePackages" options={{ title: 'Manage Packages' }} />
+          <Stack.Screen name="RecordInspection" options={{ title: 'Record Inspection' }} />
+          <Stack.Screen name="CompanyRegister" options={{ title: 'Company Registration' }} />
+          <Stack.Screen name="SparePartDetails" options={{ title: 'Part Details' }} />
+          <Stack.Screen name="CreateSparePart" options={{ title: 'Add Spare Part' }} />
+          <Stack.Screen name="EditSparePart" options={{ title: 'Edit Part' }} />
+          <Stack.Screen name="MySparePartsDashboard" options={{ title: 'My Spare Parts' }} />
+          <Stack.Screen name="SparePartSellerProfile" options={{ title: 'Seller Parts' }} />
           <Stack.Screen name="rentals/add-rental" options={{ title: 'List Vehicle for Rent' }} />
           <Stack.Screen name="rentals/my-listings" options={{ title: 'My Rental Listings' }} />
           <Stack.Screen name="rentals/my-bookings" options={{ title: 'My Bookings' }} />
