@@ -19,6 +19,19 @@ export default function WelcomeScreen() {
       </View>
 
       <View style={styles.featureGrid}>
+        {/* Spare Parts Card */}
+        <TouchableOpacity 
+          style={[styles.card, { backgroundColor: '#f0faf7' }]} 
+          activeOpacity={0.8}
+          onPress={() => router.push('/spareParts')}
+        >
+          <View style={[styles.iconWrap, { backgroundColor: '#10ac84' }]}>
+            <Ionicons name="construct" size={28} color="#fff" />
+          </View>
+          <Text style={styles.cardTitle}>Spare Parts</Text>
+          <Text style={styles.cardDesc}>Browse and buy quality spare parts and compatibility items.</Text>
+          <View style={styles.cardFooter}>
+             <Text style={[styles.cardAction, { color: '#10ac84' }]}>Explore Parts</Text>
         {/* Marketplace Card */}
         <TouchableOpacity 
           style={[styles.card, { backgroundColor: '#e8f8f5' }]} 

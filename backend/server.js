@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const path = require('path');
 const cors = require('cors');
+const fs = require('fs');
 const connectDB = require('./config/db');
 
 const fs = require('fs');
@@ -37,6 +38,11 @@ if (fs.existsSync(path.join(__dirname, 'routes/marketplaceRoutes.js'))) {
 if (fs.existsSync(path.join(__dirname, 'routes/inspectionRoutes.js'))) {
   const inspectionRoutes = require('./routes/inspectionRoutes');
   app.use('/api/inspection', inspectionRoutes);
+}
+
+if (fs.existsSync(path.join(__dirname, 'routes/sparePartsRoutes.js'))) {
+  const sparePartsRoutes = require('./routes/sparePartsRoutes');
+  app.use('/api/spare-parts', sparePartsRoutes);
 }
 
 // Test Route
