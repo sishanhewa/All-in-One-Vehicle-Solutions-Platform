@@ -32,6 +32,10 @@ export default function WelcomeScreen() {
           <Text style={styles.cardDesc}>Browse and buy quality spare parts and compatibility items.</Text>
           <View style={styles.cardFooter}>
              <Text style={[styles.cardAction, { color: '#10ac84' }]}>Explore Parts</Text>
+             <Feather name="arrow-right" size={16} color="#10ac84" />
+          </View>
+        </TouchableOpacity>
+
         {/* Marketplace Card */}
         <TouchableOpacity 
           style={[styles.card, { backgroundColor: '#e8f8f5' }]} 

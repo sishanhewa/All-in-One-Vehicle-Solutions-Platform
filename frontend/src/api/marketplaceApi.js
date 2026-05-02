@@ -1,12 +1,12 @@
 // Connecting via the Android Emulator's dedicated Localhost Bridge
-export const API_URL = 'http://10.0.2.2:5000/api/marketplace';
+export const API_URL = 'http://192.168.8.100:5000/api/marketplace';
 import * as SecureStore from 'expo-secure-store';
 
 // Helper to resolve image URLs correctly (handles both local uploads and external URLs)
 export const resolveImageUrl = (imagePath) => {
   if (!imagePath) return 'https://via.placeholder.com/400x200?text=No+Image';
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
-  return `http://10.0.2.2:5000${imagePath}`;
+  return `http://192.168.8.100:5000${imagePath}`;
 };
 
 // Strips default "Any ..." placeholder values before sending to API
