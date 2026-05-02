@@ -86,6 +86,65 @@ export default function ProfileTab() {
             iconColor="#10ac84"
           />
         )}
+        <MenuItem
+          icon="plus-circle"
+          title="List Vehicle for Rent"
+          subtitle="Add a new vehicle to the rental marketplace"
+          onPress={() => router.push('/rentals/add-rental')}
+          iconColor="#10ac84"
+        />
+        <MenuItem
+          icon="grid"
+          title="My Rental Listings"
+          subtitle="Manage your listed rental vehicles"
+          onPress={() => router.push('/rentals/my-listings')}
+          iconColor="#3498db"
+        />
+        <MenuItem
+          icon="inbox"
+          title="Rental Requests"
+          subtitle="Approve or reject booking requests for your vehicles"
+          onPress={() => router.push('/rentals/requests')}
+          iconColor="#f39c12"
+        />
+        <MenuItem
+          icon="calendar"
+          title="My Rental Bookings"
+          subtitle="Track the status of your rental bookings"
+          onPress={() => router.push('/rentals/my-bookings')}
+          iconColor="#e67e22"
+        />
+        <MenuItem
+          icon="grid"
+          title="My Listings"
+          subtitle="Manage your active and sold vehicle ads"
+          onPress={() => router.push('/ManageAds')}
+          iconColor="#3498db"
+        />
+        <MenuItem
+          icon="plus-circle"
+          title="Post New Ad"
+          subtitle="List a new vehicle on the marketplace"
+          onPress={() => router.push('/CreateListing')}
+          iconColor="#10ac84"
+        />
+        <MenuItem
+          icon="tool"
+          title="My Spare Parts"
+          subtitle="Manage your spare part listings"
+          onPress={() => router.push('/MySparePartsDashboard')}
+          iconColor="#e67e22"
+        />
+        <MenuItem
+          icon="user"
+          title="Public Profile"
+          subtitle="See how buyers view your profile"
+          onPress={() => router.push({
+            pathname: '/SellerProfile',
+            params: { sellerId: userInfo._id, sellerName: userInfo.name, sellerPhone: userInfo.phone }
+          })}
+          iconColor="#9b59b6"
+        />
       </View>
 
       {/* Logout */}

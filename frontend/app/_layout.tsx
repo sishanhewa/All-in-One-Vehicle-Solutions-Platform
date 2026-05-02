@@ -33,6 +33,7 @@ export default function RootLayout() {
           <Stack.Screen name="ManagePackages" options={{ title: 'Manage Packages' }} />
           <Stack.Screen name="RecordInspection" options={{ title: 'Record Inspection' }} />
           <Stack.Screen name="CompanyRegister" options={{ title: 'Company Registration' }} />
+          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
           
           <Stack.Screen name="AdminDashboard" options={{ title: 'Admin Panel' }} />
           <Stack.Screen name="AdminUserManagement" options={{ title: 'User Management' }} />
@@ -42,8 +43,6 @@ export default function RootLayout() {
           <Stack.Screen name="AdminTicketManagement" options={{ title: 'Support Queue' }} />
           <Stack.Screen name="AdminTicketDetail" options={{ title: 'Admin Ticket View' }} />
           <Stack.Screen name="AdminInspectionManagement" options={{ title: 'Inspections Oversight' }} />
-          
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
