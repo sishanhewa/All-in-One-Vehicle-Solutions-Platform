@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 
 /** API origin (no trailing slash). */
-export const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.9:5000';
+export const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://all-in-one-vehicle-solutions-platform.onrender.com';
 
 export const SERVICE_API_URL = `${BASE_URL}/api/service`;
 
