@@ -3,6 +3,7 @@ const InspectionBooking = require('../models/InspectionBooking');
 const InspectionPackage = require('../models/InspectionPackage');
 const User = require('../models/User');
 const PDFDocument = require('pdfkit');
+const { sendInspectionReportEmail } = require('../utils/emailService');
 
 // @desc    Create a new inspection booking
 // @route   POST /api/inspection/bookings
@@ -289,6 +290,23 @@ const completeInspection = asyncHandler(async (req, res) => {
     .populate('companyId', 'name phone companyProfile')
     .populate('packageId', 'name price duration');
 
+  // Generate PDF and send email asynchronously (don't block the response)
+  if (parsedReport && populated.userId?.email) {
+    try {
+      const doc = new PDFDocument({ size: 'A4', margin: 40 });
+      let buffers = [];
+      doc.on('data', buffers.push.bind(buffers));
+      doc.on('end', () => {
+        const pdfData = Buffer.concat(buffers);
+        sendInspectionReportEmail(populated.userId.email, populated.userId.name, pdfData, parsedReport.reportNumber || populated._id);
+      });
+      buildInspectionPDF(doc, populated, parsedReport);
+      doc.end();
+    } catch (err) {
+      console.error('Error generating email PDF:', err);
+    }
+  }
+
   res.status(200).json(populated);
 });
 
@@ -347,6 +365,12 @@ const generateReportPDF = asyncHandler(async (req, res) => {
   res.setHeader('Content-Disposition', `attachment; filename=Inspection_${report.reportNumber || booking._id}.pdf`);
   doc.pipe(res);
 
+  buildInspectionPDF(doc, booking, report);
+  doc.end();
+});
+
+// Helper function to build the PDF content layout
+const buildInspectionPDF = (doc, booking, report) => {
   // Helper for legend symbols
   const sym = (status) => {
     switch (status) {
@@ -472,9 +496,7 @@ const generateReportPDF = asyncHandler(async (req, res) => {
   
   doc.text('_________________________', 300, currentY, { lineBreak: false });
   doc.text('Customer Signature', 300, currentY + 12, { lineBreak: false });
-
-  doc.end();
-});
+};
 
 module.exports = {
   createBooking,
