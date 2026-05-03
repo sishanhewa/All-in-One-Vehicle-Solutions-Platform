@@ -30,6 +30,7 @@ const {
   completeInspection,
   uploadReportImages,
   generateReportPDF,
+  sendReportEmail,
 } = require('../controllers/inspectionBookingController');
 
 // ==========================================
@@ -87,5 +88,8 @@ router.post('/bookings/:id/images', protect, requireRole('InspectionCompany'), u
 
 // Private (User or Company): Generate PDF report
 router.get('/bookings/:id/report-pdf', protect, generateReportPDF);
+
+// Private (User or Company): Send report via email
+router.post('/bookings/:id/send-email', protect, sendReportEmail);
 
 module.exports = router;

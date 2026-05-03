@@ -90,6 +90,47 @@ const BookingDetails = () => {
     }
   };
 
+  const handleSendEmail = () => {
+    const defaultEmail = booking?.inspectionReport?.customerEmail || '';
+    Alert.prompt(
+      'Send Report via Email',
+      'Enter the email address to send the PDF report to:',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Send',
+          onPress: async (email) => {
+            if (!email || !email.includes('@')) {
+              Alert.alert('Invalid Email', 'Please enter a valid email address.');
+              return;
+            }
+            try {
+              setLoading(true);
+              const res = await fetch(`${INSPECTION_API_URL}/bookings/${bookingId}/send-email`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${userInfo?.token || ''}`,
+                },
+                body: JSON.stringify({ email }),
+              });
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.message || 'Failed to send email');
+              Alert.alert('Success', `Report sent to ${email}`);
+            } catch (error) {
+              Alert.alert('Error', error.message || 'Failed to send email');
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ],
+      'plain-text',
+      defaultEmail,
+      'email-address'
+    );
+  };
+
   const formatDate = (dateStr) => {
     if (!dateStr) return 'N/A';
     const d = new Date(dateStr);
@@ -293,6 +334,11 @@ const BookingDetails = () => {
                 <TouchableOpacity style={styles.downloadPdfBtn} onPress={handleDownloadPDF}>
                   <Feather name="download-cloud" size={20} color="#fff" />
                   <Text style={styles.downloadPdfBtnText}>Download Full PDF Report</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={[styles.downloadPdfBtn, { backgroundColor: '#3498db', marginTop: 10 }]} onPress={handleSendEmail}>
+                  <Feather name="mail" size={20} color="#fff" />
+                  <Text style={styles.downloadPdfBtnText}>Send Report via Email</Text>
                 </TouchableOpacity>
               </View>
             ) : (

@@ -511,6 +511,57 @@ const buildInspectionPDF = (doc, booking, report) => {
   doc.text('Customer Signature', 300, currentY + 12, { lineBreak: false });
 };
 
+// @desc    Send inspection report PDF via email
+// @route   POST /api/inspection/bookings/:id/send-email
+// @access  Private (User or Company)
+const sendReportEmail = asyncHandler(async (req, res) => {
+  const booking = await InspectionBooking.findById(req.params.id)
+    .populate('companyId', 'name phone companyProfile')
+    .populate('userId', 'name phone email');
+
+  if (!booking || !booking.inspectionReport) {
+    res.status(404);
+    throw new Error('Inspection report not found');
+  }
+
+  const isOwner = booking.userId._id.toString() === req.user._id.toString();
+  const isCompany = booking.companyId._id.toString() === req.user._id.toString();
+
+  if (!isOwner && !isCompany && req.user.role !== 'Admin') {
+    res.status(401);
+    throw new Error('Not authorized');
+  }
+
+  const { email } = req.body;
+  const targetEmail = email || booking.inspectionReport.customerEmail || booking.userId?.email;
+
+  if (!targetEmail) {
+    res.status(400);
+    throw new Error('No email address provided');
+  }
+
+  const report = booking.inspectionReport;
+
+  // Build PDF into buffer
+  const doc = new PDFDocument({ size: 'A4', margin: 40 });
+  let buffers = [];
+  
+  await new Promise((resolve, reject) => {
+    doc.on('data', (chunk) => buffers.push(chunk));
+    doc.on('end', resolve);
+    doc.on('error', reject);
+    buildInspectionPDF(doc, booking, report);
+    doc.end();
+  });
+
+  const pdfData = Buffer.concat(buffers);
+  console.log('[EMAIL] Manual send - PDF size:', pdfData.length, 'bytes. To:', targetEmail);
+
+  await sendInspectionReportEmail(targetEmail, booking.userId.name, pdfData, report.reportNumber || booking._id);
+
+  res.status(200).json({ message: `Report emailed successfully to ${targetEmail}` });
+});
+
 module.exports = {
   createBooking,
   getMyBookings,
@@ -522,4 +573,5 @@ module.exports = {
   completeInspection,
   uploadReportImages,
   generateReportPDF,
+  sendReportEmail,
 };
