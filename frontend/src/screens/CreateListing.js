@@ -4,7 +4,9 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { createListing } from '../api/marketplaceApi';
+import { fetchMyBookings } from '../api/inspectionApi';
 import { Ionicons } from '@expo/vector-icons';
+import DropDownPicker from 'react-native-dropdown-picker';
 
 const FUEL_TYPES = ['Petrol', 'Diesel', 'Hybrid', 'Electric'];
 const TRANSMISSIONS = ['Manual', 'Automatic', 'Tiptronic'];
@@ -18,10 +20,30 @@ const CreateListing = () => {
   const [form, setForm] = useState({
     make: '', model: '', year: '', price: '', mileage: '',
     fuelType: 'Petrol', transmission: 'Manual', bodyType: 'Sedan',
-    condition: 'Used', location: '', description: '',
+    condition: 'Used', location: '', description: '', inspectionReportId: null
   });
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const [reports, setReports] = useState([]);
+  const [reportOpen, setReportOpen] = useState(false);
+
+  React.useEffect(() => {
+    const loadReports = async () => {
+      try {
+        const myBookings = await fetchMyBookings('Completed');
+        // Only keep bookings that have an actual report attached
+        const validReports = myBookings.filter(b => b.inspectionResult);
+        setReports(validReports.map(b => ({
+          label: `${b.vehicleInfo?.make} ${b.vehicleInfo?.model} - ${b.inspectionResult} (${b.overallScore}%)`,
+          value: b._id
+        })));
+      } catch (err) {
+        console.log('Failed to fetch reports', err);
+      }
+    };
+    loadReports();
+  }, []);
 
   const updateField = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
@@ -145,6 +167,30 @@ const CreateListing = () => {
       {renderPicker('Body Type', BODY_TYPES, form.bodyType, (v) => updateField('bodyType', v))}
       {renderPicker('Condition', CONDITIONS, form.condition, (v) => updateField('condition', v))}
 
+      {/* Attach Inspection Report */}
+      {reports.length > 0 && (
+        <View style={[styles.fieldGroup, { zIndex: 1000 }]}>
+          <Text style={styles.label}>Attach Inspection Report (Optional)</Text>
+          <DropDownPicker
+            open={reportOpen}
+            value={form.inspectionReportId}
+            items={[{label: 'No Report Attached', value: null}, ...reports]}
+            setOpen={setReportOpen}
+            setValue={(callback) => {
+              const val = typeof callback === 'function' ? callback(form.inspectionReportId) : callback;
+              updateField('inspectionReportId', val);
+            }}
+            placeholder="Select a verified inspection report"
+            style={styles.dropdown}
+            textStyle={styles.dropdownText}
+            dropDownContainerStyle={styles.dropdownContainer}
+            listMode="SCROLLVIEW"
+            zIndex={1000}
+            zIndexInverse={1000}
+          />
+        </View>
+      )}
+
       {/* Description */}
       <View style={styles.fieldGroup}>
         <Text style={styles.label}>Description</Text>
@@ -202,6 +248,10 @@ const styles = StyleSheet.create({
 
   submitBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#10ac84', paddingVertical: 16, borderRadius: 14, marginTop: 8, ...Platform.select({ ios: { shadowColor: '#10ac84', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 }, android: { elevation: 4 } }) },
   submitText: { fontSize: 16, fontWeight: '700', color: '#fff' },
+  
+  dropdown: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#e9ecef', borderRadius: 12, height: 50 },
+  dropdownText: { fontSize: 15, color: '#1a1a2e' },
+  dropdownContainer: { borderColor: '#e9ecef', backgroundColor: '#fff', borderRadius: 12 },
 });
 
 export default CreateListing;

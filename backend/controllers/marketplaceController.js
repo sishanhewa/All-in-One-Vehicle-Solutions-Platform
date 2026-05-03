@@ -42,6 +42,7 @@ const getListings = asyncHandler(async (req, res) => {
 
   const listings = await Listing.find(query)
     .populate('sellerId', 'name phone email')
+    .populate('inspectionReportId', 'inspectionResult overallScore')
     .sort({ createdAt: -1 });
 
   res.status(200).json(listings);
@@ -52,7 +53,8 @@ const getListings = asyncHandler(async (req, res) => {
 // @access  Public
 const getListingById = asyncHandler(async (req, res) => {
   const listing = await Listing.findById(req.params.id)
-    .populate('sellerId', 'name phone email');
+    .populate('sellerId', 'name phone email')
+    .populate('inspectionReportId', 'inspectionResult overallScore');
 
   if (!listing) {
     res.status(404);
@@ -66,7 +68,7 @@ const getListingById = asyncHandler(async (req, res) => {
 // @route   POST /api/marketplace
 // @access  Private
 const createListing = asyncHandler(async (req, res) => {
-  const { make, model, year, price, mileage, fuelType, transmission, bodyType, location, description } = req.body;
+  const { make, model, year, price, mileage, fuelType, transmission, bodyType, location, description, inspectionReportId } = req.body;
 
   if (!make || !model || !year || !price || !location) {
     res.status(400);
@@ -89,10 +91,12 @@ const createListing = asyncHandler(async (req, res) => {
     location,
     description: description || '',
     images,
+    inspectionReportId: inspectionReportId || null,
   });
 
   const populated = await Listing.findById(listing._id)
-    .populate('sellerId', 'name phone email');
+    .populate('sellerId', 'name phone email')
+    .populate('inspectionReportId', 'inspectionResult overallScore');
 
   res.status(201).json(populated);
 });
@@ -114,7 +118,7 @@ const updateListing = asyncHandler(async (req, res) => {
   }
 
   // Update text fields
-  const fields = ['make', 'model', 'year', 'price', 'mileage', 'fuelType', 'transmission', 'bodyType', 'location', 'description', 'status'];
+  const fields = ['make', 'model', 'year', 'price', 'mileage', 'fuelType', 'transmission', 'bodyType', 'location', 'description', 'status', 'inspectionReportId'];
   fields.forEach(field => {
     if (req.body[field] !== undefined) {
       listing[field] = req.body[field];
@@ -128,7 +132,8 @@ const updateListing = asyncHandler(async (req, res) => {
 
   const updated = await listing.save();
   const populated = await Listing.findById(updated._id)
-    .populate('sellerId', 'name phone email');
+    .populate('sellerId', 'name phone email')
+    .populate('inspectionReportId', 'inspectionResult overallScore');
 
   res.status(200).json(populated);
 });

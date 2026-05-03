@@ -42,6 +42,11 @@ const listingSchema = new mongoose.Schema({
     enum: ['Available', 'Active', 'Sold', 'Removed'],
     default: 'Available',
   },
+  inspectionReportId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'InspectionBooking',
+    default: null,
+  },
 }, { timestamps: true });
 
 // Index for common queries

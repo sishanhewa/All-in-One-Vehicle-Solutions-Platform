@@ -118,6 +118,28 @@ const ListingDetails = () => {
         </View>
       ) : null}
 
+      {/* Verified Inspection Report */}
+      {listing.inspectionReportId && listing.inspectionReportId.inspectionResult && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Verified Inspection</Text>
+          <View style={styles.reportCard}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.reportResultText}>
+                Result: <Text style={listing.inspectionReportId.inspectionResult === 'Pass' ? styles.passText : styles.failText}>{listing.inspectionReportId.inspectionResult}</Text>
+              </Text>
+              <Text style={styles.reportScoreText}>Score: {listing.inspectionReportId.overallScore}%</Text>
+            </View>
+            <TouchableOpacity 
+              style={styles.downloadBtn} 
+              onPress={() => Linking.openURL(`https://all-in-one-vehicle-solutions-platform.onrender.com/api/inspection/bookings/${listing.inspectionReportId._id}/public-report-pdf`)}
+            >
+              <Feather name="download" size={18} color="#fff" />
+              <Text style={styles.downloadBtnText}>View PDF</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
       {/* Seller */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Seller Information</Text>
@@ -175,6 +197,14 @@ const styles = StyleSheet.create({
   sellerName: { fontSize: 16, fontWeight: '700', color: '#1a1a2e' },
   sellerPhone: { fontSize: 14, color: '#636e72', marginTop: 2 },
   callBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#10ac84', justifyContent: 'center', alignItems: 'center' },
+
+  reportCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fef9f0', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: '#fde8c8' },
+  reportResultText: { fontSize: 16, fontWeight: '700', color: '#1a1a2e', marginBottom: 4 },
+  reportScoreText: { fontSize: 14, color: '#e67e22', fontWeight: '600' },
+  passText: { color: '#2ecc71' },
+  failText: { color: '#e74c3c' },
+  downloadBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#e67e22', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 10 },
+  downloadBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
 
   bottomActions: { padding: 20 },
   contactBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#10ac84', paddingVertical: 16, borderRadius: 14, ...Platform.select({ ios: { shadowColor: '#10ac84', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 }, android: { elevation: 4 } }) },

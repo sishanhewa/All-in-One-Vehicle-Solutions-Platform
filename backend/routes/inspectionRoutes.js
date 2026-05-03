@@ -30,6 +30,7 @@ const {
   completeInspection,
   uploadReportImages,
   generateReportPDF,
+  generatePublicReportPDF,
   sendReportEmail,
 } = require('../controllers/inspectionBookingController');
 
@@ -88,6 +89,9 @@ router.post('/bookings/:id/images', protect, requireRole('InspectionCompany'), u
 
 // Private (User or Company): Generate PDF report
 router.get('/bookings/:id/report-pdf', protect, generateReportPDF);
+
+// Public: Generate PDF report if attached to a marketplace listing
+router.get('/bookings/:id/public-report-pdf', generatePublicReportPDF);
 
 // Private (User or Company): Send report via email
 router.post('/bookings/:id/send-email', protect, sendReportEmail);

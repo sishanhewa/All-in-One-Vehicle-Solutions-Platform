@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler');
 const InspectionBooking = require('../models/InspectionBooking');
 const InspectionPackage = require('../models/InspectionPackage');
 const User = require('../models/User');
+const Listing = require('../models/Listing');
 const PDFDocument = require('pdfkit');
 const { sendInspectionReportEmail } = require('../utils/emailService');
 
@@ -383,6 +384,38 @@ const generateReportPDF = asyncHandler(async (req, res) => {
   doc.end();
 });
 
+// @desc    Generate PDF report for a public marketplace listing
+// @route   GET /api/inspection/bookings/:id/public-report-pdf
+// @access  Public
+const generatePublicReportPDF = asyncHandler(async (req, res) => {
+  const booking = await InspectionBooking.findById(req.params.id)
+    .populate('companyId', 'name phone companyProfile')
+    .populate('userId', 'name phone email');
+
+  if (!booking || !booking.inspectionReport) {
+    res.status(404);
+    throw new Error('Inspection report not found');
+  }
+
+  // Check if this report is attached to any marketplace listing
+  const listing = await Listing.findOne({ inspectionReportId: booking._id });
+  
+  if (!listing) {
+    res.status(401);
+    throw new Error('Not authorized to view this report publicly');
+  }
+
+  const report = booking.inspectionReport;
+
+  const doc = new PDFDocument({ size: 'A4', margin: 40 });
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename=Inspection_${report.reportNumber || booking._id}.pdf`);
+  doc.pipe(res);
+
+  buildInspectionPDF(doc, booking, report);
+  doc.end();
+});
+
 // Helper function to build the PDF content layout
 const buildInspectionPDF = (doc, booking, report) => {
   // Helper for legend symbols
@@ -575,5 +608,6 @@ module.exports = {
   completeInspection,
   uploadReportImages,
   generateReportPDF,
+  generatePublicReportPDF,
   sendReportEmail,
 };
