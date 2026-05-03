@@ -1,3 +1,4 @@
+import React from 'react';
 import GarageRegister from '../src/screens/GarageRegister';
 
 export default function GarageRegisterRoute() {
