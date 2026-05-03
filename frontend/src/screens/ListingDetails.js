@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Linking, Platform, Alert } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Linking, Platform, Alert, Dimensions } from 'react-native';
+
+const { width: screenWidth } = Dimensions.get('window');
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { resolveImageUrl } from '../api/marketplaceApi';
@@ -149,7 +151,7 @@ const styles = StyleSheet.create({
   loaderWrap: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8f9fa' },
   errorText: { fontSize: 16, color: '#636e72', marginTop: 12 },
 
-  heroImage: { width: 400, height: 260, resizeMode: 'cover' },
+  heroImage: { width: screenWidth, height: 260, resizeMode: 'cover' },
   dotRow: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 10 },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#dfe6e9' },
   dotActive: { backgroundColor: '#10ac84', width: 20 },
