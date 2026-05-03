@@ -133,7 +133,7 @@ const CompanyDashboard = () => {
             <TouchableOpacity
               style={styles.completeBtn}
               activeOpacity={0.7}
-              onPress={() => router.push({ pathname: '/InspectionReportForm', params: { bookingId: item._id, bookingData: JSON.stringify(item), token: authState?.token } })}
+              onPress={() => router.push({ pathname: '/InspectionReportForm', params: { bookingId: item._id, bookingData: JSON.stringify(item), token: userInfo?.token } })}
             >
               <Feather name="clipboard" size={15} color="#fff" />
               <Text style={styles.actionBtnText}>Record Results</Text>
