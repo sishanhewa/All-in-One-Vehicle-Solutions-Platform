@@ -77,6 +77,13 @@ export default function ProfileTab() {
           onPress={() => router.push('/MyBookings')}
           iconColor="#3498db"
         />
+        <MenuItem
+          icon="settings"
+          title="My Service Bookings"
+          subtitle="Track and manage your garage repairs"
+          onPress={() => router.push('/MyRepairs')}
+          iconColor="#9b59b6"
+        />
         {userInfo.role === 'InspectionCompany' && (
           <MenuItem
             icon="briefcase"
