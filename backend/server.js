@@ -45,6 +45,11 @@ if (fs.existsSync(path.join(__dirname, 'routes/sparePartsRoutes.js'))) {
   app.use('/api/spare-parts', sparePartsRoutes);
 }
 
+if (fs.existsSync(path.join(__dirname, 'routes/supportRoutes.js'))) {
+  const supportRoutes = require('./routes/supportRoutes');
+  app.use('/api/support', supportRoutes);
+}
+
 // Test Route
 app.get('/', (req, res) => {
   res.status(200).json({ message: 'Vehicle Management API is up and running!' });

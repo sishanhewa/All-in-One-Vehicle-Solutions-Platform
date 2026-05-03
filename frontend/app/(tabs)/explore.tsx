@@ -164,6 +164,13 @@ export default function ProfileTab() {
           iconColor="#e67e22"
         />
         <MenuItem
+          icon="message-circle"
+          title="My Support Tickets"
+          subtitle="View and manage your complaints"
+          onPress={() => router.push('/MyTickets')}
+          iconColor="#e74c3c"
+        />
+        <MenuItem
           icon="user"
           title="Public Profile"
           subtitle="See how buyers view your profile"
