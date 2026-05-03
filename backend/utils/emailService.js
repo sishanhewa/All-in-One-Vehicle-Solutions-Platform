@@ -1,12 +1,14 @@
 const nodemailer = require('nodemailer');
+const dns = require('dns');
+
+// Force Node.js to resolve DNS to IPv4 first (fixes ENETUNREACH on Render)
+dns.setDefaultResultOrder('ipv4first');
 
 const sendInspectionReportEmail = async (toEmail, userName, pdfBuffer, reportNumber) => {
-  // Use port 465 (direct SSL) with IPv4 forced — more reliable on cloud platforms
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
     secure: true,
-    family: 4,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
@@ -43,7 +45,7 @@ const sendInspectionReportEmail = async (toEmail, userName, pdfBuffer, reportNum
     console.log(`Email successfully sent to ${toEmail}`, info.response);
   } catch (error) {
     console.error(`Failed to send email to ${toEmail}: `, error.message);
-    throw error; // Re-throw so the caller can catch it
+    throw error;
   }
 };
 
