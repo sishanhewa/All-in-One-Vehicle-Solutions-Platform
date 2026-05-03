@@ -291,14 +291,15 @@ const completeInspection = asyncHandler(async (req, res) => {
     .populate('packageId', 'name price duration');
 
   // Generate PDF and send email asynchronously (don't block the response)
-  if (parsedReport && populated.userId?.email) {
+  const targetEmail = parsedReport?.customerEmail || populated.userId?.email;
+  if (parsedReport && targetEmail) {
     try {
       const doc = new PDFDocument({ size: 'A4', margin: 40 });
       let buffers = [];
       doc.on('data', buffers.push.bind(buffers));
       doc.on('end', () => {
         const pdfData = Buffer.concat(buffers);
-        sendInspectionReportEmail(populated.userId.email, populated.userId.name, pdfData, parsedReport.reportNumber || populated._id);
+        sendInspectionReportEmail(targetEmail, populated.userId.name, pdfData, parsedReport.reportNumber || populated._id);
       });
       buildInspectionPDF(doc, populated, parsedReport);
       doc.end();

@@ -57,6 +57,7 @@ const inspectionBookingSchema = new mongoose.Schema({
   // === Structured Inspection Report (mirrors physical form) ===
   inspectionReport: {
     reportNumber: { type: String },
+    customerEmail: { type: String },
     inspectionDateTime: { type: Date },
     vehiclePowerSystem: {
       type: String,

@@ -16,6 +16,7 @@ const STATUS_OPTIONS = [
 
 const INITIAL_REPORT = {
   reportNumber: '',
+  customerEmail: '',
   inspectionDateTime: new Date().toISOString(),
   vehiclePowerSystem: 'Non-Hybrid',
   registrationNo: '',
@@ -168,6 +169,9 @@ export default function InspectionReportForm() {
           
           <Text style={styles.inputLabel}>Report Number *</Text>
           <TextInput style={styles.input} value={report.reportNumber} onChangeText={(t) => handleTextChange('reportNumber', t)} placeholder="e.g. 107620" />
+
+          <Text style={styles.inputLabel}>Customer Email (For PDF)</Text>
+          <TextInput style={styles.input} value={report.customerEmail} onChangeText={(t) => handleTextChange('customerEmail', t)} placeholder="customer@example.com" keyboardType="email-address" autoCapitalize="none" />
 
           <Text style={styles.inputLabel}>Registration No *</Text>
           <TextInput style={styles.input} value={report.registrationNo} onChangeText={(t) => handleTextChange('registrationNo', t)} placeholder="e.g. JK 0492" />
