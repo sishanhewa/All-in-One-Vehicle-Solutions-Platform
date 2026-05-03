@@ -7,11 +7,12 @@ const Listing = require('../models/Listing');
 const getListings = asyncHandler(async (req, res) => {
   const { 
     make, fuelType, transmission, bodyType, location, 
-    minPrice, maxPrice, yearMin, yearMax, condition, search 
+    minPrice, maxPrice, yearMin, yearMax, condition, search, sellerId 
   } = req.query;
 
   let query = { status: 'Available' };
 
+  if (sellerId) query.sellerId = sellerId;
   if (make) query.make = new RegExp(make, 'i');
   if (fuelType) query.fuelType = fuelType;
   if (transmission) query.transmission = transmission;
