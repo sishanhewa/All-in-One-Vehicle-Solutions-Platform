@@ -25,10 +25,36 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Marketplace',
+          title: 'Home',
           tabBarIcon: ({ color, focused }) => (
             <Ionicons 
               name={focused ? 'home' : 'home-outline'} 
+              size={24} 
+              color={color} 
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="marketplace"
+        options={{
+          title: 'Marketplace',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              name={focused ? 'cart' : 'cart-outline'} 
+              size={24} 
+              color={color} 
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="rentals"
+        options={{
+          title: 'Rentals',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              name={focused ? 'car-sport' : 'car-sport-outline'} 
               size={24} 
               color={color} 
             />
@@ -42,6 +68,19 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons 
               name={focused ? 'shield-checkmark' : 'shield-checkmark-outline'} 
+              size={24} 
+              color={color} 
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="spareParts"
+        options={{
+          title: 'Spare Parts',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              name={focused ? 'construct' : 'construct-outline'} 
               size={24} 
               color={color} 
             />

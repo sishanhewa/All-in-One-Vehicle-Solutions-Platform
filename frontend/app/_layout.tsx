@@ -33,7 +33,26 @@ export default function RootLayout() {
           <Stack.Screen name="ManagePackages" options={{ title: 'Manage Packages' }} />
           <Stack.Screen name="RecordInspection" options={{ title: 'Record Inspection' }} />
           <Stack.Screen name="CompanyRegister" options={{ title: 'Company Registration' }} />
+          <Stack.Screen name="SparePartDetails" options={{ title: 'Part Details' }} />
+          <Stack.Screen name="CreateSparePart" options={{ title: 'Add Spare Part' }} />
+          <Stack.Screen name="EditSparePart" options={{ title: 'Edit Part' }} />
+          <Stack.Screen name="MySparePartsDashboard" options={{ title: 'My Spare Parts' }} />
+          <Stack.Screen name="SparePartSellerProfile" options={{ title: 'Seller Parts' }} />
+          <Stack.Screen name="rentals/add-rental" options={{ title: 'List Vehicle for Rent' }} />
+          <Stack.Screen name="rentals/my-listings" options={{ title: 'My Rental Listings' }} />
+          <Stack.Screen name="rentals/my-bookings" options={{ title: 'My Bookings' }} />
+          <Stack.Screen name="rentals/requests" options={{ title: 'Rental Requests' }} />
+          <Stack.Screen name="rentals/booking-detail" options={{ title: 'Booking Details' }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+          
+          <Stack.Screen name="AdminDashboard" options={{ title: 'Admin Panel' }} />
+          <Stack.Screen name="AdminUserManagement" options={{ title: 'User Management' }} />
+          <Stack.Screen name="AdminUserDetail" options={{ title: 'User Details' }} />
+          <Stack.Screen name="AdminAdManagement" options={{ title: 'Ad Management' }} />
+          <Stack.Screen name="AdminAdDetail" options={{ title: 'Ad Details' }} />
+          <Stack.Screen name="AdminTicketManagement" options={{ title: 'Support Queue' }} />
+          <Stack.Screen name="AdminTicketDetail" options={{ title: 'Admin Ticket View' }} />
+          <Stack.Screen name="AdminInspectionManagement" options={{ title: 'Inspections Oversight' }} />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
