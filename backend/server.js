@@ -23,8 +23,7 @@ const app = express();
 app.use(express.json()); // Parses incoming JSON requests
 app.use(cors()); // Enables Cross-Origin Resource Sharing
 
-// Make 'public/uploads' static so the mobile app can request the images over Http
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+// Local uploads route removed since Cloudinary handles images now
 
 // Mount the API Routes
 app.use('/api/auth', authRoutes);

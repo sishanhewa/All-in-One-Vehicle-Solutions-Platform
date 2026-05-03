@@ -10,7 +10,7 @@ const createRentalVehicle = asyncHandler(async (req, res) => {
   
   let images = [];
   if (req.files && req.files.length > 0) {
-    images = req.files.map(file => `/uploads/${file.filename}`);
+    images = req.files.map(file => file.path);
   }
 
   let parsedRequiredDocs;
@@ -102,12 +102,12 @@ const requestBooking = asyncHandler(async (req, res) => {
     endDate,
     totalDays,
     totalMonths,
-    drivingLicensePath: files.drivingLicense ? `/uploads/${files.drivingLicense[0].filename}` : undefined,
-    idProofPath: files.idProof ? `/uploads/${files.idProof[0].filename}` : undefined,
-    billingProofPath: files.billingProof ? `/uploads/${files.billingProof[0].filename}` : undefined,
+    drivingLicensePath: files.drivingLicense ? files.drivingLicense[0].path : undefined,
+    idProofPath: files.idProof ? files.idProof[0].path : undefined,
+    billingProofPath: files.billingProof ? files.billingProof[0].path : undefined,
     guarantorName,
-    guarantorIdPath: files.guarantorId ? `/uploads/${files.guarantorId[0].filename}` : undefined,
-    guarantorBillingPath: files.guarantorBilling ? `/uploads/${files.guarantorBilling[0].filename}` : undefined,
+    guarantorIdPath: files.guarantorId ? files.guarantorId[0].path : undefined,
+    guarantorBillingPath: files.guarantorBilling ? files.guarantorBilling[0].path : undefined,
     status: 'Pending'
   });
 

@@ -73,7 +73,7 @@ const createListing = asyncHandler(async (req, res) => {
   }
 
   // Collect image paths from multer
-  const images = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
+  const images = req.files ? req.files.map(file => file.path) : [];
 
   const listing = await Listing.create({
     sellerId: req.user._id,
@@ -122,7 +122,7 @@ const updateListing = asyncHandler(async (req, res) => {
 
   // If new images were uploaded, replace the existing images
   if (req.files && req.files.length > 0) {
-    listing.images = req.files.map(file => `/uploads/${file.filename}`);
+    listing.images = req.files.map(file => file.path);
   }
 
   const updated = await listing.save();

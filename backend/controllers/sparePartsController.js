@@ -73,7 +73,7 @@ const createPart = asyncHandler(async (req, res) => {
   }
 
   // Collect image paths from multer
-  const images = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
+  const images = req.files ? req.files.map(file => file.path) : [];
 
   const part = await VehiclePart.create({
     sellerId: req.user._id,
@@ -141,7 +141,7 @@ const updatePart = asyncHandler(async (req, res) => {
 
   // If new images were uploaded, replace the existing images
   if (req.files && req.files.length > 0) {
-    part.images = req.files.map(file => `/uploads/${file.filename}`);
+    part.images = req.files.map(file => file.path);
   }
 
   const updated = await part.save();

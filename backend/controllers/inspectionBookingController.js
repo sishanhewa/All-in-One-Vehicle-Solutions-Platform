@@ -305,7 +305,7 @@ const uploadReportImages = asyncHandler(async (req, res) => {
     throw new Error('Please upload at least one image');
   }
 
-  const newImages = req.files.map(file => `/uploads/${file.filename}`);
+  const newImages = req.files.map(file => file.path);
   booking.reportImages = [...booking.reportImages, ...newImages];
   const updated = await booking.save();
 

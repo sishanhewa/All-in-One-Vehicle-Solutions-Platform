@@ -109,7 +109,7 @@ const updateCompanyProfile = asyncHandler(async (req, res) => {
 
   // Handle logo upload
   if (req.files && req.files.length > 0) {
-    user.companyProfile.logo = `/uploads/${req.files[0].filename}`;
+    user.companyProfile.logo = req.files[0].path;
   }
 
   const updated = await user.save();
@@ -191,7 +191,7 @@ const createPackage = asyncHandler(async (req, res) => {
 
   let images = [];
   if (req.files && req.files.length > 0) {
-    images = req.files.map(file => `/uploads/${file.filename}`);
+    images = req.files.map(file => file.path);
   }
 
   // Parse arrays if sent as JSON strings (from FormData)
@@ -260,7 +260,7 @@ const updatePackage = asyncHandler(async (req, res) => {
 
   // Handle image uploads
   if (req.files && req.files.length > 0) {
-    updateData.images = req.files.map(file => `/uploads/${file.filename}`);
+    updateData.images = req.files.map(file => file.path);
   }
 
   Object.assign(pkg, updateData);
