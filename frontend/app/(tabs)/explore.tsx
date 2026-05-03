@@ -72,7 +72,7 @@ export default function ProfileTab() {
         )}
         <MenuItem
           icon="calendar"
-          title="My Bookings"
+          title="My Inspection Bookings"
           subtitle="Manage your inspection bookings"
           onPress={() => router.push('/MyBookings')}
           iconColor="#3498db"
@@ -114,34 +114,7 @@ export default function ProfileTab() {
           onPress={() => router.push('/rentals/my-bookings')}
           iconColor="#e67e22"
         />
-        <MenuItem
-          icon="plus-circle"
-          title="List Vehicle for Rent"
-          subtitle="Add a new vehicle to the rental marketplace"
-          onPress={() => router.push('/rentals/add-rental')}
-          iconColor="#10ac84"
-        />
-        <MenuItem
-          icon="grid"
-          title="My Rental Listings"
-          subtitle="Manage your listed rental vehicles"
-          onPress={() => router.push('/rentals/my-listings')}
-          iconColor="#3498db"
-        />
-        <MenuItem
-          icon="inbox"
-          title="Rental Requests"
-          subtitle="Approve or reject booking requests for your vehicles"
-          onPress={() => router.push('/rentals/requests')}
-          iconColor="#f39c12"
-        />
-        <MenuItem
-          icon="calendar"
-          title="My Bookings"
-          subtitle="Track the status of your rental bookings"
-          onPress={() => router.push('/rentals/my-bookings')}
-          iconColor="#e67e22"
-        />
+
         <MenuItem
           icon="grid"
           title="My Listings"

@@ -4,13 +4,16 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons, Feather } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function BookVehicleScreen() {
   const { vehicleId } = useLocalSearchParams();
   const router = useRouter();
 
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
   const [guarantorName, setGuarantorName] = useState('');
   
   const [drivingLicense, setDrivingLicense] = useState<any>(null);
@@ -64,8 +67,8 @@ export default function BookVehicleScreen() {
       const token = await AsyncStorage.getItem('userToken');
       const formData = new FormData();
 
-      formData.append('startDate', startDate);
-      formData.append('endDate', endDate);
+      formData.append('startDate', startDate!.toISOString().split('T')[0]);
+      formData.append('endDate', endDate!.toISOString().split('T')[0]);
       formData.append('totalDays', '5');
       formData.append('totalMonths', '0');
       formData.append('guarantorName', guarantorName);
@@ -166,16 +169,42 @@ export default function BookVehicleScreen() {
         </View>
 
         <Text style={styles.label}>Start Date</Text>
-        <View style={styles.inputWrap}>
+        <TouchableOpacity style={styles.inputWrap} onPress={() => setShowStartPicker(true)}>
           <Ionicons name="calendar-outline" size={18} color="#b2bec3" style={{ marginLeft: 14 }} />
-          <TextInput style={styles.input} value={startDate} onChangeText={setStartDate} placeholder="YYYY-MM-DD" placeholderTextColor="#b2bec3" />
-        </View>
+          <Text style={[styles.input, !startDate && { color: '#b2bec3' }]}>
+            {startDate ? startDate.toISOString().split('T')[0] : 'Select start date'}
+          </Text>
+        </TouchableOpacity>
+        {showStartPicker && (
+          <DateTimePicker
+            value={startDate || new Date()}
+            mode="date"
+            display="default"
+            onChange={(event, date) => {
+              setShowStartPicker(Platform.OS === 'ios');
+              if (date) setStartDate(date);
+            }}
+          />
+        )}
 
         <Text style={styles.label}>End Date</Text>
-        <View style={styles.inputWrap}>
+        <TouchableOpacity style={styles.inputWrap} onPress={() => setShowEndPicker(true)}>
           <Ionicons name="calendar-outline" size={18} color="#b2bec3" style={{ marginLeft: 14 }} />
-          <TextInput style={styles.input} value={endDate} onChangeText={setEndDate} placeholder="YYYY-MM-DD" placeholderTextColor="#b2bec3" />
-        </View>
+          <Text style={[styles.input, !endDate && { color: '#b2bec3' }]}>
+            {endDate ? endDate.toISOString().split('T')[0] : 'Select end date'}
+          </Text>
+        </TouchableOpacity>
+        {showEndPicker && (
+          <DateTimePicker
+            value={endDate || new Date()}
+            mode="date"
+            display="default"
+            onChange={(event, date) => {
+              setShowEndPicker(Platform.OS === 'ios');
+              if (date) setEndDate(date);
+            }}
+          />
+        )}
       </View>
 
       {/* Your Documents */}

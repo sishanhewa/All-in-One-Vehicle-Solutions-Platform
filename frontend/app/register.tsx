@@ -63,6 +63,34 @@ export default function RegisterScreen() {
       <TouchableOpacity onPress={() => router.push('/login')} style={{marginTop: 20}}>
         <Text style={styles.linkText}>Already have an account? <Text style={styles.linkBold}>Login here</Text></Text>
       </TouchableOpacity>
+
+      <View style={styles.businessSection}>
+        <View style={styles.dividerRow}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>Business Accounts</Text>
+          <View style={styles.dividerLine} />
+        </View>
+        
+        <View style={styles.businessLinksRow}>
+          <TouchableOpacity 
+            onPress={() => router.push('/GarageRegister')} 
+            style={styles.businessBtn}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="construct" size={18} color="#8e44ad" />
+            <Text style={[styles.businessBtnText, {color: '#8e44ad'}]}>Register Garage</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            onPress={() => router.push('/CompanyRegister')} 
+            style={styles.businessBtn}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="shield-checkmark" size={18} color="#3498db" />
+            <Text style={[styles.businessBtnText, {color: '#3498db'}]}>Register Inspection Co.</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </ScrollView>
   );
 }
@@ -79,5 +107,12 @@ const styles = StyleSheet.create({
   btn: { backgroundColor: '#10ac84', padding: 18, borderRadius: 12, alignItems: 'center', marginTop: 10 },
   btnText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
   linkText: { textAlign: 'center', color: '#b2bec3', fontSize: 15 },
-  linkBold: { color: '#10ac84', fontWeight: '700' }
+  linkBold: { color: '#10ac84', fontWeight: '700' },
+  businessSection: { marginTop: 35 },
+  dividerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: '#eee' },
+  dividerText: { marginHorizontal: 12, color: '#b2bec3', fontSize: 13, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
+  businessLinksRow: { flexDirection: 'column', gap: 12 },
+  businessBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8f9fa', padding: 15, borderRadius: 12, borderWidth: 1, borderColor: '#eee', gap: 8 },
+  businessBtnText: { fontSize: 15, fontWeight: '700' }
 });
