@@ -19,7 +19,7 @@ const ListingDetails = () => {
 
   const loadListing = async () => {
     try {
-      const API_URL = 'http://10.0.2.2:5000/api/marketplace';
+      const API_URL = 'https://all-in-one-vehicle-solutions-platform.onrender.com/api/marketplace';
       const response = await fetch(`${API_URL}/${listingId}`);
       const data = await response.json();
       setListing(data);

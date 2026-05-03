@@ -17,7 +17,7 @@ const SellerProfile = () => {
 
   const loadSeller = async () => {
     try {
-      const API = 'http://10.0.2.2:5000/api/marketplace';
+      const API = 'https://all-in-one-vehicle-solutions-platform.onrender.com/api/marketplace';
       const res = await fetch(`${API}?sellerId=${sellerId}`);
       const data = await res.json();
       setListings(data);
