@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Platform, Linking, Image } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Platform, Linking, Image, Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons, Feather } from '@expo/vector-icons';
 
@@ -8,6 +10,7 @@ export default function RentalVehicleDetails() {
   const router = useRouter();
   const [vehicle, setVehicle] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   useEffect(() => {
     fetchDetail();
@@ -62,7 +65,31 @@ export default function RentalVehicleDetails() {
       {/* Hero Image */}
       <View style={styles.heroWrap}>
         {vehicle.images && vehicle.images.length > 0 ? (
-          <Image source={{ uri: vehicle.images[0].startsWith('http') ? vehicle.images[0] : `https://all-in-one-vehicle-solutions-platform.onrender.com${vehicle.images[0]}` }} style={{ width: '100%', height: '100%', position: 'absolute' }} resizeMode="cover" />
+          <>
+            <ScrollView
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onMomentumScrollEnd={(e) => {
+                const idx = Math.round(e.nativeEvent.contentOffset.x / width);
+                setActiveImageIndex(idx);
+              }}
+            >
+              {vehicle.images.map((img: string, i: number) => {
+                const uri = img.startsWith('http') ? img : `https://all-in-one-vehicle-solutions-platform.onrender.com${img}`;
+                return (
+                  <Image key={i} source={{ uri }} style={{ width, height: '100%' }} resizeMode="cover" />
+                );
+              })}
+            </ScrollView>
+            {vehicle.images.length > 1 && (
+              <View style={styles.dotRow}>
+                {vehicle.images.map((_: any, i: number) => (
+                  <View key={i} style={[styles.dot, activeImageIndex === i && styles.dotActive]} />
+                ))}
+              </View>
+            )}
+          </>
         ) : (
           <Ionicons name="car-sport" size={64} color="#10ac84" />
         )}
@@ -198,6 +225,9 @@ const styles = StyleSheet.create({
   errorText: { marginTop: 12, fontSize: 16, fontWeight: '600', color: '#e74c3c' },
 
   heroWrap: { height: 180, backgroundColor: '#f0faf7', justifyContent: 'center', alignItems: 'center' },
+  dotRow: { position: 'absolute', bottom: 10, flexDirection: 'row', justifyContent: 'center', width: '100%', gap: 6 },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: 'rgba(255, 255, 255, 0.5)' },
+  dotActive: { backgroundColor: '#10ac84', width: 20 },
   availBadge: { position: 'absolute', top: 16, right: 16, flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
   availBadgeText: { color: '#fff', fontSize: 12, fontWeight: '700' },
 
