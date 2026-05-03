@@ -381,16 +381,19 @@ const generateReportPDF = asyncHandler(async (req, res) => {
   doc.fontSize(14).font('Helvetica-Bold').text('Vehicle Identification Details', { align: 'center' });
   doc.moveDown(0.5);
   doc.fontSize(10).font('Helvetica');
-  doc.text(`Registration No: ${report.registrationNo || 'N/A'}`, 40, doc.y, { continued: true });
-  doc.text(`Meter Reading: ${report.meterReading || 'N/A'}`, 300, doc.y);
+  const yReg = doc.y;
+  doc.text(`Registration No: ${report.registrationNo || 'N/A'}`, 40, yReg);
+  doc.text(`Meter Reading: ${report.meterReading || 'N/A'}`, 300, yReg);
 
   doc.moveDown(2);
-  doc.fontSize(12).font('Helvetica-Bold').text('Legend: A = Adjusted | ✓ = Checked | X = Problem | C = Clean | R = Replace', { align: 'center' });
+  doc.fontSize(12).font('Helvetica-Bold').text('Legend: A = Adjusted | ✓ = Checked | X = Problem | C = Clean | R = Replace', 40, doc.y, { align: 'center' });
   doc.moveDown(1);
 
   // Draw checklists using a simple two-column layout
   const col1 = 40;
   const col2 = 300;
+  
+  if (doc.y > doc.page.height - doc.page.margins.bottom - 200) doc.addPage();
   let currentY = doc.y;
 
   doc.fontSize(10).font('Helvetica-Bold');
@@ -415,7 +418,12 @@ const generateReportPDF = asyncHandler(async (req, res) => {
     currentY += 15;
   }
 
+  // Restore X to left margin so moveDown behaves
+  doc.x = 40;
+  doc.y = currentY;
   doc.moveDown(2);
+  
+  if (doc.y > doc.page.height - doc.page.margins.bottom - 180) doc.addPage();
   currentY = doc.y;
 
   doc.fontSize(10).font('Helvetica-Bold');
@@ -440,28 +448,26 @@ const generateReportPDF = asyncHandler(async (req, res) => {
     currentY += 15;
   }
 
+  doc.x = 40;
+  doc.y = currentY;
   doc.moveDown(2);
+  
+  if (doc.y > doc.page.height - doc.page.margins.bottom - 40) doc.addPage();
   currentY = doc.y;
+  
   doc.fontSize(10).font('Helvetica-Bold').text('Service Options:', col1, currentY);
   doc.font('Helvetica');
   const so = report.serviceOptions || {};
   doc.text(`Full Service: [${so.fullService ? '✓' : ' '}]    Oil Change: [${so.oilChange ? '✓' : ' '}]    Interior: [${so.interior ? '✓' : ' '}]`, col1, currentY + 15);
 
+  doc.x = 40;
+  doc.y = currentY + 15;
   doc.moveDown(2);
+  
   doc.font('Helvetica-Bold').text('Remarks:');
   doc.font('Helvetica').text(report.remarks || 'None');
 
   doc.moveDown(4);
-  currentY = doc.y;
-  doc.text('_________________________', 40, currentY);
-  doc.text('Technician Signature', 40, currentY + 15);
-  
-  doc.text('_________________________', 220, currentY);
-  doc.text('Service Adviser Signature', 220, currentY + 15);
-
-  doc.text('_________________________', 400, currentY);
-  doc.text('Customer Signature', 400, currentY + 15);
-
   doc.end();
 });
 
