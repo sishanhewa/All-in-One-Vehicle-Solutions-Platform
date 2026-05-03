@@ -385,9 +385,9 @@ const generateReportPDF = asyncHandler(async (req, res) => {
   doc.text(`Registration No: ${report.registrationNo || 'N/A'}`, 40, yReg);
   doc.text(`Meter Reading: ${report.meterReading || 'N/A'}`, 300, yReg);
 
+  doc.moveDown(2);
+  doc.fontSize(10).font('Helvetica-Bold').text('Legend: A = Adjusted | OK = Checked | X = Problem | C = Clean | R = Replace', { align: 'center' });
   doc.moveDown(1);
-  doc.fontSize(10).font('Helvetica-Bold').text('Legend: A = Adjusted | OK = Checked | X = Problem | C = Clean | R = Replace', 40, doc.y, { align: 'center', lineBreak: false });
-  doc.moveDown(0.5);
 
   // Draw checklists using a simple two-column layout
   const col1 = 40;
