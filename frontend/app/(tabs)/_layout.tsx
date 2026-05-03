@@ -72,20 +72,6 @@ export default function TabLayout() {
         }}
       />
 
-      {/* ── Inspections ── User & Admin ── */}
-      <Tabs.Screen
-        name="marketplace"
-        options={{
-          title: 'Marketplace',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons 
-              name={focused ? 'cart' : 'cart-outline'} 
-              size={24} 
-              color={color} 
-            />
-          ),
-        }}
-      />
       <Tabs.Screen
         name="rentals"
         options={{
