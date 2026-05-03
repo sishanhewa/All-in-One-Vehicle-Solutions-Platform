@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { fetchBookingById, cancelBookingAPI, resolveInspectionImageUrl } from '../api/inspectionApi';
+import { fetchBookingById, cancelBookingAPI, resolveInspectionImageUrl, INSPECTION_API_URL } from '../api/inspectionApi';
 import { AuthContext } from '../context/AuthContext';
 import { Feather, Ionicons } from '@expo/vector-icons';
 
@@ -60,6 +62,28 @@ const BookingDetails = () => {
         }
       }
     ]);
+  };
+
+  const handleDownloadPDF = async () => {
+    try {
+      setLoading(true);
+      const url = `${INSPECTION_API_URL}/bookings/${bookingId}/report-pdf`;
+      const fileUri = FileSystem.documentDirectory + `report_${bookingId}.pdf`;
+      
+      const { uri } = await FileSystem.downloadAsync(url, fileUri, {
+        headers: { Authorization: `Bearer ${userInfo?.token || ''}` },
+      });
+      
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri);
+      } else {
+        Alert.alert('Success', 'PDF downloaded to ' + uri);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to download PDF report');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const formatDate = (dateStr) => {
@@ -191,28 +215,54 @@ const BookingDetails = () => {
               </View>
             </View>
 
-            {/* Checklist */}
-            {booking.checklist && booking.checklist.length > 0 && (
+            {/* Inspection Report Form Data */}
+            {booking.inspectionReport ? (
               <View style={styles.checklistCard}>
-                <Text style={styles.checklistTitle}>Detailed Checklist</Text>
-                {booking.checklist.map((item, idx) => (
-                  <View key={idx} style={styles.checklistItem}>
-                    <View style={[styles.conditionDot, { backgroundColor: CONDITION_COLORS[item.condition] || '#b2bec3' }]} />
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.checklistItemName}>{item.item}</Text>
-                      <Text style={[styles.checklistCondition, { color: CONDITION_COLORS[item.condition] || '#b2bec3' }]}>{item.condition}</Text>
-                      {item.notes ? <Text style={styles.checklistNotes}>{item.notes}</Text> : null}
-                    </View>
-                  </View>
-                ))}
+                <Text style={styles.checklistTitle}>Detailed Vehicle Report</Text>
+                
+                <View style={styles.reportSummaryRow}>
+                  <Text style={styles.reportLabel}>Power System:</Text>
+                  <Text style={styles.reportValue}>{booking.inspectionReport.vehiclePowerSystem || 'N/A'}</Text>
+                </View>
+                <View style={styles.reportSummaryRow}>
+                  <Text style={styles.reportLabel}>Meter Reading:</Text>
+                  <Text style={styles.reportValue}>{booking.inspectionReport.meterReading || 'N/A'}</Text>
+                </View>
+                
+                <View style={{ height: 1, backgroundColor: '#eee', marginVertical: 10 }} />
+                
+                <Text style={[styles.checklistTitle, { fontSize: 13, color: '#636e72', marginBottom: 10 }]}>
+                  Legend: ✓ Checked, X Problem, A Adjusted, C Clean, R Replace
+                </Text>
+                
+                <TouchableOpacity style={styles.downloadPdfBtn} onPress={handleDownloadPDF}>
+                  <Feather name="download-cloud" size={20} color="#fff" />
+                  <Text style={styles.downloadPdfBtnText}>Download Full PDF Report</Text>
+                </TouchableOpacity>
               </View>
+            ) : (
+              booking.checklist && booking.checklist.length > 0 && (
+                <View style={styles.checklistCard}>
+                  <Text style={styles.checklistTitle}>Detailed Checklist</Text>
+                  {booking.checklist.map((item, idx) => (
+                    <View key={idx} style={styles.checklistItem}>
+                      <View style={[styles.conditionDot, { backgroundColor: CONDITION_COLORS[item.condition] || '#b2bec3' }]} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.checklistItemName}>{item.item}</Text>
+                        <Text style={[styles.checklistCondition, { color: CONDITION_COLORS[item.condition] || '#b2bec3' }]}>{item.condition}</Text>
+                        {item.notes ? <Text style={styles.checklistNotes}>{item.notes}</Text> : null}
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )
             )}
 
             {/* Remarks */}
-            {booking.resultRemarks ? (
+            {booking.inspectionReport?.remarks || booking.resultRemarks ? (
               <View style={styles.remarksCard}>
                 <Text style={styles.remarksTitle}>Inspector Remarks</Text>
-                <Text style={styles.remarksText}>{booking.resultRemarks}</Text>
+                <Text style={styles.remarksText}>{booking.inspectionReport?.remarks || booking.resultRemarks}</Text>
               </View>
             ) : null}
 
@@ -297,6 +347,13 @@ const styles = StyleSheet.create({
 
   cancelBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 16, backgroundColor: '#fff', borderRadius: 14, borderWidth: 1, borderColor: '#fce4e4', marginTop: 10 },
   cancelBtnText: { color: '#e74c3c', fontWeight: '700', fontSize: 16 },
+
+  reportSummaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
+  reportLabel: { fontSize: 14, color: '#636e72', fontWeight: '500' },
+  reportValue: { fontSize: 14, color: '#1a1a2e', fontWeight: '700' },
+
+  downloadPdfBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#e67e22', padding: 14, borderRadius: 12, marginTop: 16 },
+  downloadPdfBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
 });
 
 export default BookingDetails;

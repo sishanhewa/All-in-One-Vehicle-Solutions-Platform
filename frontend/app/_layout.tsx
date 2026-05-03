@@ -31,8 +31,10 @@ export default function RootLayout() {
           <Stack.Screen name="MyBookings" options={{ title: 'My Bookings' }} />
           <Stack.Screen name="BookingDetails" options={{ title: 'Booking Details' }} />
           <Stack.Screen name="CompanyDashboard" options={{ title: 'Company Dashboard' }} />
+          <Stack.Screen name="SupportHome" options={{ title: 'Support' }} />
           <Stack.Screen name="ManagePackages" options={{ title: 'Manage Packages' }} />
           <Stack.Screen name="RecordInspection" options={{ title: 'Record Inspection' }} />
+          <Stack.Screen name="InspectionReportForm" options={{ title: 'Vehicle Inspection Report' }} />
           <Stack.Screen name="CompanyRegister" options={{ title: 'Company Registration' }} />
           <Stack.Screen name="SparePartDetails" options={{ title: 'Part Details' }} />
           <Stack.Screen name="CreateSparePart" options={{ title: 'Add Spare Part' }} />

@@ -29,6 +29,7 @@ const {
   startInspection,
   completeInspection,
   uploadReportImages,
+  generateReportPDF,
 } = require('../controllers/inspectionBookingController');
 
 // ==========================================
@@ -83,5 +84,8 @@ router.put('/bookings/:id/confirm', protect, requireRole('InspectionCompany'), c
 router.put('/bookings/:id/start', protect, requireRole('InspectionCompany'), startInspection);
 router.put('/bookings/:id/complete', protect, requireRole('InspectionCompany'), completeInspection);
 router.post('/bookings/:id/images', protect, requireRole('InspectionCompany'), upload.array('reportImages', 10), uploadReportImages);
+
+// Private (User or Company): Generate PDF report
+router.get('/bookings/:id/report-pdf', protect, generateReportPDF);
 
 module.exports = router;
