@@ -1,19 +1,19 @@
 const nodemailer = require('nodemailer');
 
 const sendInspectionReportEmail = async (toEmail, userName, pdfBuffer, reportNumber) => {
-  // Transporter configured for Gmail (port 587, forced IPv4 for Render)
+  // Use port 465 (direct SSL) with IPv4 forced — more reliable on cloud platforms
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
+    port: 465,
+    secure: true,
     family: 4,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
+    connectionTimeout: 30000,
+    greetingTimeout: 30000,
+    socketTimeout: 60000,
   });
 
   const mailOptions = {
@@ -39,11 +39,11 @@ const sendInspectionReportEmail = async (toEmail, userName, pdfBuffer, reportNum
   };
 
   try {
-    await transporter.sendMail(mailOptions);
-    console.log(`Email successfully sent to ${toEmail}`);
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`Email successfully sent to ${toEmail}`, info.response);
   } catch (error) {
     console.error(`Failed to send email to ${toEmail}: `, error.message);
-    // Don't throw the error, we don't want the API to crash if email fails
+    throw error; // Re-throw so the caller can catch it
   }
 };
 
