@@ -131,7 +131,7 @@ export default function MyRentalListingsScreen() {
             >
               <View style={styles.cardImagePlaceholder}>
                 {item.images && item.images.length > 0 ? (
-                  <Image source={{ uri: `https://all-in-one-vehicle-solutions-platform.onrender.com${item.images[0]}` }} style={{ width: '100%', height: '100%', borderRadius: 12 }} resizeMode="cover" />
+                  <Image source={{ uri: item.images[0].startsWith('http') ? item.images[0] : `https://all-in-one-vehicle-solutions-platform.onrender.com${item.images[0]}` }} style={{ width: '100%', height: '100%', borderRadius: 12 }} resizeMode="cover" />
                 ) : (
                   <Ionicons name="car-sport" size={36} color="#10ac84" />
                 )}

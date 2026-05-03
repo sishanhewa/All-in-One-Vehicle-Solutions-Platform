@@ -108,7 +108,7 @@ export default function BookingDetailScreen() {
         <Text style={styles.docTitle}>{title}</Text>
       </View>
       <Image
-        source={{ uri: `${API_BASE}${path}` }}
+        source={{ uri: path.startsWith('http') ? path : `${API_BASE}${path}` }}
         style={styles.docImage}
         resizeMode="cover"
       />

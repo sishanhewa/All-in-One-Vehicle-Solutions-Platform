@@ -62,7 +62,7 @@ export default function RentalVehicleDetails() {
       {/* Hero Image */}
       <View style={styles.heroWrap}>
         {vehicle.images && vehicle.images.length > 0 ? (
-          <Image source={{ uri: `https://all-in-one-vehicle-solutions-platform.onrender.com${vehicle.images[0]}` }} style={{ width: '100%', height: '100%', position: 'absolute' }} resizeMode="cover" />
+          <Image source={{ uri: vehicle.images[0].startsWith('http') ? vehicle.images[0] : `https://all-in-one-vehicle-solutions-platform.onrender.com${vehicle.images[0]}` }} style={{ width: '100%', height: '100%', position: 'absolute' }} resizeMode="cover" />
         ) : (
           <Ionicons name="car-sport" size={64} color="#10ac84" />
         )}

@@ -83,7 +83,7 @@ export default function RentalsListScreen() {
             >
               <View style={styles.cardImageWrap}>
                 {item.images && item.images.length > 0 ? (
-                  <Image source={{ uri: `https://all-in-one-vehicle-solutions-platform.onrender.com${item.images[0]}` }} style={{ width: '100%', height: '100%', borderRadius: 12 }} resizeMode="cover" />
+                  <Image source={{ uri: item.images[0].startsWith('http') ? item.images[0] : `https://all-in-one-vehicle-solutions-platform.onrender.com${item.images[0]}` }} style={{ width: '100%', height: '100%', borderRadius: 12 }} resizeMode="cover" />
                 ) : (
                   <Ionicons name="car-sport" size={40} color="#10ac84" />
                 )}
