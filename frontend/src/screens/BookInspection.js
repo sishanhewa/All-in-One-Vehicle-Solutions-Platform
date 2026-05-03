@@ -3,7 +3,8 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Activi
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { createBookingAPI } from '../api/inspectionApi';
 import { AuthContext } from '../context/AuthContext';
-import { Picker } from '@react-native-picker/picker';
+import DropDownPicker from 'react-native-dropdown-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Feather, Ionicons } from '@expo/vector-icons';
 
 const VEHICLE_TYPES = ['Car', 'SUV', 'Van', 'Motorcycle', 'Truck'];
@@ -21,10 +22,28 @@ const BookInspection = () => {
   const [year, setYear] = useState('');
   const [plateNumber, setPlateNumber] = useState('');
   const [vehicleType, setVehicleType] = useState('Car');
+  const [vehicleTypeOpen, setVehicleTypeOpen] = useState(false);
+  const [vehicleTypeItems, setVehicleTypeItems] = useState(VEHICLE_TYPES.map(v => ({label: v, value: v})));
+
   const [appointmentDate, setAppointmentDate] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [dateObj, setDateObj] = useState(new Date());
+
   const [appointmentTime, setAppointmentTime] = useState(TIME_SLOTS[2]);
+  const [timeOpen, setTimeOpen] = useState(false);
+  const [timeItems, setTimeItems] = useState(TIME_SLOTS.map(t => ({label: t, value: t})));
+
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const onDateChange = (event, selectedDate) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setDateObj(selectedDate);
+      const formattedDate = selectedDate.toISOString().split('T')[0];
+      setAppointmentDate(formattedDate);
+    }
+  };
 
   useEffect(() => {
     if (!userInfo) {
@@ -78,19 +97,6 @@ const BookInspection = () => {
     }
   };
 
-  const PickerField = ({ label, icon, selectedValue, onValueChange, items }) => (
-    <View style={styles.pickerContainer}>
-      <View style={styles.pickerLabelRow}>
-        <Ionicons name={icon} size={14} color="#636e72" />
-        <Text style={styles.pickerLabel}>{label}</Text>
-      </View>
-      <View style={styles.pickerBox}>
-        <Picker selectedValue={selectedValue} onValueChange={onValueChange} style={styles.picker} dropdownIconColor="#636e72">
-          {items.map(item => <Picker.Item key={item} label={item} value={item} />)}
-        </Picker>
-      </View>
-    </View>
-  );
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -130,22 +136,70 @@ const BookInspection = () => {
         <TextInput style={[styles.input, { flex: 1, marginRight: 8 }]} placeholder="Year (e.g. 2021)" placeholderTextColor="#b2bec3" keyboardType="numeric" value={year} onChangeText={setYear} />
         <TextInput style={[styles.input, { flex: 1 }]} placeholder="Plate (e.g. CAB-1234)" placeholderTextColor="#b2bec3" value={plateNumber} onChangeText={setPlateNumber} autoCapitalize="characters" />
       </View>
-      <PickerField label="Vehicle Type" icon="car-outline" selectedValue={vehicleType} onValueChange={setVehicleType} items={VEHICLE_TYPES} />
+      <View style={{ marginBottom: 12, zIndex: 3000 }}>
+        <View style={styles.pickerLabelRow}>
+          <Ionicons name="car-outline" size={14} color="#636e72" />
+          <Text style={styles.pickerLabel}>Vehicle Type</Text>
+        </View>
+        <DropDownPicker
+          open={vehicleTypeOpen}
+          value={vehicleType}
+          items={vehicleTypeItems}
+          setOpen={setVehicleTypeOpen}
+          setValue={setVehicleType}
+          setItems={setVehicleTypeItems}
+          zIndex={3000}
+          zIndexInverse={1000}
+          listMode="SCROLLVIEW"
+          style={styles.dropdown}
+          textStyle={styles.dropdownText}
+          dropDownContainerStyle={styles.dropdownContainer}
+        />
+      </View>
 
       {/* Appointment */}
       <Text style={styles.sectionTitle}>Appointment</Text>
-      <View style={styles.dateInputWrap}>
+      <TouchableOpacity 
+        style={styles.dateInputWrap} 
+        onPress={() => setShowDatePicker(true)}
+        activeOpacity={0.7}
+      >
         <Ionicons name="calendar-outline" size={18} color="#e67e22" />
-        <TextInput
-          style={styles.dateInput}
-          placeholder="Date (YYYY-MM-DD)"
-          placeholderTextColor="#b2bec3"
-          value={appointmentDate}
-          onChangeText={setAppointmentDate}
-          keyboardType="numeric"
+        <Text style={[styles.dateInput, !appointmentDate && {color: '#b2bec3'}]}>
+          {appointmentDate || "Date (YYYY-MM-DD)"}
+        </Text>
+      </TouchableOpacity>
+
+      {showDatePicker && (
+        <DateTimePicker
+          value={dateObj}
+          mode="date"
+          display="default"
+          minimumDate={new Date()}
+          onChange={onDateChange}
+        />
+      )}
+
+      <View style={{ marginBottom: 12, zIndex: 2000 }}>
+        <View style={styles.pickerLabelRow}>
+          <Ionicons name="time-outline" size={14} color="#636e72" />
+          <Text style={styles.pickerLabel}>Time Slot</Text>
+        </View>
+        <DropDownPicker
+          open={timeOpen}
+          value={appointmentTime}
+          items={timeItems}
+          setOpen={setTimeOpen}
+          setValue={setAppointmentTime}
+          setItems={setTimeItems}
+          zIndex={2000}
+          zIndexInverse={2000}
+          listMode="SCROLLVIEW"
+          style={styles.dropdown}
+          textStyle={styles.dropdownText}
+          dropDownContainerStyle={styles.dropdownContainer}
         />
       </View>
-      <PickerField label="Time Slot" icon="time-outline" selectedValue={appointmentTime} onValueChange={setAppointmentTime} items={TIME_SLOTS} />
 
       {/* Notes */}
       <Text style={styles.sectionTitle}>Additional Notes</Text>
@@ -193,11 +247,11 @@ const styles = StyleSheet.create({
   input: { backgroundColor: '#f8f9fa', borderRadius: 12, padding: 14, marginBottom: 12, fontSize: 15, color: '#1a1a2e', borderWidth: 1, borderColor: '#e9ecef' },
   textArea: { height: 100, textAlignVertical: 'top' },
 
-  pickerContainer: { flex: 1, marginBottom: 12, marginHorizontal: 2 },
   pickerLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 5 },
   pickerLabel: { fontSize: 12, color: '#636e72', fontWeight: '600' },
-  pickerBox: { backgroundColor: '#f8f9fa', borderRadius: 12, borderWidth: 1, borderColor: '#e9ecef', height: 48, justifyContent: 'center', overflow: 'hidden' },
-  picker: { height: 48, color: '#1a1a2e' },
+  dropdown: { backgroundColor: '#f8f9fa', borderRadius: 12, borderWidth: 1, borderColor: '#e9ecef', height: 48 },
+  dropdownText: { fontSize: 15, color: '#1a1a2e' },
+  dropdownContainer: { backgroundColor: '#fff', borderColor: '#e9ecef', borderRadius: 12 },
 
   dateInputWrap: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#f8f9fa', borderRadius: 12, padding: 14, marginBottom: 12, borderWidth: 1, borderColor: '#e9ecef' },
   dateInput: { flex: 1, fontSize: 15, color: '#1a1a2e' },
