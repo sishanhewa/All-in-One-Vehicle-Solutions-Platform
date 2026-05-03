@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useContext } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Image, TextInput, Alert, StatusBar, Platform, KeyboardAvoidingView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Image, TextInput, Alert, StatusBar, Platform, KeyboardAvoidingView, Modal } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fetchTicketById, addResponseAPI, updateStatusAPI, resolveImageUrl } from '../api/supportApi';
@@ -17,6 +17,7 @@ const TicketDetails = () => {
   const [replyMessage, setReplyMessage] = useState('');
   const [isReplying, setIsReplying] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
 
   const loadTicket = async () => {
     try {
@@ -100,7 +101,7 @@ const TicketDetails = () => {
           <Feather name="arrow-left" size={24} color="#1a1a2e" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Ticket Details</Text>
-        {(isOwner && ticket.status !== 'Closed') ? (
+        {(isOwner && ticket.status !== 'Closed' && ticket.status !== 'Resolved') ? (
           <TouchableOpacity onPress={() => router.push({ pathname: '/EditTicket', params: { ticketId: ticket._id } })} style={styles.editBtn}>
             <Feather name="edit-2" size={20} color="#10ac84" />
           </TouchableOpacity>
@@ -146,7 +147,9 @@ const TicketDetails = () => {
             <Text style={styles.sectionTitle}>Attachments</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {ticket.images.map((img, idx) => (
-                <Image key={idx} source={{ uri: resolveImageUrl(img) }} style={styles.attachedImage} />
+                <TouchableOpacity key={idx} onPress={() => setPreviewImage(resolveImageUrl(img))} activeOpacity={0.8}>
+                  <Image source={{ uri: resolveImageUrl(img) }} style={styles.attachedImage} />
+                </TouchableOpacity>
               ))}
             </ScrollView>
           </View>
@@ -211,6 +214,19 @@ const TicketDetails = () => {
         )}
 
       </ScrollView>
+
+      {/* Full Screen Image Preview Modal */}
+      <Modal visible={!!previewImage} transparent={true} onRequestClose={() => setPreviewImage(null)} animationType="fade">
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center' }}>
+          <TouchableOpacity style={{ position: 'absolute', top: Platform.OS === 'ios' ? 50 : 20, right: 20, zIndex: 10, padding: 10 }} onPress={() => setPreviewImage(null)}>
+            <Ionicons name="close" size={32} color="#fff" />
+          </TouchableOpacity>
+          {previewImage && (
+            <Image source={{ uri: previewImage }} style={{ width: '100%', height: '80%', resizeMode: 'contain' }} />
+          )}
+        </View>
+      </Modal>
+
     </KeyboardAvoidingView>
   );
 };

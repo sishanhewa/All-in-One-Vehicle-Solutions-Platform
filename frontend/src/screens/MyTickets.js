@@ -157,9 +157,11 @@ const MyTickets = () => {
           <Ionicons name="receipt-outline" size={64} color="#dfe6e9" />
           <Text style={styles.emptyTitle}>No tickets found</Text>
           <Text style={styles.emptyText}>You haven't created any support tickets yet.</Text>
-          <TouchableOpacity style={styles.createBtn} onPress={() => router.push('/CreateTicket')}>
-            <Text style={styles.createBtnText}>Create Ticket</Text>
-          </TouchableOpacity>
+          {userInfo.role !== 'Admin' && (
+            <TouchableOpacity style={styles.createBtn} onPress={() => router.push('/CreateTicket')}>
+              <Text style={styles.createBtnText}>Create Ticket</Text>
+            </TouchableOpacity>
+          )}
         </View>
       ) : (
         <FlatList

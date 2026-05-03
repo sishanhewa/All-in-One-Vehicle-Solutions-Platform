@@ -3,6 +3,7 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator, 
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fetchTickets } from '../api/supportApi';
+import { AuthContext } from '../context/AuthContext';
 import { Ionicons, Feather } from '@expo/vector-icons';
 
 const CATEGORIES = ['All Categories', 'Vehicle Listing Issue', 'Rental Dispute', 'Spare Part Complaint', 'Inspection Problem', 'Payment Issue', 'Account Issue', 'App Bug', 'Other'];
@@ -12,6 +13,7 @@ const PRIORITIES = ['All Priorities', 'Low', 'Medium', 'High', 'Urgent'];
 const SupportHome = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { userInfo } = React.useContext(AuthContext);
   
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -218,13 +220,15 @@ const SupportHome = () => {
       )}
 
       {/* FAB for Create Ticket */}
-      <TouchableOpacity 
-        style={styles.fab} 
-        activeOpacity={0.8}
-        onPress={() => router.push('/CreateTicket')}
-      >
-        <Ionicons name="add" size={28} color="#fff" />
-      </TouchableOpacity>
+      {(!userInfo || userInfo.role !== 'Admin') && (
+        <TouchableOpacity 
+          style={styles.fab} 
+          activeOpacity={0.8}
+          onPress={() => router.push('/CreateTicket')}
+        >
+          <Ionicons name="add" size={28} color="#fff" />
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
