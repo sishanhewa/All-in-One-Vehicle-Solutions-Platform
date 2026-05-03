@@ -16,7 +16,7 @@
 | | | |
 |---|---|---|
 | **Group Number** | ITP-SE-03 | |
-| **Member 1** | IT24100097 – Sishan Hewapathirana | Vehicle Inspection & Verification, User Authentication, Admin Dashboard & Deployment |
+| **Member 1** | IT24100097 – Sishan Hewapathirana | Vehicle Inspection & Verification, Admin Dashboard & Deployment |
 | **Member 2** | IT24103109 – Rashmi | Vehicle Marketplace |
 | **Member 3** | IT24102298 – Sadila | Vehicle Rental Management |
 | **Member 4** | IT24103553 – Shanuka | Spare Parts Management |
