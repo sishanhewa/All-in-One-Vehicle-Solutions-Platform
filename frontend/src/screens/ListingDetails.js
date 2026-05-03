@@ -48,12 +48,23 @@ const ListingDetails = () => {
     }
   };
 
-  const handleWhatsApp = () => {
+  const handleWhatsApp = async () => {
     if (listing?.sellerId?.phone) {
       // Remove any non-numeric characters from the phone number
       const phone = listing.sellerId.phone.replace(/[^0-9]/g, '');
       const msg = `Hi, I'm interested in your ${listing.year} ${listing.make} ${listing.model} listed on VMS.`;
-      Linking.openURL(`whatsapp://send?text=${encodeURIComponent(msg)}&phone=${phone}`);
+      const url = `whatsapp://send?text=${encodeURIComponent(msg)}&phone=${phone}`;
+      
+      try {
+        const canOpen = await Linking.canOpenURL(url);
+        if (canOpen) {
+          await Linking.openURL(url);
+        } else {
+          Alert.alert('WhatsApp Not Found', 'Please install WhatsApp to use this feature, or use the Call button instead.');
+        }
+      } catch (error) {
+        Alert.alert('WhatsApp Not Found', 'Please install WhatsApp to use this feature, or use the Call button instead.');
+      }
     }
   };
 
