@@ -1,11 +1,12 @@
 const nodemailer = require('nodemailer');
 
 const sendInspectionReportEmail = async (toEmail, userName, pdfBuffer, reportNumber) => {
-  // Transporter configured for Gmail (port 587 for cloud compatibility)
+  // Transporter configured for Gmail (port 587, forced IPv4 for Render)
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,
     secure: false,
+    family: 4,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
