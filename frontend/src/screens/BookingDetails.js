@@ -70,17 +70,21 @@ const BookingDetails = () => {
       const url = `${INSPECTION_API_URL}/bookings/${bookingId}/report-pdf`;
       const fileUri = FileSystem.documentDirectory + `report_${bookingId}.pdf`;
       
-      const { uri } = await FileSystem.downloadAsync(url, fileUri, {
+      const { uri, status } = await FileSystem.downloadAsync(url, fileUri, {
         headers: { Authorization: `Bearer ${userInfo?.token || ''}` },
       });
       
+      if (status !== 200) {
+        throw new Error('Server returned ' + status + '. Is the backend deployed?');
+      }
+
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri);
       } else {
         Alert.alert('Success', 'PDF downloaded to ' + uri);
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to download PDF report');
+      Alert.alert('Download Error', error.message || 'Failed to download PDF report');
     } finally {
       setLoading(false);
     }
@@ -231,9 +235,60 @@ const BookingDetails = () => {
                 
                 <View style={{ height: 1, backgroundColor: '#eee', marginVertical: 10 }} />
                 
-                <Text style={[styles.checklistTitle, { fontSize: 13, color: '#636e72', marginBottom: 10 }]}>
-                  Legend: ✓ Checked, X Problem, A Adjusted, C Clean, R Replace
+                <Text style={[styles.checklistTitle, { fontSize: 13, color: '#636e72', marginBottom: 10, marginTop: 10 }]}>
+                  Legend: ✓ Checked, X Problem, A Adjusted, C Clean, R Replace, - N/A
                 </Text>
+
+                {['engineOn', 'engineOff', 'mechanical', 'suspensionWheelsExhaust'].map((sectionKey) => {
+                  const sectionData = booking.inspectionReport[sectionKey];
+                  if (!sectionData) return null;
+                  
+                  const sectionTitles = {
+                    engineOn: 'A. Engine ON',
+                    engineOff: 'B. Engine OFF',
+                    mechanical: 'C. Mechanical / Undercarriage',
+                    suspensionWheelsExhaust: 'D. Suspension / Wheels / Exhaust'
+                  };
+
+                  return (
+                    <View key={sectionKey} style={styles.reportSection}>
+                      <Text style={styles.reportSectionTitle}>{sectionTitles[sectionKey]}</Text>
+                      {Object.entries(sectionData).map(([itemKey, status]) => {
+                        // format camelCase to Title Case
+                        const label = itemKey.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                        
+                        let color = '#b2bec3';
+                        let symbol = '-';
+                        if (status === 'checked') { color = '#2ecc71'; symbol = '✓'; }
+                        else if (status === 'problem') { color = '#e74c3c'; symbol = 'X'; }
+                        else if (status === 'adjusted') { color = '#3498db'; symbol = 'A'; }
+                        else if (status === 'clean') { color = '#1abc9c'; symbol = 'C'; }
+                        else if (status === 'replace') { color = '#e67e22'; symbol = 'R'; }
+
+                        return (
+                          <View key={itemKey} style={styles.reportItemRow}>
+                            <Text style={styles.reportItemLabel}>{label}</Text>
+                            <View style={[styles.reportItemStatus, { backgroundColor: color }]}>
+                              <Text style={styles.reportItemStatusText}>{symbol}</Text>
+                            </View>
+                          </View>
+                        );
+                      })}
+                    </View>
+                  );
+                })}
+                
+                {booking.inspectionReport.serviceOptions && Object.keys(booking.inspectionReport.serviceOptions).length > 0 && (
+                  <View style={styles.reportSection}>
+                    <Text style={styles.reportSectionTitle}>Service Options Completed</Text>
+                    {Object.entries(booking.inspectionReport.serviceOptions).filter(([k,v]) => v).map(([opt]) => (
+                      <View key={opt} style={styles.reportItemRow}>
+                        <Text style={styles.reportItemLabel}>{opt.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</Text>
+                        <Ionicons name="checkmark-circle" size={20} color="#2ecc71" />
+                      </View>
+                    ))}
+                  </View>
+                )}
                 
                 <TouchableOpacity style={styles.downloadPdfBtn} onPress={handleDownloadPDF}>
                   <Feather name="download-cloud" size={20} color="#fff" />
@@ -354,6 +409,13 @@ const styles = StyleSheet.create({
 
   downloadPdfBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#e67e22', padding: 14, borderRadius: 12, marginTop: 16 },
   downloadPdfBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
+
+  reportSection: { marginTop: 16, backgroundColor: '#f8f9fa', padding: 12, borderRadius: 10, borderWidth: 1, borderColor: '#eee' },
+  reportSectionTitle: { fontSize: 14, fontWeight: '700', color: '#1a1a2e', marginBottom: 10, borderBottomWidth: 1, borderBottomColor: '#dfe6e9', paddingBottom: 6 },
+  reportItemRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: '#f1f2f6' },
+  reportItemLabel: { fontSize: 13, color: '#2d3436', flex: 1 },
+  reportItemStatus: { width: 24, height: 24, borderRadius: 6, justifyContent: 'center', alignItems: 'center' },
+  reportItemStatusText: { color: '#fff', fontSize: 12, fontWeight: 'bold' },
 });
 
 export default BookingDetails;
