@@ -61,6 +61,59 @@ export default function ProfileTab() {
 
       {/* Menu */}
       <View style={styles.menu}>
+        {userInfo.role === 'Admin' && (
+          <MenuItem
+            icon="shield"
+            title="Admin Dashboard"
+            subtitle="System administration & oversight"
+            onPress={() => router.push('/AdminDashboard')}
+            iconColor="#e74c3c"
+          />
+        )}
+        <MenuItem
+          icon="calendar"
+          title="My Bookings"
+          subtitle="Manage your inspection bookings"
+          onPress={() => router.push('/MyBookings')}
+          iconColor="#3498db"
+        />
+        {userInfo.role === 'InspectionCompany' && (
+          <MenuItem
+            icon="briefcase"
+            title="Company Dashboard"
+            subtitle="Manage your inspection center"
+            onPress={() => router.push('/CompanyDashboard')}
+            iconColor="#10ac84"
+          />
+        )}
+        <MenuItem
+          icon="plus-circle"
+          title="List Vehicle for Rent"
+          subtitle="Add a new vehicle to the rental marketplace"
+          onPress={() => router.push('/rentals/add-rental')}
+          iconColor="#10ac84"
+        />
+        <MenuItem
+          icon="grid"
+          title="My Rental Listings"
+          subtitle="Manage your listed rental vehicles"
+          onPress={() => router.push('/rentals/my-listings')}
+          iconColor="#3498db"
+        />
+        <MenuItem
+          icon="inbox"
+          title="Rental Requests"
+          subtitle="Approve or reject booking requests for your vehicles"
+          onPress={() => router.push('/rentals/requests')}
+          iconColor="#f39c12"
+        />
+        <MenuItem
+          icon="calendar"
+          title="My Rental Bookings"
+          subtitle="Track the status of your rental bookings"
+          onPress={() => router.push('/rentals/my-bookings')}
+          iconColor="#e67e22"
+        />
         <MenuItem
           icon="plus-circle"
           title="List Vehicle for Rent"
