@@ -53,7 +53,7 @@ const createTicket = asyncHandler(async (req, res) => {
     throw new Error('Please provide subject and description');
   }
 
-  const images = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
+  const images = req.files ? req.files.map(file => file.path) : [];
 
   const ticket = await SupportTicket.create({
     userId: req.user._id,
@@ -98,7 +98,7 @@ const updateTicket = asyncHandler(async (req, res) => {
   });
 
   if (req.files && req.files.length > 0) {
-    ticket.images = req.files.map(file => `/uploads/${file.filename}`);
+    ticket.images = req.files.map(file => file.path);
   }
 
   const updated = await ticket.save();

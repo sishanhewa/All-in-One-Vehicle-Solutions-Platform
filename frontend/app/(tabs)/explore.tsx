@@ -16,8 +16,8 @@ export default function ProfileTab() {
         <View style={styles.guestIconWrap}>
           <Feather name="user" size={40} color="#b2bec3" />
         </View>
-        <Text style={styles.guestTitle}>Welcome to VehicleMarket</Text>
-        <Text style={styles.guestText}>Login or create an account to manage your listings and track your ads</Text>
+        <Text style={styles.guestTitle}>Welcome to VehicleHub</Text>
+        <Text style={styles.guestText}>Login or create an account to rent vehicles, manage your listings and track your ads</Text>
         <TouchableOpacity style={styles.guestLoginBtn} activeOpacity={0.8} onPress={() => router.push('/login')}>
           <Feather name="log-in" size={18} color="#fff" />
           <Text style={styles.guestLoginBtnTxt}>Login</Text>
@@ -72,7 +72,7 @@ export default function ProfileTab() {
         )}
         <MenuItem
           icon="calendar"
-          title="My Bookings"
+          title="My Inspection Bookings"
           subtitle="Manage your inspection bookings"
           onPress={() => router.push('/MyBookings')}
           iconColor="#3498db"
@@ -114,6 +114,7 @@ export default function ProfileTab() {
           onPress={() => router.push('/rentals/my-bookings')}
           iconColor="#e67e22"
         />
+
         <MenuItem
           icon="grid"
           title="My Listings"
@@ -134,6 +135,13 @@ export default function ProfileTab() {
           subtitle="Manage your spare part listings"
           onPress={() => router.push('/MySparePartsDashboard')}
           iconColor="#e67e22"
+        />
+        <MenuItem
+          icon="message-circle"
+          title="My Support Tickets"
+          subtitle="View and manage your complaints"
+          onPress={() => router.push('/MyTickets')}
+          iconColor="#e74c3c"
         />
         <MenuItem
           icon="user"

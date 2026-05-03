@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Vehicle Management System — Complete API Collection",
-    "description": "Full API collection for the Vehicle Management System including Auth, Marketplace, and Vehicle Inspection modules.\n\n## Setup\n1. Set `base_url` variable to `http://localhost:5000`\n2. Register a user and copy the token to `user_token`\n3. Register a company and copy the token to `company_token`\n\n## Testing Workflow\n1. Auth → Register & Login\n2. Marketplace → CRUD listings\n3. Inspection → Register company → Create packages → Book → Confirm → Start → Complete",
+    "description": "Full API collection for the Vehicle Management System including Auth, Marketplace, and Vehicle Inspection modules.\n\n## Setup\n1. Set `base_url` variable to `http://localhost:5000`\n2. Register a user and copy the token to `user_token`\n3. Register a company and copy the token to `company_token`\n\n## Testing Workflow\n1. Auth → Register & Login\n2. Marketplace → CRUD listings\n3. Inspection → Register company → Create packages → Book → Confirm → Start → Complete\n\nFor detailed request/response examples, refer to `API_TESTING_GUIDE.md`.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -33,9 +33,9 @@
             "listen": "test",
             "script": {
               "exec": [
-                "var jsonData = pm.response.json();",
+                "var jsonData = res.getBody();",
                 "if (jsonData.token) {",
-                "  pm.collectionVariables.set('user_token', jsonData.token);",
+                "  bru.setVar('user_token', jsonData.token);",
                 "  console.log('✅ user_token saved');",
                 "}"
               ]
@@ -57,9 +57,9 @@
             "listen": "test",
             "script": {
               "exec": [
-                "var jsonData = pm.response.json();",
+                "var jsonData = res.getBody();",
                 "if (jsonData.token) {",
-                "  pm.collectionVariables.set('user_token', jsonData.token);",
+                "  bru.setVar('user_token', jsonData.token);",
                 "  console.log('✅ user_token saved');",
                 "}"
               ]
@@ -81,10 +81,10 @@
             "listen": "test",
             "script": {
               "exec": [
-                "var jsonData = pm.response.json();",
+                "var jsonData = res.getBody();",
                 "if (jsonData.token) {",
-                "  pm.collectionVariables.set('company_token', jsonData.token);",
-                "  pm.collectionVariables.set('company_id', jsonData._id);",
+                "  bru.setVar('company_token', jsonData.token);",
+                "  bru.setVar('company_id', jsonData._id);",
                 "  console.log('✅ company_token & company_id saved');",
                 "}"
               ]
@@ -145,16 +145,18 @@
             "body": {
               "mode": "formdata",
               "formdata": [
+                { "key": "title", "value": "2023 Toyota Aqua for Sale", "type": "text" },
                 { "key": "make", "value": "Toyota", "type": "text" },
-                { "key": "model", "value": "Corolla", "type": "text" },
-                { "key": "year", "value": "2020", "type": "text" },
-                { "key": "price", "value": "6500000", "type": "text" },
-                { "key": "mileage", "value": "45000", "type": "text" },
-                { "key": "fuelType", "value": "Petrol", "type": "text" },
+                { "key": "model", "value": "Aqua", "type": "text" },
+                { "key": "year", "value": "2023", "type": "text" },
+                { "key": "price", "value": "8500000", "type": "text" },
+                { "key": "mileage", "value": "25000", "type": "text" },
+                { "key": "fuelType", "value": "Hybrid", "type": "text" },
                 { "key": "transmission", "value": "Automatic", "type": "text" },
-                { "key": "bodyType", "value": "Sedan", "type": "text" },
+                { "key": "bodyType", "value": "Hatchback", "type": "text" },
                 { "key": "location", "value": "Colombo", "type": "text" },
-                { "key": "description", "value": "Well maintained Toyota Corolla 2020 model. Single owner.", "type": "text" },
+                { "key": "condition", "value": "Reconditioned", "type": "text" },
+                { "key": "description", "value": "Single owner, mint condition. Low mileage.", "type": "text" },
                 { "key": "images", "type": "file", "src": "" }
               ]
             }
@@ -163,9 +165,9 @@
             "listen": "test",
             "script": {
               "exec": [
-                "var jsonData = pm.response.json();",
+                "var jsonData = res.getBody();",
                 "if (jsonData._id) {",
-                "  pm.collectionVariables.set('listing_id', jsonData._id);",
+                "  bru.setVar('listing_id', jsonData._id);",
                 "  console.log('✅ listing_id saved');",
                 "}"
               ]
@@ -179,11 +181,8 @@
             "header": [{ "key": "Authorization", "value": "Bearer {{user_token}}" }],
             "url": { "raw": "{{base_url}}/api/marketplace/{{listing_id}}", "host": ["{{base_url}}"], "path": ["api", "marketplace", "{{listing_id}}"] },
             "body": {
-              "mode": "formdata",
-              "formdata": [
-                { "key": "price", "value": "6200000", "type": "text" },
-                { "key": "description", "value": "Price reduced! Well maintained Toyota Corolla.", "type": "text" }
-              ]
+              "mode": "raw",
+              "raw": "{\n  \"price\": 7900000,\n  \"description\": \"Price reduced! Single owner, excellent condition.\"\n}"
             }
           }
         },
@@ -224,10 +223,10 @@
             "listen": "test",
             "script": {
               "exec": [
-                "var jsonData = pm.response.json();",
+                "var jsonData = res.getBody();",
                 "if (jsonData.token) {",
-                "  pm.collectionVariables.set('company_token', jsonData.token);",
-                "  pm.collectionVariables.set('company_id', jsonData._id);",
+                "  bru.setVar('company_token', jsonData.token);",
+                "  bru.setVar('company_id', jsonData._id);",
                 "  console.log('✅ company_token & company_id saved');",
                 "}"
               ]
@@ -333,9 +332,9 @@
             "listen": "test",
             "script": {
               "exec": [
-                "var jsonData = pm.response.json();",
+                "var jsonData = res.getBody();",
                 "if (jsonData._id) {",
-                "  pm.collectionVariables.set('package_id', jsonData._id);",
+                "  bru.setVar('package_id', jsonData._id);",
                 "  console.log('✅ package_id saved');",
                 "}"
               ]
@@ -397,9 +396,9 @@
             "listen": "test",
             "script": {
               "exec": [
-                "var jsonData = pm.response.json();",
+                "var jsonData = res.getBody();",
                 "if (jsonData._id) {",
-                "  pm.collectionVariables.set('booking_id', jsonData._id);",
+                "  bru.setVar('booking_id', jsonData._id);",
                 "  console.log('✅ booking_id saved');",
                 "}"
               ]
@@ -585,9 +584,9 @@
             "listen": "test",
             "script": {
               "exec": [
-                "var jsonData = pm.response.json();",
-                "pm.collectionVariables.set('company_token', jsonData.token);",
-                "pm.collectionVariables.set('company_id', jsonData._id);",
+                "var jsonData = res.getBody();",
+                "bru.setVar('company_token', jsonData.token);",
+                "bru.setVar('company_id', jsonData._id);",
                 "console.log('✅ Company logged in:', jsonData.companyProfile?.companyName);"
               ]
             }
@@ -603,9 +602,9 @@
             "listen": "test",
             "script": {
               "exec": [
-                "var jsonData = pm.response.json();",
+                "var jsonData = res.getBody();",
                 "if (jsonData.length > 0) {",
-                "  pm.collectionVariables.set('package_id', jsonData[0]._id);",
+                "  bru.setVar('package_id', jsonData[0]._id);",
                 "  console.log('✅ package_id saved:', jsonData[0].name);",
                 "}"
               ]
@@ -627,8 +626,8 @@
             "listen": "test",
             "script": {
               "exec": [
-                "var jsonData = pm.response.json();",
-                "pm.collectionVariables.set('user_token', jsonData.token);",
+                "var jsonData = res.getBody();",
+                "bru.setVar('user_token', jsonData.token);",
                 "console.log('✅ User registered:', jsonData.name);"
               ]
             }
@@ -652,8 +651,8 @@
             "listen": "test",
             "script": {
               "exec": [
-                "var jsonData = pm.response.json();",
-                "pm.collectionVariables.set('booking_id', jsonData._id);",
+                "var jsonData = res.getBody();",
+                "bru.setVar('booking_id', jsonData._id);",
                 "console.log('✅ Booking created:', jsonData.status);"
               ]
             }
@@ -668,7 +667,7 @@
           },
           "event": [{
             "listen": "test",
-            "script": { "exec": ["console.log('✅ Status:', pm.response.json().status);"] }
+            "script": { "exec": ["console.log('✅ Status:', res.getBody().status);"] }
           }]
         },
         {
@@ -680,7 +679,7 @@
           },
           "event": [{
             "listen": "test",
-            "script": { "exec": ["console.log('✅ Status:', pm.response.json().status);"] }
+            "script": { "exec": ["console.log('✅ Status:', res.getBody().status);"] }
           }]
         },
         {
@@ -699,7 +698,7 @@
           },
           "event": [{
             "listen": "test",
-            "script": { "exec": ["var d = pm.response.json(); console.log('✅ Result:', d.inspectionResult, '| Score:', d.overallScore);"] }
+            "script": { "exec": ["var d = res.getBody(); console.log('✅ Result:', d.inspectionResult, '| Score:', d.overallScore);"] }
           }]
         },
         {
@@ -713,7 +712,7 @@
             "listen": "test",
             "script": {
               "exec": [
-                "var d = pm.response.json();",
+                "var d = res.getBody();",
                 "console.log('✅ Final Status:', d.status);",
                 "console.log('✅ Result:', d.inspectionResult);",
                 "console.log('✅ Score:', d.overallScore);",

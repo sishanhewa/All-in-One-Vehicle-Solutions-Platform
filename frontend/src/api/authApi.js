@@ -1,5 +1,5 @@
 // Base URL for authentication API
-const AUTH_API_URL = 'http://10.0.2.2:5000/api/auth';
+const AUTH_API_URL = 'https://all-in-one-vehicle-solutions-platform.onrender.com/api/auth';
 
 export const registerUserAPI = async (userData) => {
   const response = await fetch(`${AUTH_API_URL}/register`, {

@@ -1,13 +1,13 @@
 import * as SecureStore from 'expo-secure-store';
 
 // Base URL for inspection API - uses the same server as marketplace
-export const INSPECTION_API_URL = 'http://10.0.2.2:5000/api/inspection';
+export const INSPECTION_API_URL = 'https://all-in-one-vehicle-solutions-platform.onrender.com/api/inspection';
 
 // Helper to resolve inspection image URLs
 export const resolveInspectionImageUrl = (imagePath) => {
   if (!imagePath) return 'https://via.placeholder.com/400x200?text=No+Image';
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
-  return `http://10.0.2.2:5000${imagePath}`;
+  return `https://all-in-one-vehicle-solutions-platform.onrender.com${imagePath}`;
 };
 
 // Helper to get auth header

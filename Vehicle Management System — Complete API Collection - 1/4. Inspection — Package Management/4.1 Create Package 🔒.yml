@@ -1,0 +1,55 @@
+info:
+  name: 4.1 Create Package 🔒
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{base_url}}/api/inspection/packages"
+  headers:
+    - name: Authorization
+      value: Bearer {{company_token}}
+  body:
+    type: multipart-form
+    data:
+      - name: name
+        type: text
+        value: Full Vehicle Inspection
+      - name: description
+        type: text
+        value: Comprehensive 80-point vehicle inspection covering all major systems.
+      - name: price
+        type: text
+        value: "15000"
+      - name: duration
+        type: text
+        value: "90"
+      - name: vehicleTypes
+        type: text
+        value: '["Car","SUV","Van"]'
+      - name: checklistItems
+        type: text
+        value: '["Engine","Transmission","Brakes","Suspension","Electrical","Body","Interior","Tires"]'
+      - name: images
+        type: file
+        value: []
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: "var jsonData = res.getBody();\r
+
+        if (jsonData._id) {\r
+
+        \  bru.setVar('package_id', jsonData._id);\r
+
+        \  console.log('✅ package_id saved');\r
+
+        }"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,33 @@
+info:
+  name: 3.7 Update Company Profile 🔒
+  type: http
+  seq: 7
+
+http:
+  method: PUT
+  url: "{{base_url}}/api/inspection/companies/profile"
+  headers:
+    - name: Authorization
+      value: Bearer {{company_token}}
+  body:
+    type: multipart-form
+    data:
+      - name: companyName
+        type: text
+        value: Updated Company Name
+      - name: description
+        type: text
+        value: Updated description for the company
+      - name: operatingHours
+        type: text
+        value: Mon-Sun 7:00 AM - 7:00 PM
+      - name: logo
+        type: file
+        value: []
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

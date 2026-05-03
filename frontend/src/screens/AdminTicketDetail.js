@@ -1,14 +1,14 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Image, TextInput, Alert, StatusBar, Platform, KeyboardAvoidingView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Image, TextInput, Alert, StatusBar, Platform, KeyboardAvoidingView, Modal } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fetchTickets, assignTicketStatus, respondToTicket, deleteTicket } from '../api/adminApi';
-import { Feather } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 // NOTE: Re-using the normal support endpoint for fetching a single ticket since adminApi doesn't duplicate the GET /:id right now.
 // Actually, I can just fetch all tickets and find the one. 
 // Or better, I will use fetchTickets and filter.
 
-const BASE_URL = 'http://192.168.8.100:5000';
+const BASE_URL = 'https://all-in-one-vehicle-solutions-platform.onrender.com';
 const resolveImageUrl = (imagePath) => {
   if (!imagePath) return 'https://via.placeholder.com/400x200?text=No+Image';
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
@@ -25,6 +25,7 @@ const AdminTicketDetail = () => {
   const [replyMessage, setReplyMessage] = useState('');
   const [isReplying, setIsReplying] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
 
   const loadTicket = async () => {
     try {
@@ -165,7 +166,9 @@ const AdminTicketDetail = () => {
             <Text style={styles.sectionTitle}>Attachments</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {ticket.images.map((img, idx) => (
-                <Image key={idx} source={{ uri: resolveImageUrl(img) }} style={styles.attachedImage} />
+                <TouchableOpacity key={idx} onPress={() => setPreviewImage(resolveImageUrl(img))} activeOpacity={0.8}>
+                  <Image source={{ uri: resolveImageUrl(img) }} style={styles.attachedImage} />
+                </TouchableOpacity>
               ))}
             </ScrollView>
           </View>
@@ -226,6 +229,19 @@ const AdminTicketDetail = () => {
         </View>
 
       </ScrollView>
+
+      {/* Full Screen Image Preview Modal */}
+      <Modal visible={!!previewImage} transparent={true} onRequestClose={() => setPreviewImage(null)} animationType="fade">
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center' }}>
+          <TouchableOpacity style={{ position: 'absolute', top: Platform.OS === 'ios' ? 50 : 20, right: 20, zIndex: 10, padding: 10 }} onPress={() => setPreviewImage(null)}>
+            <Ionicons name="close" size={32} color="#fff" />
+          </TouchableOpacity>
+          {previewImage && (
+            <Image source={{ uri: previewImage }} style={{ width: '100%', height: '80%', resizeMode: 'contain' }} />
+          )}
+        </View>
+      </Modal>
+
     </KeyboardAvoidingView>
   );
 };

@@ -4,13 +4,27 @@ const jwt = require('jsonwebtoken');
 
 // Helper to generate JWT Token
 const generateToken = (id) => {
-  // Use a secure fallback secret if not explicitly provided in .env
   return jwt.sign({ id }, process.env.JWT_SECRET || 'wmt-fallback-super-secret-key-2026', {
     expiresIn: '30d',
   });
 };
 
-// @desc    Register a new Seller Account
+/** Shapes the user object sent back to the client after login / register. */
+const userPayload = (user) => ({
+  _id:           user._id,
+  name:          user.name,
+  email:         user.email,
+  phone:         user.phone,
+  role:          user.role,
+  garageId:      user.garageId ?? null,
+  isActive:      user.isActive,
+  // companyProfile is always returned — Inspection module depends on it for
+  // InspectionCompany accounts. Other roles receive null and can safely ignore it.
+  companyProfile: user.companyProfile ?? null,
+  token:         generateToken(user._id),
+});
+
+// @desc    Register a new customer account
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
@@ -18,67 +32,51 @@ const registerUser = asyncHandler(async (req, res) => {
 
   if (!name || !email || !password || !phone) {
     res.status(400);
-    throw new Error('Please append all required fields to create a Seller Account');
+    throw new Error('Please provide name, email, password, and phone');
   }
 
-  // Check if seller already exists
   const userExists = await User.findOne({ email });
   if (userExists) {
     res.status(400);
-    throw new Error('Seller Account already exists with this email');
+    throw new Error('An account already exists with this email');
   }
 
-  // Create standard user natively
   const user = await User.create({ name, email, password, phone });
 
   if (user) {
-    res.status(201).json({
-      _id: user.id,
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      role: user.role,
-      companyProfile: user.companyProfile || null,
-      token: generateToken(user._id),
-    });
+    res.status(201).json(userPayload(user));
   } else {
     res.status(400);
-    throw new Error('Invalid user details. Database rejected creation.');
+    throw new Error('Invalid user details. Registration failed.');
   }
 });
 
-// @desc    Authenticate a Seller Account
+// @desc    Authenticate a user
 // @route   POST /api/auth/login
 // @access  Public
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  // Search user natively
   const user = await User.findOne({ email });
 
-  // Compare strictly securely hashed payload
   if (user && (await user.matchPassword(password))) {
-    res.json({
-      _id: user.id,
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      role: user.role,
-      companyProfile: user.companyProfile || null,
-      token: generateToken(user._id),
-    });
+    // Block deactivated accounts
+    if (user.isActive === false) {
+      res.status(403);
+      throw new Error('This account has been deactivated. Contact your garage owner.');
+    }
+    res.json(userPayload(user));
   } else {
     res.status(401);
     throw new Error('Invalid email or password');
   }
 });
 
-// @desc    Get current logged in Seller details
+// @desc    Get current logged-in user details
 // @route   GET /api/auth/profile
 // @access  Private
 const getProfile = asyncHandler(async (req, res) => {
-  // req.user is dynamically appended by the `protect` middleware
-  res.status(200).json(req.user);
+  res.status(200).json(userPayload(req.user));
 });
 
 module.exports = { registerUser, loginUser, getProfile };

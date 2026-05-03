@@ -1,3 +1,4 @@
+import React from 'react';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -35,6 +36,20 @@ export default function RootLayout() {
           <Stack.Screen name="RecordInspection" options={{ title: 'Record Inspection' }} />
           <Stack.Screen name="InspectionReportForm" options={{ title: 'Vehicle Inspection Report' }} />
           <Stack.Screen name="CompanyRegister" options={{ title: 'Company Registration' }} />
+          <Stack.Screen name="SparePartDetails" options={{ title: 'Part Details' }} />
+          <Stack.Screen name="CreateSparePart" options={{ title: 'Add Spare Part' }} />
+          <Stack.Screen name="EditSparePart" options={{ title: 'Edit Part' }} />
+          <Stack.Screen name="MySparePartsDashboard" options={{ title: 'My Spare Parts' }} />
+          <Stack.Screen name="SparePartSellerProfile" options={{ title: 'Seller Parts' }} />
+          <Stack.Screen name="CreateTicket" options={{ title: 'Submit Complaint' }} />
+          <Stack.Screen name="TicketDetails" options={{ title: 'Ticket Details' }} />
+          <Stack.Screen name="EditTicket" options={{ title: 'Edit Ticket' }} />
+          <Stack.Screen name="MyTickets" options={{ title: 'My Tickets' }} />
+          <Stack.Screen name="rentals/add-rental" options={{ title: 'List Vehicle for Rent' }} />
+          <Stack.Screen name="rentals/my-listings" options={{ title: 'My Rental Listings' }} />
+          <Stack.Screen name="rentals/my-bookings" options={{ title: 'My Bookings' }} />
+          <Stack.Screen name="rentals/requests" options={{ title: 'Rental Requests' }} />
+          <Stack.Screen name="rentals/booking-detail" options={{ title: 'Booking Details' }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
           
           <Stack.Screen name="AdminDashboard" options={{ title: 'Admin Panel' }} />

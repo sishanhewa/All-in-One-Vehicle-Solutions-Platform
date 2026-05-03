@@ -1,0 +1,31 @@
+info:
+  name: Step 8 — View Completed Booking (User)
+  type: http
+  seq: 8
+
+http:
+  method: GET
+  url: "{{base_url}}/api/inspection/bookings/{{booking_id}}"
+  headers:
+    - name: Authorization
+      value: Bearer {{user_token}}
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: "var d = res.getBody();\r
+
+        console.log('✅ Final Status:', d.status);\r
+
+        console.log('✅ Result:', d.inspectionResult);\r
+
+        console.log('✅ Score:', d.overallScore);\r
+
+        console.log('✅ Checklist items:', d.checklist?.length);"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
