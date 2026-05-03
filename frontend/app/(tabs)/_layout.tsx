@@ -64,7 +64,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="marketplace"
         options={{
-          title: 'Marketplace',
+          title: 'Market',
           tabBarItemStyle: show(isUser || isAdmin),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'cart' : 'cart-outline'} size={24} color={color} />
@@ -72,10 +72,12 @@ export default function TabLayout() {
         }}
       />
 
+      {/* ── Rentals ── User & Admin ── */}
       <Tabs.Screen
         name="rentals"
         options={{
           title: 'Rentals',
+          tabBarItemStyle: show(isUser || isAdmin),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons 
               name={focused ? 'car-sport' : 'car-sport-outline'} 
@@ -85,10 +87,12 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      {/* ── Inspections ── User & Admin ── */}
       <Tabs.Screen
         name="inspections"
         options={{
-          title: 'Inspections',
+          title: 'Inspect',
           tabBarItemStyle: show(isUser || isAdmin),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'shield-checkmark' : 'shield-checkmark-outline'} size={24} color={color} />
@@ -100,8 +104,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="services"
         options={{
-          title: 'Services',
-          tabBarActiveTintColor: '#8e44ad',
+          title: 'Service',
           tabBarItemStyle: show(isUser || isAdmin),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'construct' : 'construct-outline'} size={24} color={color} />
@@ -145,12 +148,12 @@ export default function TabLayout() {
         }}
       />
 
-      {/* ── My Repairs ── User & Admin ── */}
+      {/* ── My Repairs ── hidden from tab bar, accessible from Account ── */}
       <Tabs.Screen
         name="myRepairs"
         options={{
           title: 'My Repairs',
-          tabBarItemStyle: show(isUser || isAdmin),
+          tabBarItemStyle: hidden,
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'construct' : 'construct-outline'} size={24} color={color} />
           ),
@@ -181,11 +184,12 @@ export default function TabLayout() {
         }}
       />
 
-      {/* ── Account ── all roles ── */}
+      {/* ── Spare Parts ── hidden from tab bar, accessible from Account ── */}
       <Tabs.Screen
         name="spareParts"
         options={{
           title: 'Spare Parts',
+          tabBarItemStyle: hidden,
           tabBarIcon: ({ color, focused }) => (
             <Ionicons 
               name={focused ? 'construct' : 'construct-outline'} 
@@ -195,10 +199,13 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      {/* ── Support ── hidden from tab bar, accessible from Account ── */}
       <Tabs.Screen
         name="support"
         options={{
           title: 'Support',
+          tabBarItemStyle: hidden,
           tabBarIcon: ({ color, focused }) => (
             <Ionicons 
               name={focused ? 'chatbubble-ellipses' : 'chatbubble-ellipses-outline'} 
@@ -208,6 +215,8 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      {/* ── Account ── all roles ── */}
       <Tabs.Screen
         name="explore"
         options={{
