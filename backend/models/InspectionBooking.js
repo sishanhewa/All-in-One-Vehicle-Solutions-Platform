@@ -37,6 +37,7 @@ const inspectionBookingSchema = new mongoose.Schema({
   },
   notes: { type: String }, // User notes for the company
   cancelReason: { type: String }, // If cancelled
+  customerEmail: { type: String }, // Email where the report should be sent
 
   // === Post-Inspection Fields (filled by company) ===
   inspectionResult: {
@@ -57,7 +58,6 @@ const inspectionBookingSchema = new mongoose.Schema({
   // === Structured Inspection Report (mirrors physical form) ===
   inspectionReport: {
     reportNumber: { type: String },
-    customerEmail: { type: String },
     inspectionDateTime: { type: Date },
     vehiclePowerSystem: {
       type: String,

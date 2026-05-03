@@ -11,7 +11,7 @@ const { sendInspectionReportEmail } = require('../utils/emailService');
 const createBooking = asyncHandler(async (req, res) => {
   const {
     companyId, packageId, appointmentDate, appointmentTime, notes,
-    make, model, year, plateNumber, vehicleType
+    make, model, year, plateNumber, vehicleType, customerEmail
   } = req.body;
 
   if (!companyId || !packageId || !appointmentDate || !appointmentTime || !make || !model || !year || !plateNumber) {
@@ -52,6 +52,7 @@ const createBooking = asyncHandler(async (req, res) => {
     appointmentDate: new Date(appointmentDate),
     appointmentTime,
     notes: notes || '',
+    customerEmail,
     status: 'Pending',
   });
 
@@ -291,7 +292,7 @@ const completeInspection = asyncHandler(async (req, res) => {
     .populate('packageId', 'name price duration');
 
   // Generate PDF and send email asynchronously (don't block the response)
-  const targetEmail = parsedReport?.customerEmail || populated.userId?.email;
+  const targetEmail = populated.customerEmail || populated.userId?.email;
   console.log('[EMAIL] Target email:', targetEmail, '| Has report:', !!parsedReport);
   if (parsedReport && targetEmail) {
     try {
@@ -404,6 +405,7 @@ const buildInspectionPDF = (doc, booking, report) => {
   doc.text(`Report No: ${report.reportNumber || 'N/A'}`, { align: 'right' });
   doc.moveUp();
   doc.text(`Name: ${booking.userId.name}`);
+  doc.text(`Customer Email: ${booking.customerEmail || booking.userId.email || 'N/A'}`);
   
   doc.moveDown(0.5);
   doc.fontSize(8).text('This report is issued only for the use of above mentioned client and is not to be used for any other purpose. Inspection is necessarily superficial. No responsibility will be accepted regarding the repairs done after the inspection and defects that do not appear at present, which may develop subsequently.');
@@ -533,7 +535,7 @@ const sendReportEmail = asyncHandler(async (req, res) => {
   }
 
   const { email } = req.body;
-  const targetEmail = email || booking.inspectionReport.customerEmail || booking.userId?.email;
+  const targetEmail = email || booking.customerEmail || booking.userId?.email;
 
   if (!targetEmail) {
     res.status(400);

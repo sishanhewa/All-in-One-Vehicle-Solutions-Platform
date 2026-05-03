@@ -24,6 +24,7 @@ const BookInspection = () => {
   const [vehicleType, setVehicleType] = useState('Car');
   const [vehicleTypeOpen, setVehicleTypeOpen] = useState(false);
   const [vehicleTypeItems, setVehicleTypeItems] = useState(VEHICLE_TYPES.map(v => ({label: v, value: v})));
+  const [customerEmail, setCustomerEmail] = useState(userInfo?.email || '');
 
   const [appointmentDate, setAppointmentDate] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -53,8 +54,13 @@ const BookInspection = () => {
   }, [userInfo]);
 
   const handleSubmit = async () => {
-    if (!make || !model || !year || !plateNumber || !appointmentDate) {
-      Alert.alert('Missing Fields', 'Please fill in all vehicle details and select an appointment date.');
+    if (!make || !model || !year || !plateNumber || !appointmentDate || !customerEmail) {
+      Alert.alert('Missing Fields', 'Please fill in all vehicle details, email, and select an appointment date.');
+      return;
+    }
+
+    if (!customerEmail.includes('@')) {
+      Alert.alert('Invalid Email', 'Please enter a valid email address for report delivery.');
       return;
     }
 
@@ -84,6 +90,7 @@ const BookInspection = () => {
         appointmentDate,
         appointmentTime,
         notes,
+        customerEmail,
       });
       Alert.alert(
         'Booking Confirmed! 🎉',
@@ -136,6 +143,15 @@ const BookInspection = () => {
         <TextInput style={[styles.input, { flex: 1, marginRight: 8 }]} placeholder="Year (e.g. 2021)" placeholderTextColor="#b2bec3" keyboardType="numeric" value={year} onChangeText={setYear} />
         <TextInput style={[styles.input, { flex: 1 }]} placeholder="Plate (e.g. CAB-1234)" placeholderTextColor="#b2bec3" value={plateNumber} onChangeText={setPlateNumber} autoCapitalize="characters" />
       </View>
+      <TextInput 
+        style={styles.input} 
+        placeholder="Delivery Email (where report will be sent)" 
+        placeholderTextColor="#b2bec3" 
+        keyboardType="email-address" 
+        autoCapitalize="none" 
+        value={customerEmail} 
+        onChangeText={setCustomerEmail} 
+      />
       <View style={{ marginBottom: 12, zIndex: 3000 }}>
         <View style={styles.pickerLabelRow}>
           <Ionicons name="car-outline" size={14} color="#636e72" />
