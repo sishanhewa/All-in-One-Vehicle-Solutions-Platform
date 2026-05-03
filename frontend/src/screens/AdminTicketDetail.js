@@ -8,7 +8,7 @@ import { Feather } from '@expo/vector-icons';
 // Actually, I can just fetch all tickets and find the one. 
 // Or better, I will use fetchTickets and filter.
 
-const BASE_URL = 'http://192.168.8.100:5000';
+const BASE_URL = 'https://all-in-one-vehicle-solutions-platform.onrender.com';
 const resolveImageUrl = (imagePath) => {
   if (!imagePath) return 'https://via.placeholder.com/400x200?text=No+Image';
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;

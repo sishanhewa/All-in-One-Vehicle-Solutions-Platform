@@ -25,7 +25,7 @@ export default function RentalRequestsScreen() {
   const fetchRequests = async () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
-      const response = await fetch('http://192.168.8.100:5000/api/rentals/owner/bookings', {
+      const response = await fetch('https://all-in-one-vehicle-solutions-platform.onrender.com/api/rentals/owner/bookings', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -59,7 +59,7 @@ export default function RentalRequestsScreen() {
           onPress: async () => {
             try {
               const token = await AsyncStorage.getItem('userToken');
-              const response = await fetch(`http://192.168.8.100:5000/api/rentals/bookings/${id}/status`, {
+              const response = await fetch(`https://all-in-one-vehicle-solutions-platform.onrender.com/api/rentals/bookings/${id}/status`, {
                 method: 'PUT',
                 headers: {
                   'Authorization': `Bearer ${token}`,

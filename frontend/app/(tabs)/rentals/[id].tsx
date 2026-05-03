@@ -15,7 +15,7 @@ export default function RentalVehicleDetails() {
 
   const fetchDetail = async () => {
     try {
-      const response = await fetch(`http://192.168.8.100:5000/api/rentals/${id}`);
+      const response = await fetch(`https://all-in-one-vehicle-solutions-platform.onrender.com/api/rentals/${id}`);
       const data = await response.json();
       if (response.ok) {
         setVehicle(data);
@@ -62,7 +62,7 @@ export default function RentalVehicleDetails() {
       {/* Hero Image */}
       <View style={styles.heroWrap}>
         {vehicle.images && vehicle.images.length > 0 ? (
-          <Image source={{ uri: `http://192.168.8.100:5000${vehicle.images[0]}` }} style={{ width: '100%', height: '100%', position: 'absolute' }} resizeMode="cover" />
+          <Image source={{ uri: `https://all-in-one-vehicle-solutions-platform.onrender.com${vehicle.images[0]}` }} style={{ width: '100%', height: '100%', position: 'absolute' }} resizeMode="cover" />
         ) : (
           <Ionicons name="car-sport" size={64} color="#10ac84" />
         )}

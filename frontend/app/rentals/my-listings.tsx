@@ -17,7 +17,7 @@ export default function MyRentalListingsScreen() {
   const fetchMyVehicles = async () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
-      const response = await fetch('http://192.168.8.100:5000/api/rentals/owner/listings', {
+      const response = await fetch('https://all-in-one-vehicle-solutions-platform.onrender.com/api/rentals/owner/listings', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -51,7 +51,7 @@ export default function MyRentalListingsScreen() {
           onPress: async () => {
             try {
               const token = await AsyncStorage.getItem('userToken');
-              const response = await fetch(`http://192.168.8.100:5000/api/rentals/${id}`, {
+              const response = await fetch(`https://all-in-one-vehicle-solutions-platform.onrender.com/api/rentals/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
               });
@@ -72,7 +72,7 @@ export default function MyRentalListingsScreen() {
   const toggleAvailability = async (id: string, currentStatus: boolean) => {
     try {
       const token = await AsyncStorage.getItem('userToken');
-      const response = await fetch(`http://192.168.8.100:5000/api/rentals/${id}`, {
+      const response = await fetch(`https://all-in-one-vehicle-solutions-platform.onrender.com/api/rentals/${id}`, {
         method: 'PUT',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -131,7 +131,7 @@ export default function MyRentalListingsScreen() {
             >
               <View style={styles.cardImagePlaceholder}>
                 {item.images && item.images.length > 0 ? (
-                  <Image source={{ uri: `http://192.168.8.100:5000${item.images[0]}` }} style={{ width: '100%', height: '100%', borderRadius: 12 }} resizeMode="cover" />
+                  <Image source={{ uri: `https://all-in-one-vehicle-solutions-platform.onrender.com${item.images[0]}` }} style={{ width: '100%', height: '100%', borderRadius: 12 }} resizeMode="cover" />
                 ) : (
                   <Ionicons name="car-sport" size={36} color="#10ac84" />
                 )}

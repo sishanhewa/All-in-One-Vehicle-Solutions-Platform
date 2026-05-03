@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 
 // Connecting via the Android Emulator's dedicated Localhost Bridge
-const BASE_URL = 'http://192.168.8.100:5000';
+const BASE_URL = 'https://all-in-one-vehicle-solutions-platform.onrender.com';
 export const API_URL = `${BASE_URL}/api/spare-parts`;
 
 // Helper to resolve image URLs correctly (handles both local uploads and external URLs)

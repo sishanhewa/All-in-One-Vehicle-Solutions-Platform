@@ -4,7 +4,7 @@ import { useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons, Feather } from '@expo/vector-icons';
 
-const API_BASE = 'http://192.168.8.100:5000';
+const API_BASE = 'https://all-in-one-vehicle-solutions-platform.onrender.com';
 const { width } = Dimensions.get('window');
 
 const statusConfig: Record<string, { color: string; bg: string; icon: string }> = {

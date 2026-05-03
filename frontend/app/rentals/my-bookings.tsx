@@ -25,7 +25,7 @@ export default function MyBookingsScreen() {
   const fetchBookings = async () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
-      const response = await fetch('http://192.168.8.100:5000/api/rentals/my-bookings', {
+      const response = await fetch('https://all-in-one-vehicle-solutions-platform.onrender.com/api/rentals/my-bookings', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

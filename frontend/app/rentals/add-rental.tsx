@@ -74,7 +74,7 @@ export default function AddRentalScreen() {
         } as any);
       });
 
-      const response = await fetch('http://192.168.8.100:5000/api/rentals', {
+      const response = await fetch('https://all-in-one-vehicle-solutions-platform.onrender.com/api/rentals', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

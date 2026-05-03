@@ -17,7 +17,7 @@ export default function RentalsListScreen() {
   const fetchVehicles = async () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
-      const response = await fetch('http://192.168.8.100:5000/api/rentals', {
+      const response = await fetch('https://all-in-one-vehicle-solutions-platform.onrender.com/api/rentals', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -83,7 +83,7 @@ export default function RentalsListScreen() {
             >
               <View style={styles.cardImageWrap}>
                 {item.images && item.images.length > 0 ? (
-                  <Image source={{ uri: `http://192.168.8.100:5000${item.images[0]}` }} style={{ width: '100%', height: '100%', borderRadius: 12 }} resizeMode="cover" />
+                  <Image source={{ uri: `https://all-in-one-vehicle-solutions-platform.onrender.com${item.images[0]}` }} style={{ width: '100%', height: '100%', borderRadius: 12 }} resizeMode="cover" />
                 ) : (
                   <Ionicons name="car-sport" size={40} color="#10ac84" />
                 )}

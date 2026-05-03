@@ -25,7 +25,7 @@ export default function BookVehicleScreen() {
   useEffect(() => {
     const fetchVehicle = async () => {
       try {
-        const response = await fetch(`http://192.168.8.100:5000/api/rentals/${vehicleId}`);
+        const response = await fetch(`https://all-in-one-vehicle-solutions-platform.onrender.com/api/rentals/${vehicleId}`);
         const data = await response.json();
         if (response.ok) setVehicle(data);
       } catch (err) {
@@ -84,7 +84,7 @@ export default function BookVehicleScreen() {
       if (reqDocs.guarantorId && guarantorId) appendFile('guarantorId', guarantorId);
       if (reqDocs.guarantorBilling && guarantorBilling) appendFile('guarantorBilling', guarantorBilling);
 
-      const response = await fetch(`http://192.168.8.100:5000/api/rentals/${vehicleId}/book`, {
+      const response = await fetch(`https://all-in-one-vehicle-solutions-platform.onrender.com/api/rentals/${vehicleId}/book`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
