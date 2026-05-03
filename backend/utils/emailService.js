@@ -1,17 +1,30 @@
 const nodemailer = require('nodemailer');
 const dns = require('dns');
+const { promisify } = require('util');
 
-// Force Node.js to resolve DNS to IPv4 first (fixes ENETUNREACH on Render)
-dns.setDefaultResultOrder('ipv4first');
+const resolve4 = promisify(dns.resolve4);
 
 const sendInspectionReportEmail = async (toEmail, userName, pdfBuffer, reportNumber) => {
+  // Manually resolve Gmail SMTP to IPv4 — Render's free tier doesn't support IPv6
+  let host = 'smtp.gmail.com';
+  try {
+    const addresses = await resolve4('smtp.gmail.com');
+    host = addresses[0];
+    console.log('[EMAIL] Resolved smtp.gmail.com to IPv4:', host);
+  } catch (dnsErr) {
+    console.error('[EMAIL] DNS resolve failed, using hostname:', dnsErr.message);
+  }
+
   const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
+    host: host,
     port: 465,
     secure: true,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
+    },
+    tls: {
+      servername: 'smtp.gmail.com', // Required for TLS cert validation
     },
     connectionTimeout: 30000,
     greetingTimeout: 30000,
