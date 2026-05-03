@@ -6,7 +6,7 @@ import { resolveImageUrl } from '../api/marketplaceApi';
 import { Ionicons } from '@expo/vector-icons';
 
 const SellerProfile = () => {
-  const { sellerId } = useLocalSearchParams();
+  const { sellerId, sellerName, sellerPhone } = useLocalSearchParams();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [seller, setSeller] = useState(null);
@@ -30,20 +30,26 @@ const SellerProfile = () => {
 
   if (loading) return <View style={s.center}><ActivityIndicator size="large" color="#10ac84" /></View>;
 
+  const displaySeller = seller || { name: sellerName || 'Unknown Seller', phone: sellerPhone || '' };
+
   return (
     <View style={[s.container, { paddingTop: insets.top }]}>
-      {seller && (
-        <View style={s.profileCard}>
-          <View style={s.avatar}><Ionicons name="person" size={32} color="#fff" /></View>
-          <Text style={s.name}>{seller.name}</Text>
-          <Text style={s.phone}>{seller.phone}</Text>
-          <Text style={s.count}>{listings.length} listing{listings.length !== 1 ? 's' : ''}</Text>
-        </View>
-      )}
+      <View style={s.profileCard}>
+        <View style={s.avatar}><Ionicons name="person" size={32} color="#fff" /></View>
+        <Text style={s.name}>{displaySeller.name}</Text>
+        <Text style={s.phone}>{displaySeller.phone}</Text>
+        <Text style={s.count}>{listings.length} listing{listings.length !== 1 ? 's' : ''}</Text>
+      </View>
       <FlatList
         data={listings}
         keyExtractor={i => i._id}
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+        ListEmptyComponent={
+          <View style={{ alignItems: 'center', marginTop: 40 }}>
+            <Ionicons name="car-outline" size={48} color="#b2bec3" />
+            <Text style={{ marginTop: 12, fontSize: 16, color: '#636e72', fontWeight: '500' }}>No active listings</Text>
+          </View>
+        }
         renderItem={({ item }) => (
           <TouchableOpacity style={s.card} onPress={() => router.push({ pathname: '/ListingDetails', params: { listingId: item._id } })}>
             <Image source={{ uri: item.images?.length ? resolveImageUrl(item.images[0]) : 'https://via.placeholder.com/120x90' }} style={s.thumb} />
