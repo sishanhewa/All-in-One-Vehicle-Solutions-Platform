@@ -1,6 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 
-const BASE_URL = 'http://192.168.8.100:5000';
+const BASE_URL = 'https://all-in-one-vehicle-solutions-platform.onrender.com';
 export const API_URL = `${BASE_URL}/api/support`;
 
 export const resolveImageUrl = (imagePath) => {
