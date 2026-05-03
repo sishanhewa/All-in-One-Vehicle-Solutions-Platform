@@ -1,0 +1,36 @@
+info:
+  name: Step 1 — Login as Company
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{base_url}}/api/auth/login"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "email": "info@ceylonautocare.lk",
+        "password": "ceylon123"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: "var jsonData = res.getBody();\r
+
+        bru.setVar('company_token', jsonData.token);\r
+
+        bru.setVar('company_id', jsonData._id);\r
+
+        console.log('✅ Company logged in:', jsonData.companyProfile?.companyName);"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

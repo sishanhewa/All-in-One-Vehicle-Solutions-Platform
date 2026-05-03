@@ -1,0 +1,11 @@
+info:
+  name: 4. Inspection — Package Management
+  type: folder
+  seq: 4
+
+request:
+  auth: inherit
+
+docs:
+  content: CRUD operations for inspection packages (Company only)
+  type: text/markdown

@@ -1,0 +1,48 @@
+info:
+  name: 5.1 Create Booking 🔒 User
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{base_url}}/api/inspection/bookings"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: Bearer {{user_token}}
+  body:
+    type: json
+    data: |-
+      {
+        "companyId": "{{company_id}}",
+        "packageId": "{{package_id}}",
+        "make": "Toyota",
+        "model": "Corolla",
+        "year": 2021,
+        "plateNumber": "CAB-1234",
+        "vehicleType": "Car",
+        "appointmentDate": "2026-04-15",
+        "appointmentTime": "10:00 AM",
+        "notes": "Please also check the AC system"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: "var jsonData = res.getBody();\r
+
+        if (jsonData._id) {\r
+
+        \  bru.setVar('booking_id', jsonData._id);\r
+
+        \  console.log('✅ booking_id saved');\r
+
+        }"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

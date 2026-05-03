@@ -1,0 +1,38 @@
+info:
+  name: Step 7 — Complete Inspection (Company)
+  type: http
+  seq: 7
+
+http:
+  method: PUT
+  url: "{{base_url}}/api/inspection/bookings/{{booking_id}}/complete"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: Bearer {{company_token}}
+  body:
+    type: json
+    data: |-
+      {
+        "inspectionResult": "Conditional",
+        "overallScore": 72,
+        "checklist": [
+          { "item": "Engine", "condition": "Good", "notes": "Runs well" },
+          { "item": "Brakes", "condition": "Poor", "notes": "Immediate replacement needed" },
+          { "item": "Tires", "condition": "Fair", "notes": "50% tread remaining" }
+        ],
+        "resultRemarks": "Vehicle needs brake work before it is roadworthy. Rest of the systems are acceptable."
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: var d = res.getBody(); console.log('✅ Result:', d.inspectionResult, '| Score:', d.overallScore);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
