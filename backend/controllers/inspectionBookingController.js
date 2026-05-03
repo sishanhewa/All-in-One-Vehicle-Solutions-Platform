@@ -350,7 +350,7 @@ const generateReportPDF = asyncHandler(async (req, res) => {
   // Helper for legend symbols
   const sym = (status) => {
     switch (status) {
-      case 'checked': return '✓';
+      case 'checked': return 'OK';
       case 'problem': return 'X';
       case 'adjusted': return 'A';
       case 'clean': return 'C';
@@ -385,15 +385,14 @@ const generateReportPDF = asyncHandler(async (req, res) => {
   doc.text(`Registration No: ${report.registrationNo || 'N/A'}`, 40, yReg);
   doc.text(`Meter Reading: ${report.meterReading || 'N/A'}`, 300, yReg);
 
-  doc.moveDown(2);
-  doc.fontSize(12).font('Helvetica-Bold').text('Legend: A = Adjusted | ✓ = Checked | X = Problem | C = Clean | R = Replace', 40, doc.y, { align: 'center' });
   doc.moveDown(1);
+  doc.fontSize(10).font('Helvetica-Bold').text('Legend: A = Adjusted | OK = Checked | X = Problem | C = Clean | R = Replace', 40, doc.y, { align: 'center', lineBreak: false });
+  doc.moveDown(0.5);
 
   // Draw checklists using a simple two-column layout
   const col1 = 40;
   const col2 = 300;
   
-  if (doc.y > doc.page.height - doc.page.margins.bottom - 200) doc.addPage();
   let currentY = doc.y;
 
   doc.fontSize(10).font('Helvetica-Bold');
@@ -408,22 +407,21 @@ const generateReportPDF = asyncHandler(async (req, res) => {
   const maxRows1 = Math.max(engineOnKeys.length, engineOffKeys.length);
   for (let i = 0; i < maxRows1; i++) {
     if (engineOnKeys[i]) {
-      doc.text(engineOnKeys[i].label, col1, currentY);
-      doc.text(`[ ${sym(report.engineOn[engineOnKeys[i].key])} ]`, col1 + 200, currentY);
+      doc.text(engineOnKeys[i].label, col1, currentY, { lineBreak: false });
+      doc.text(`[ ${sym(report.engineOn[engineOnKeys[i].key])} ]`, col1 + 200, currentY, { lineBreak: false });
     }
     if (engineOffKeys[i]) {
-      doc.text(engineOffKeys[i].label, col2, currentY);
-      doc.text(`[ ${sym(report.engineOff[engineOffKeys[i].key])} ]`, col2 + 200, currentY);
+      doc.text(engineOffKeys[i].label, col2, currentY, { lineBreak: false });
+      doc.text(`[ ${sym(report.engineOff[engineOffKeys[i].key])} ]`, col2 + 200, currentY, { lineBreak: false });
     }
-    currentY += 15;
+    currentY += 12;
   }
 
   // Restore X to left margin so moveDown behaves
   doc.x = 40;
   doc.y = currentY;
-  doc.moveDown(2);
+  doc.moveDown(0.5);
   
-  if (doc.y > doc.page.height - doc.page.margins.bottom - 180) doc.addPage();
   currentY = doc.y;
 
   doc.fontSize(10).font('Helvetica-Bold');
@@ -438,36 +436,43 @@ const generateReportPDF = asyncHandler(async (req, res) => {
   const maxRows2 = Math.max(mechKeys.length, suspKeys.length);
   for (let i = 0; i < maxRows2; i++) {
     if (mechKeys[i]) {
-      doc.text(mechKeys[i].label, col1, currentY);
-      doc.text(`[ ${sym(report.mechanical[mechKeys[i].key])} ]`, col1 + 200, currentY);
+      doc.text(mechKeys[i].label, col1, currentY, { lineBreak: false });
+      doc.text(`[ ${sym(report.mechanical[mechKeys[i].key])} ]`, col1 + 200, currentY, { lineBreak: false });
     }
     if (suspKeys[i]) {
-      doc.text(suspKeys[i].label, col2, currentY);
-      doc.text(`[ ${sym(report.suspensionWheelsExhaust[suspKeys[i].key])} ]`, col2 + 200, currentY);
+      doc.text(suspKeys[i].label, col2, currentY, { lineBreak: false });
+      doc.text(`[ ${sym(report.suspensionWheelsExhaust[suspKeys[i].key])} ]`, col2 + 200, currentY, { lineBreak: false });
     }
-    currentY += 15;
+    currentY += 12;
   }
 
   doc.x = 40;
   doc.y = currentY;
-  doc.moveDown(2);
+  doc.moveDown(0.5);
   
-  if (doc.y > doc.page.height - doc.page.margins.bottom - 40) doc.addPage();
   currentY = doc.y;
   
-  doc.fontSize(10).font('Helvetica-Bold').text('Service Options:', col1, currentY);
+  doc.fontSize(10).font('Helvetica-Bold').text('Service Options:', col1, currentY, { lineBreak: false });
   doc.font('Helvetica');
   const so = report.serviceOptions || {};
-  doc.text(`Full Service: [${so.fullService ? '✓' : ' '}]    Oil Change: [${so.oilChange ? '✓' : ' '}]    Interior: [${so.interior ? '✓' : ' '}]`, col1, currentY + 15);
+  doc.text(`Full Service: [${so.fullService ? 'OK' : ' '}]    Oil Change: [${so.oilChange ? 'OK' : ' '}]    Interior: [${so.interior ? 'OK' : ' '}]`, col1, currentY + 12, { lineBreak: false });
 
   doc.x = 40;
-  doc.y = currentY + 15;
-  doc.moveDown(2);
+  doc.y = currentY + 12;
+  doc.moveDown(1);
   
   doc.font('Helvetica-Bold').text('Remarks:');
   doc.font('Helvetica').text(report.remarks || 'None');
 
-  doc.moveDown(4);
+  doc.moveDown(2);
+  currentY = doc.y;
+  
+  doc.text('_________________________', 40, currentY, { lineBreak: false });
+  doc.text('Technician Signature', 40, currentY + 12, { lineBreak: false });
+  
+  doc.text('_________________________', 300, currentY, { lineBreak: false });
+  doc.text('Customer Signature', 300, currentY + 12, { lineBreak: false });
+
   doc.end();
 });
 
