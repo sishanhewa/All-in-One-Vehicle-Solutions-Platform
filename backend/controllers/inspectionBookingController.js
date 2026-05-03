@@ -292,20 +292,32 @@ const completeInspection = asyncHandler(async (req, res) => {
 
   // Generate PDF and send email asynchronously (don't block the response)
   const targetEmail = parsedReport?.customerEmail || populated.userId?.email;
+  console.log('[EMAIL] Target email:', targetEmail, '| Has report:', !!parsedReport);
   if (parsedReport && targetEmail) {
     try {
       const doc = new PDFDocument({ size: 'A4', margin: 40 });
       let buffers = [];
-      doc.on('data', buffers.push.bind(buffers));
-      doc.on('end', () => {
-        const pdfData = Buffer.concat(buffers);
-        sendInspectionReportEmail(targetEmail, populated.userId.name, pdfData, parsedReport.reportNumber || populated._id);
+      doc.on('data', (chunk) => buffers.push(chunk));
+      doc.on('end', async () => {
+        try {
+          const pdfData = Buffer.concat(buffers);
+          console.log('[EMAIL] PDF generated, size:', pdfData.length, 'bytes. Sending to:', targetEmail);
+          await sendInspectionReportEmail(targetEmail, populated.userId.name, pdfData, parsedReport.reportNumber || populated._id);
+          console.log('[EMAIL] Email sent successfully to', targetEmail);
+        } catch (emailErr) {
+          console.error('[EMAIL] Failed to send email:', emailErr.message);
+        }
+      });
+      doc.on('error', (pdfErr) => {
+        console.error('[EMAIL] PDF generation error:', pdfErr.message);
       });
       buildInspectionPDF(doc, populated, parsedReport);
       doc.end();
     } catch (err) {
-      console.error('Error generating email PDF:', err);
+      console.error('[EMAIL] Error in PDF/email block:', err.message);
     }
+  } else {
+    console.log('[EMAIL] Skipped - no report or no target email');
   }
 
   res.status(200).json(populated);
