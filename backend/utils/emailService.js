@@ -1,13 +1,14 @@
-const Brevo = require('@getbrevo/brevo');
+const SibApiV3Sdk = require('sib-api-v3-sdk');
 
 const sendInspectionReportEmail = async (toEmail, userName, pdfBuffer, reportNumber) => {
-  console.log('[EMAIL] Attempting to send via Brevo API to:', toEmail);
+  console.log('[EMAIL] Attempting to send via Brevo SDK to:', toEmail);
 
-  let apiInstance = new Brevo.TransactionalEmailsApi();
-  let apiKey = apiInstance.authentications['apiKey'];
+  let defaultClient = SibApiV3Sdk.ApiClient.instance;
+  let apiKey = defaultClient.authentications['api-key'];
   apiKey.apiKey = process.env.BREVO_API_KEY;
 
-  let sendSmtpEmail = new Brevo.SendSmtpEmail();
+  let apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+  let sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
 
   sendSmtpEmail.subject = `Your Vehicle Inspection Report (#${reportNumber || 'N/A'}) is Ready!`;
   sendSmtpEmail.htmlContent = `
@@ -24,7 +25,7 @@ const sendInspectionReportEmail = async (toEmail, userName, pdfBuffer, reportNum
     </html>
   `;
   
-  // Sender must be the email address you verified in Brevo
+  // Sender must be verified in Brevo
   sendSmtpEmail.sender = { 
     name: "Vehicle Management System", 
     email: process.env.EMAIL_USER || "lankacv.stmp@gmail.com" 
@@ -32,7 +33,7 @@ const sendInspectionReportEmail = async (toEmail, userName, pdfBuffer, reportNum
   
   sendSmtpEmail.to = [{ email: toEmail, name: userName }];
   
-  // Attachments in Brevo API are base64 encoded strings
+  // Attachments in Brevo API are base64 strings
   sendSmtpEmail.attachment = [
     {
       name: `Inspection_${reportNumber || 'Report'}.pdf`,
@@ -42,11 +43,11 @@ const sendInspectionReportEmail = async (toEmail, userName, pdfBuffer, reportNum
 
   try {
     const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
-    console.log('[EMAIL] Brevo Success! Message ID:', data.body.messageId);
+    console.log('[EMAIL] Brevo Success! Message ID:', data.messageId);
     return data;
   } catch (error) {
-    console.error('[EMAIL] Brevo API Error:', error.response ? error.response.body : error.message);
-    throw new Error(error.response ? error.response.body.message : error.message);
+    console.error('[EMAIL] Brevo SDK Error:', error.response ? error.response.text : error.message);
+    throw new Error(error.response ? error.response.text : error.message);
   }
 };
 
