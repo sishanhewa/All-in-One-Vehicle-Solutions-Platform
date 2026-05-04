@@ -1,0 +1,789 @@
+{
+  "info": {
+    "name": "VMS - Inspection Module",
+    "description": "API Endpoints for the Vehicle Management System Inspection Module",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://all-in-one-vehicle-solutions-platform.onrender.com/api/inspection",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "YOUR_BEARER_TOKEN_HERE",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Companies",
+      "item": [
+        {
+          "name": "Register Company",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"company@example.com\",\n  \"password\": \"password123\",\n  \"phone\": \"0712345678\",\n  \"companyName\": \"Auto Inspect Pro\",\n  \"description\": \"Best inspection company in town\",\n  \"address\": \"123 Main Street\",\n  \"city\": \"Colombo\",\n  \"operatingHours\": \"Mon-Sat 8:00 AM - 6:00 PM\",\n  \"website\": \"www.autoinspect.lk\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/companies/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Companies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/companies?city=Colombo&search=Auto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies"
+              ],
+              "query": [
+                {
+                  "key": "city",
+                  "value": "Colombo",
+                  "description": "Optional: Filter by city"
+                },
+                {
+                  "key": "search",
+                  "value": "Auto",
+                  "description": "Optional: Search by company name"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Company Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/companies/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies",
+                "profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Company Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "companyName",
+                  "value": "Updated Auto Inspect Pro",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Updated description",
+                  "type": "text"
+                },
+                {
+                  "key": "address",
+                  "value": "456 Updated Street",
+                  "type": "text"
+                },
+                {
+                  "key": "city",
+                  "value": "Kandy",
+                  "type": "text"
+                },
+                {
+                  "key": "operatingHours",
+                  "value": "Mon-Fri 9AM-5PM",
+                  "type": "text"
+                },
+                {
+                  "key": "website",
+                  "value": "www.updatedinspect.lk",
+                  "type": "text"
+                },
+                {
+                  "key": "name",
+                  "value": "John Updated",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": "0711112222",
+                  "type": "text"
+                },
+                {
+                  "key": "logo",
+                  "type": "file"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/companies/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies",
+                "profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Company By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/companies/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "COMPANY_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Packages by Company ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/companies/:id/packages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies",
+                ":id",
+                "packages"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "COMPANY_ID_HERE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Packages",
+      "item": [
+        {
+          "name": "Get My Packages",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/packages/my-packages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "my-packages"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Package",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Standard Inspection",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Full body and engine check",
+                  "type": "text"
+                },
+                {
+                  "key": "price",
+                  "value": "5000",
+                  "type": "text"
+                },
+                {
+                  "key": "duration",
+                  "value": "60",
+                  "type": "text",
+                  "description": "Duration in minutes"
+                },
+                {
+                  "key": "vehicleTypes",
+                  "value": "[\"Car\", \"SUV\"]",
+                  "type": "text"
+                },
+                {
+                  "key": "checklistItems",
+                  "value": "[\"Engine Check\", \"Brake Test\", \"Suspension\"]",
+                  "type": "text"
+                },
+                {
+                  "key": "images",
+                  "type": "file"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/packages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Package",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Updated Standard Inspection",
+                  "type": "text"
+                },
+                {
+                  "key": "price",
+                  "value": "5500",
+                  "type": "text"
+                },
+                {
+                  "key": "isActive",
+                  "value": "true",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/packages/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "PACKAGE_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Package",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/packages/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "PACKAGE_ID_HERE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Create Booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyId\": \"COMPANY_ID_HERE\",\n  \"packageId\": \"PACKAGE_ID_HERE\",\n  \"appointmentDate\": \"2026-05-10\",\n  \"appointmentTime\": \"10:00 AM\",\n  \"make\": \"Toyota\",\n  \"model\": \"Corolla\",\n  \"year\": 2018,\n  \"plateNumber\": \"WP CBD-1234\",\n  \"vehicleType\": \"Car\",\n  \"notes\": \"Please check AC\",\n  \"customerEmail\": \"customer@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bookings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bookings"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get My Bookings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bookings/my-bookings?status=Pending",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bookings",
+                "my-bookings"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "Pending",
+                  "description": "Optional: Filter by status (Pending, Confirmed, In Progress, Completed, Cancelled)"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Company Queue",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bookings/queue?date=today",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bookings",
+                "queue"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "Pending"
+                },
+                {
+                  "key": "date",
+                  "value": "today",
+                  "description": "today, week, or omit for all"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Booking By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bookings/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bookings",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "BOOKING_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cancel Booking",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Changed my mind\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bookings/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bookings",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "BOOKING_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Confirm Booking",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bookings/:id/confirm",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bookings",
+                ":id",
+                "confirm"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "BOOKING_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Start Inspection",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bookings/:id/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bookings",
+                ":id",
+                "start"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "BOOKING_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Complete Inspection",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inspectionResult\": \"Pass\",\n  \"overallScore\": 85,\n  \"checklist\": [\n    {\"item\": \"Engine\", \"status\": \"Pass\"}\n  ],\n  \"resultRemarks\": \"Good condition overall\",\n  \"inspectionReport\": {\n    \"reportNumber\": \"REP-12345\",\n    \"engineOn\": {\"idle\": \"checked\"},\n    \"engineOff\": {\"battery\": \"checked\"},\n    \"mechanical\": {\"brakes\": \"checked\"},\n    \"suspensionWheelsExhaust\": {\"shocks\": \"checked\"}\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bookings/:id/complete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bookings",
+                ":id",
+                "complete"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "BOOKING_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload Report Images",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "reportImages",
+                  "type": "file"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bookings/:id/images",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bookings",
+                ":id",
+                "images"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "BOOKING_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Report PDF",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bookings/:id/report-pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bookings",
+                ":id",
+                "report-pdf"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "BOOKING_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Public Report PDF",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bookings/:id/public-report-pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bookings",
+                ":id",
+                "public-report-pdf"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "BOOKING_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Send Report Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"target@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bookings/:id/send-email",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bookings",
+                ":id",
+                "send-email"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "BOOKING_ID_HERE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

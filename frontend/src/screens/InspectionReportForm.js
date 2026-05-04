@@ -96,6 +96,26 @@ export default function InspectionReportForm() {
     }));
   };
 
+  const markAllAsGood = () => {
+    setReport(prev => {
+      const markSection = (sectionObj) => {
+        const newSec = { ...sectionObj };
+        for (let k in newSec) {
+          newSec[k] = 'checked';
+        }
+        return newSec;
+      };
+      
+      return {
+        ...prev,
+        engineOn: markSection(prev.engineOn),
+        engineOff: markSection(prev.engineOff),
+        mechanical: markSection(prev.mechanical),
+        suspensionWheelsExhaust: markSection(prev.suspensionWheelsExhaust)
+      };
+    });
+  };
+
   const handleSubmit = async () => {
     if (!report.reportNumber || !report.registrationNo) {
       Alert.alert('Error', 'Please fill in the Report Number and Registration No.');
@@ -190,7 +210,13 @@ export default function InspectionReportForm() {
 
         {/* Legend */}
         <View style={styles.legendCard}>
-          <Text style={styles.legendTitle}>Legend</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <Text style={[styles.legendTitle, { marginBottom: 0 }]}>Legend</Text>
+            <TouchableOpacity style={styles.allGoodBtn} onPress={markAllAsGood}>
+              <Feather name="check-circle" size={14} color="#fff" />
+              <Text style={styles.allGoodBtnText}>All Good</Text>
+            </TouchableOpacity>
+          </View>
           <View style={styles.legendRow}>
             {STATUS_OPTIONS.map(opt => (
               <View key={opt.value} style={styles.legendItem}>
@@ -349,6 +375,8 @@ const styles = StyleSheet.create({
   
   legendCard: { backgroundColor: '#2d3436', borderRadius: 12, padding: 16, marginBottom: 16 },
   legendTitle: { color: '#fff', fontSize: 14, fontWeight: '700', marginBottom: 10 },
+  allGoodBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#10ac84', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6 },
+  allGoodBtnText: { color: '#fff', fontSize: 12, fontWeight: 'bold' },
   legendRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6, width: '30%' },
   legendBox: { width: 24, height: 24, borderRadius: 6, justifyContent: 'center', alignItems: 'center' },
